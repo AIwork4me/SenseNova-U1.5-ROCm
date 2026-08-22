@@ -73,7 +73,10 @@ Primary evidence artifacts:
 - Bugs 1–3 likely affect **every** gfx1100 user of the official
   `torch==2.8.0` rocm6.3 wheel doing half-precision conv/GEMM through
   rocBLAS or MIOpen JIT (plain matmuls survive because they route through
-  hipBLASLt). Worth filing upstream (pytorch + ROCm).
+  hipBLASLt). Filed upstream:
+  [pytorch/pytorch#194447](https://github.com/pytorch/pytorch/issues/194447).
+- The companion upstream fix for SenseNova-U1's interleave bug is filed as
+  [OpenSenseNova/SenseNova-U1#260](https://github.com/OpenSenseNova/SenseNova-U1/pull/260).
 - A wheel built against a ROCm ≥ 7.x userspace, or bundling a fixed comgr,
   should make the preloads unnecessary. The `cudnn.enabled=False` bypass
   costs some conv performance (unfold+GEMM instead of MIOpen's compiled
