@@ -30,8 +30,9 @@ def test_manifest_complete():
     assert any(f["path"] == "config.json" for f in files)
 
 
-def test_upstream_pinned():
-    """The pinned upstream commit must be recorded and, when present, checked out."""
+def test_upstream_pinned_and_patched():
+    """The pinned upstream commit must be recorded; when checked out, the
+    interleave patch must be applied (01-setup-venv.sh does this)."""
     common = open(f"{ROOT}/scripts/lib/common.sh").read()
     assert 'UPSTREAM_PINNED_COMMIT="76c32c2"' in common
     upstream = f"{ROOT}/third_party/SenseNova-U1"
@@ -40,6 +41,10 @@ def test_upstream_pinned():
             ["git", "-C", upstream, "rev-parse", "--short=7", "HEAD"],
             capture_output=True, text=True).stdout.strip()
         assert head == "76c32c2", f"upstream HEAD {head} != pinned 76c32c2"
+        # the patch file exists and targets the known call sites
+        patch = open(f"{ROOT}/patches/0001-interleave-pass-image_size-to-_t2i_predict_v.patch").read()
+        assert patch.count("+") >= 10
+        assert "image_size=image_size" in patch
 
 
 def _bash(script, *args):

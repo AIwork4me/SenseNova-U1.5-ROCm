@@ -14,3 +14,4 @@ models/
 # OS / editor
 .DS_Store
 *.swp
+third_party/
