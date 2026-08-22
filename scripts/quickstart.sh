@@ -83,7 +83,7 @@ case "$TASK" in
         UP="$ROOT/third_party/SenseNova-U1"
         bash "$ROOT/scripts/run-task.sh" vqa \
             --image "$UP/examples/vqa/data/images/menu.jpg" \
-            --question "${QUESTION:-Describe this image in one sentence."} \
+            --question "${QUESTION:-Describe this image in one sentence.}" \
             --max_new_tokens 512 \
             --output "$OUT_DIR/quickstart/vqa-$STAMP.txt" \
             --profile
@@ -102,8 +102,7 @@ case "$TASK" in
         ;;
     interleave)
         bash "$ROOT/scripts/run-task.sh" interleave \
-            --prompt "${PROMPT:-I want to learn how to cook tomato and egg stir-fry. Please give me a beginner-friendly illustrated tutorial."}\
-" \
+            --prompt "${PROMPT:-I want to learn how to cook tomato and egg stir-fry. Please give me a beginner-friendly illustrated tutorial.}" \
             --resolution "16:9" \
             --output_dir "$OUT_DIR/quickstart/interleave-$STAMP" \
             --stem demo

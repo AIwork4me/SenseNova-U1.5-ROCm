@@ -61,8 +61,12 @@ case "$TASK" in
 esac
 
 mkdir -p "$OUT_DIR/$TASK"
+# Our ROCm fixes (MIOpen bypass; BLAS preloads come from common.sh) wrap the
+# upstream script without touching it.
+export PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
 log "task=$TASK  model=$MODEL_DIR  vram_mode=$VRAM_MODE  attn=sdpa"
-exec "$PY" "$UPSTREAM/$SCRIPT" \
+exec "$PY" -m sensenova_u1_rocm \
+    "$UPSTREAM/$SCRIPT" \
     --model_path "$MODEL_DIR" \
     --vram_mode "$VRAM_MODE" \
     --attn_backend sdpa \

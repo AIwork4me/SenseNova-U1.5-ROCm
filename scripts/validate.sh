@@ -18,16 +18,19 @@ set -euo pipefail
 
 usage() {
     cat <<'EOF'
-Usage: bash scripts/validate.sh [ONLY=<block>]
+Usage: bash scripts/validate.sh [ONLY=<block>|--only <block>]
 
 Runs the full validation suite and writes receipts + logs under
-docs/results/. Blocks: vqa t2i t2i-think edit interleave determinism vram-modes
+docs/results/. Blocks: vqa t2i t2i-think edit interleave determinism
+vram-modes (vram-mode-balanced/fast/low are addressable individually too).
 EOF
 }
 
 case "${1:-}" in
     -h|--help) usage; exit 0 ;;
     "") ;;
+    ONLY=*) ONLY="${1#ONLY=}" ;;
+    --only) [ $# -ge 2 ] || { echo "ERROR: --only needs a block name" >&2; exit 2; }; ONLY="$2" ;;
     *) echo "ERROR: unknown argument: $1" >&2; usage >&2; exit 2 ;;
 esac
 
@@ -68,16 +71,20 @@ peak_vram_bytes() {
 }
 
 # Wrap one task run: sampler + wall clock + receipt + log capture.
+# GROUP (optional) lets ONLY=<group> select a set of related blocks.
 # run_block <name> <cmd...>
 run_block() {
     local name="$1"; shift
-    if [ -n "${ONLY:-}" ] && [ "$ONLY" != "$name" ]; then
+    if [ -n "${ONLY:-}" ] && [ "$ONLY" != "$name" ] && [ "$ONLY" != "${GROUP:-}" ]; then
         log "skipping block '$name' (ONLY=${ONLY})"
         return 0
     fi
     log "=== block: $name ==="
     local log_file="$LOGS/$name.log"
     local t0 t1 rc
+    local artifact_args=()
+    for a in ${BLOCK_ARTIFACTS:-}; do artifact_args+=("sha256:$a"); done
+    BLOCK_ARTIFACTS=""
     start_vram_sampler
     t0=$(date +%s.%N)
     set +e
@@ -97,6 +104,7 @@ run_block() {
         "vram_mode=$VRAM_MODE" \
         "command=$(printf '%q ' "$@")" \
         "log=logs/$name.log" \
+        ${artifact_args[@]+"${artifact_args[@]}"} \
         "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ -d @$t0)"
     if [ "$rc" -ne 0 ]; then
         log "block '$name' FAILED (rc=$rc) — see $log_file"
@@ -116,27 +124,27 @@ run_block vqa bash "$ROOT/scripts/run-task.sh" vqa \
     --output "$OUT_DIR/validation/vqa-menu.txt"
 
 # ---- 2. T2I 2048x2048 @ 50 steps ----
+BLOCK_ARTIFACTS="$OUT_DIR/validation/t2i-2048.png" \
 run_block t2i bash "$ROOT/scripts/run-task.sh" t2i \
     --prompt "A cinematic mountain village at sunrise, golden light over slate roofs, drifting mist between timber houses, ultra detailed" \
     "${T2I_ARGS[@]}" --num_steps 50 \
     --output "$OUT_DIR/validation/t2i-2048.png"
-"$ROOT/scripts/receipt.py" "$RECEIPTS/t2i.json" "sha256:$OUT_DIR/validation/t2i-2048.png"
 
 # ---- 3. T2I + reasoning mode ----
+BLOCK_ARTIFACTS="$OUT_DIR/validation/t2i-think.png $OUT_DIR/validation/t2i-think.think.txt" \
 run_block t2i-think bash "$ROOT/scripts/run-task.sh" t2i \
     --prompt "A male peacock trying to attract a female" \
     "${T2I_ARGS[@]}" --num_steps 50 --think --print_think \
     --output "$OUT_DIR/validation/t2i-think.png"
-"$ROOT/scripts/receipt.py" "$RECEIPTS/t2i-think.json" "sha256:$OUT_DIR/validation/t2i-think.png"
 
 # ---- 4. Image editing ----
+BLOCK_ARTIFACTS="$OUT_DIR/validation/edit-jacket.png" \
 run_block edit bash "$ROOT/scripts/run-task.sh" edit \
     --image "$UP/examples/editing/data/images/1.webp" \
     --prompt "Change the jacket of the person on the left to bright yellow." \
     --cfg_scale 4.0 --img_cfg_scale 1.0 --cfg_norm none --timestep_shift 3.0 \
     --num_steps 50 --seed 42 --profile \
     --output "$OUT_DIR/validation/edit-jacket.png"
-"$ROOT/scripts/receipt.py" "$RECEIPTS/edit.json" "sha256:$OUT_DIR/validation/edit-jacket.png"
 
 # ---- 5. Interleave ----
 run_block interleave bash "$ROOT/scripts/run-task.sh" interleave \
@@ -174,10 +182,10 @@ PYEOF
 fi
 
 # ---- 7. VRAM mode comparison (10 steps, per-step latency focus) ----
-if [ -z "${ONLY:-}" ] || [ "$ONLY" = vram-modes ]; then
+if [ -z "${ONLY:-}" ] || [ "$ONLY" = vram-modes ] || [[ "$ONLY" == vram-mode-* ]]; then
     log "=== block: vram-modes (10-step probe) ==="
     for mode in balanced fast low; do
-        VRAM_MODE="$mode" run_block "vram-mode-$mode" bash "$ROOT/scripts/run-task.sh" t2i \
+        GROUP=vram-modes VRAM_MODE="$mode" run_block "vram-mode-$mode" bash "$ROOT/scripts/run-task.sh" t2i \
             --prompt "A red paper lantern hanging in a snowy street at dusk" \
             "${T2I_ARGS[@]}" --num_steps 10 \
             --output "$OUT_DIR/validation/vrammode-$mode.png"

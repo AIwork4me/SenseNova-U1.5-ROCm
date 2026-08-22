@@ -1,0 +1,11 @@
+{
+  "artifacts": {},
+  "block": "interleave",
+  "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh interleave --prompt I\\ want\\ to\\ learn\\ how\\ to\\ cook\\ tomato\\ and\\ egg\\ stir-fry.\\ Please\\ give\\ me\\ a\\ beginner-friendly\\ illustrated\\ tutorial. --resolution 16:9 --num_steps 50 --seed 42 --output_dir /workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave --stem tutorial ",
+  "log": "logs/interleave.log",
+  "peak_vram_bytes": 51172560896,
+  "peak_vram_gib": 47.66,
+  "started_at": "2026-08-22T10:06:24Z",
+  "vram_mode": "balanced",
+  "wall_seconds": 3392.0
+}

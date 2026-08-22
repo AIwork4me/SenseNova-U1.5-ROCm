@@ -1,0 +1,20 @@
+{
+  "artifacts": {
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.png": {
+      "bytes": 7424985,
+      "sha256": "2be9d97921f2574e5df82de3132afeb77264a859faec0216e1f5cb6a885d27bd"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.think.txt": {
+      "bytes": 1006,
+      "sha256": "9baa13674c47147b8f66511992fbf12fdbf931a04db18316b89c6b4206760e0d"
+    }
+  },
+  "block": "t2i-think",
+  "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh t2i --prompt A\\ male\\ peacock\\ trying\\ to\\ attract\\ a\\ female --width 2048 --height 2048 --cfg_scale 4.0 --cfg_norm none --timestep_shift 3.0 --seed 42 --profile --num_steps 50 --think --print_think --output /workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.png ",
+  "log": "logs/t2i-think.log",
+  "peak_vram_bytes": 23982514176,
+  "peak_vram_gib": 22.34,
+  "started_at": "2026-08-22T09:21:16Z",
+  "vram_mode": "balanced",
+  "wall_seconds": 546.6
+}

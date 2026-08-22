@@ -103,6 +103,19 @@ free_model="$(df -Pk "$MODEL_BASE" 2>/dev/null | awk 'NR==2 {print $4}')"
     && ok "~$(( free_model / 1024 / 1024 )) GiB free at $MODEL_BASE (checkpoint needs ~51 GiB)" \
     || warn "low disk at $MODEL_BASE — checkpoint needs ~51 GiB (override with MODEL_BASE=...)"
 
+echo "== rocBLAS Tensile workaround =="
+# The torch rocm wheel's bundled rocBLAS segfaults on half-precision GEMMs
+# routed through it (any bf16 Conv2d) on gfx1100 unless ROCBLAS_TENSILE_LIBPATH
+# points at a full system kernel set. scripts/lib/common.sh exports it; here
+# we check the system library actually exists. See
+# docs/results/findings/rocblas-tensile-segfault.md
+if ls /opt/rocm/lib/rocblas/library/*gfx*.dat >/dev/null 2>&1 \
+   || ls /usr/local/rocm/lib/rocblas/library/*gfx*.dat >/dev/null 2>&1; then
+    ok "system rocBLAS Tensile kernels present (workaround applicable)"
+else
+    warn "no system rocBLAS Tensile kernels found — bf16 conv may segfault with torch rocm wheels (see docs/results/findings/rocblas-tensile-segfault.md)"
+fi
+
 echo "== host RAM (layer-offload path) =="
 ram_kib="$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
 ram_gib=$(( ram_kib / 1024 / 1024 ))

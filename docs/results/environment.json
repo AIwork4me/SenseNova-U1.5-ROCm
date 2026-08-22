@@ -1,0 +1,17 @@
+{
+  "python": "3.12.3",
+  "torch": "2.8.0+rocm6.3",
+  "torch_backend": "hip",
+  "torch_hip_version": "6.3.42131-fa1d09cbd",
+  "transformers": "4.57.1",
+  "accelerate": "1.14.0",
+  "gpu_available": true,
+  "gpu_count": 1,
+  "gpu_name": "AMD Radeon Graphics",
+  "gpu_arch": [
+    11,
+    0
+  ],
+  "gpu_total_vram_gib": 47.98,
+  "rocm_smi": "============================ ROCm System Management Interface ============================\n=========================================== ID ===========================================\nGPU[0]\t\t: Device Name: \t\tAMD Radeon Graphics\nGPU[0]\t\t: Device ID: \t\t0x744b\nGPU[0]\t\t: Device Rev: \t\t0x00\nGPU[0]\t\t: Subsystem ID: \t0x0e0c\nGPU[0]\t\t: GUID: \t\t6853\n==========================================================================================\n====================================== Product Info ======================================\nGPU[0]\t\t: Card Series: \t\tAMD Radeon Graphics\nGPU[0]\t\t: Card Model: \t\t0x744b\nGPU[0]\t\t: Card Vendor: \t\tAdvanced Micro Devices, Inc. [AMD/ATI]\nGPU[0]\t\t: Card SKU: \t\tD7070910\nGPU[0]\t\t: Subsystem ID: \t0x0e0c\nGPU[0]\t\t: Device Rev: \t\t0x00\nGPU[0]\t\t: Node ID: \t\t2\nGPU[0]\t\t: GUID: \t\t6853\nGPU[0]\t\t: GFX Version: \t\tgfx1100\n==========================================================================================\n================================== End of ROCm SMI Log ==================================="
+}

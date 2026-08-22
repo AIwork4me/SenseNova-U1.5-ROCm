@@ -23,6 +23,39 @@ MODEL_DIR="${MODEL_DIR:-$MODEL_BASE/$MODEL_DIR_NAME}"
 # Generated images / answers / receipts go here
 OUT_DIR="${OUT_DIR:-$ROOT/outputs}"
 
+# --- ROCm math-library workaround (measured on the reference host) ---------
+# The PyTorch rocm6.3 wheel's bundled BLAS stack is broken on gfx1100:
+#   (a) rocBLAS segfaults in Tensile::PlaceholderLibrary::loadPlaceholderLibrary()
+#       on any half-precision GEMM routed through it (repro: any bf16 Conv2d);
+#   (b) even redirected to the system kernel set, its 6.3-era decompressor
+#       cannot read ROCm 7.x Tensile .dat files ("Unbundle Objects Error:
+#       ... Unknown frame descriptor") and large bf16 GEMMs (the first LLM
+#       q_proj) fail with HIPBLAS_STATUS_INTERNAL_ERROR.
+# Fix: route ALL BLAS calls through the system ROCm install by preloading
+# its hipBLAS + rocBLAS (symbol interposition beats the wheel's bundled
+# copies) and pointing rocBLAS at the system Tensile kernels. Verified
+# numerically: bf16 conv/GEMM outputs match CPU fp32 references at bf16
+# rounding level. See docs/results/findings/rocm6.3-wheel-blas-on-gfx1100.md
+# Override: set BLAS_FIX=0 to disable (e.g. on CUDA hosts or a future fixed
+# wheel), or point ROCM_HOME at a different ROCm install.
+if [ "${BLAS_FIX:-1}" = "1" ]; then
+    _rocm_home="${ROCM_HOME:-}"
+    if [ -z "$_rocm_home" ]; then
+        for _p in /opt/rocm /usr/local/rocm; do
+            [ -e "$_p/lib/librocblas.so" ] && _rocm_home="$_p" && break
+        done
+    fi
+    if [ -n "$_rocm_home" ] && [ -e "$_rocm_home/lib/librocblas.so" ]; then
+        case ":${LD_PRELOAD:-}:" in
+            *":$_rocm_home/lib/librocblas.so:"*) ;;
+            *) export LD_PRELOAD="$_rocm_home/lib/libhipblas.so:$_rocm_home/lib/librocblas.so${LD_PRELOAD:+:$LD_PRELOAD}" ;;
+        esac
+        if [ -z "${ROCBLAS_TENSILE_LIBPATH:-}" ] && [ -d "$_rocm_home/lib/rocblas/library" ]; then
+            export ROCBLAS_TENSILE_LIBPATH="$_rocm_home/lib/rocblas/library"
+        fi
+    fi
+fi
+
 log()  { echo "[$PROJECT_NAME] $*"; }
 warn() { echo "[$PROJECT_NAME] WARNING: $*" >&2; }
 die()  { echo "[$PROJECT_NAME] FAIL: $*" >&2; exit 1; }

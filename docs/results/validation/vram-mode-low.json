@@ -1,0 +1,11 @@
+{
+  "artifacts": {},
+  "block": "vram-mode-low",
+  "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh t2i --prompt A\\ red\\ paper\\ lantern\\ hanging\\ in\\ a\\ snowy\\ street\\ at\\ dusk --width 2048 --height 2048 --cfg_scale 4.0 --cfg_norm none --timestep_shift 3.0 --seed 42 --profile --num_steps 10 --output /workspace/SenseNova-U1.5-ROCm/outputs/validation/vrammode-low.png ",
+  "log": "logs/vram-mode-low.log",
+  "peak_vram_bytes": 3640258560,
+  "peak_vram_gib": 3.39,
+  "started_at": "2026-08-22T10:00:16Z",
+  "vram_mode": "low",
+  "wall_seconds": 208.4
+}

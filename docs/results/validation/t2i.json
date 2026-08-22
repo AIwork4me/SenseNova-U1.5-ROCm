@@ -1,0 +1,16 @@
+{
+  "artifacts": {
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-2048.png": {
+      "bytes": 6349742,
+      "sha256": "39688e22c66059aa5cd21245edaf53a979e507b4e671dcf6c2a00c9f8c79b92f"
+    }
+  },
+  "block": "t2i",
+  "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh t2i --prompt A\\ cinematic\\ mountain\\ village\\ at\\ sunrise\\,\\ golden\\ light\\ over\\ slate\\ roofs\\,\\ drifting\\ mist\\ between\\ timber\\ houses\\,\\ ultra\\ detailed --width 2048 --height 2048 --cfg_scale 4.0 --cfg_norm none --timestep_shift 3.0 --seed 42 --profile --num_steps 50 --output /workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-2048.png ",
+  "log": "logs/t2i.log",
+  "peak_vram_bytes": 23926067200,
+  "peak_vram_gib": 22.28,
+  "started_at": "2026-08-22T09:14:16Z",
+  "vram_mode": "balanced",
+  "wall_seconds": 420.1
+}

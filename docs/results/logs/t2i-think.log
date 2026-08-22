@@ -1,0 +1,39 @@
+[SenseNova-U1.5-ROCm] task=t2i  model=/root/.cache/huggingface/modelscope/SenseNova-U1.5-8B-MoT  vram_mode=balanced  attn=sdpa
+[sensenova_u1_rocm] MIOpen bypass active (conv via unfold+GEMM; SENU15_MIOPEN=1 to re-enable)
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.22it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.95it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.64s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.89s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.19s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.38s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.51s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.60s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.66s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.18s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.13s/it]
+[saved] /workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.png
+[saved] /workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.think.txt
+--- think ---
+1. **Instruction Understanding:**
+The core subject is a male peacock displaying its tail feathers. The context involves attracting a female, implying a display posture.
+
+2. **Reasoning Process:**
+Peacocks display their iridescent tail feathers in a fan shape to attract females.
+
+3. **Establish the frame:**
+The composition centers the male peacock with its tail feathers fully extended in a wide fan shape. The framing captures the full spread of the tail feathers to emphasize the display posture.
+
+4. **Set the lighting and color:**
+Natural lighting highlights the iridescent quality of the tail feathers. The colors are vibrant, showcasing the detailed patterns on the feathers.
+
+5. **Lock the style:**
+The image is rendered as a realistic photograph with sharp focus on the subject. The finish is natural, avoiding artistic filters or illustrations.
+
+6. **Explicit Prompt:**
+A realistic photograph of a male peacock with its tail feathers fully fanned out in a vibrant, eye-patterned display.
+</think>
+--- end think ---
+
+================================================================
+Profile summary
+================================================================
+  config              : vram_mode=balanced, fast_vram_fraction=0.9, fast_vram_headroom_gib=2.0, fast_activation_reserve_gib=4.0, attn_backend=sdpa, dtype=bfloat16
+  model load          :   67.210 s
+  load peak memory    : cpu RSS 43.04 GiB
+  generations         : 1 call(s), 1 image(s) total, 473.541 s wall
+  avg per image       :  473.541 s
+  image tokens        : patch_size=32, avg 4096 tok/image (4096)
+  throughput          :     8.65 tok/s
+  generation peak mem : allocated 3.66 GiB, reserved 21.90 GiB, cpu RSS 50.31 GiB
+================================================================
