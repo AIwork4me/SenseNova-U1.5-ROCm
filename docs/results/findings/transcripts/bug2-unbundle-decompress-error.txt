@@ -1,0 +1,6 @@
+Unbundle Objects Error: Failed to decompress input: Could not decompress embedded file contents: Unknown frame descriptor
+Traceback (most recent call last):
+  File "/tmp/repro_llmgemm.py", line 10, in <module>
+    r = (y.float() - (x.float() @ lin.weight.float().T + lin.bias.float())).abs().median()
+                      ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+RuntimeError: CUDA error: HIPBLAS_STATUS_INTERNAL_ERROR when calling `hipblasSgemm( handle, opa, opb, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc)`

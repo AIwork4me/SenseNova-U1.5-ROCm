@@ -18,8 +18,8 @@ correctly, which is why those tasks work unpatched.
 interleave functions (the variable is already in scope — the progress-bar
 description uses it a few lines above).
 
-**Symptom before the patch** (from
-`docs/results/logs/interleave.log` of 2026-08-22):
+**Symptom before the patch** (pre-patch run transcript:
+[../docs/results/logs/interleave-prepatch-typeerror.txt](../docs/results/logs/interleave-prepatch-typeerror.txt)):
 
 ```
 File ".../modeling_neo_chat.py", line 614, in _t2i_predict_v

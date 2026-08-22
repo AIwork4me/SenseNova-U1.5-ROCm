@@ -61,6 +61,13 @@ lin(torch.randn(16060, 4096, device="cuda", dtype=torch.bfloat16))
 # → RuntimeError: HIPBLAS_STATUS_INTERNAL_ERROR
 ```
 
+Primary evidence artifacts:
+
+- [`transcripts/bug1-rocblas-tensile-segv.txt`](transcripts/bug1-rocblas-tensile-segv.txt) — gdb backtrace (wheel-only bf16 conv → SIGSEGV in `Tensile::PlaceholderLibrary::loadPlaceholderLibrary`, wheel `librocblas.so`)
+- [`transcripts/bug2-unbundle-decompress-error.txt`](transcripts/bug2-unbundle-decompress-error.txt) — full decompressor error + `HIPBLAS_STATUS_INTERNAL_ERROR` (libpath-only, large bf16 GEMM)
+- [`transcripts/bug3-miopen-comgr-segv.txt`](transcripts/bug3-miopen-comgr-segv.txt) — gdb backtrace (full-model forward → SIGSEGV in `COMGR::DataObject::clearData`, wheel `libamd_comgr.so`, via `hiprtcCompileProgram` / MIOpen JIT)
+- [`repro-matrix.md`](repro-matrix.md) — the full standalone matrix (dtypes × MIOpen on/off × workaround combos) with numeric-sanity results
+
 ## Open questions / upstream value
 
 - Bugs 1–3 likely affect **every** gfx1100 user of the official

@@ -1,0 +1,47 @@
+[SenseNova-U1.5-ROCm] task=interleave  model=/root/.cache/huggingface/modelscope/SenseNova-U1.5-8B-MoT  vram_mode=balanced  attn=sdpa
+[sensenova_u1_rocm] MIOpen bypass active (conv via unfold+GEMM; SENU15_MIOPEN=1 to re-enable)
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.24it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.96it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.64s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.89s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.18s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.38s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.51s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.59s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.64s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.16s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.13s/it]
+prompt: hello
+<think>
+The user's request is a simple greeting, "hello," which serves as an excellent starting point for a comprehensive multimodal planning session. To provide a high-quality response, I will design a visual narrative that explores the concept of "Hello" through a series of diverse and evocative scenes. My primary goal is to demonstrate how a single word can be interpreted through various lenses: the warmth of a personal greeting, the grandeur of a natural landscape, the precision of a technological marvel, the vibrancy of a cultural festival, and the serenity of a quiet moment. This approach not only answers the user's greeting but also provides a rich, multi-faceted experience that showcases the versatility of visual storytelling. I will structure the response as a journey, beginning with a human-centric scene to establish an immediate emotional connection. From there, the narrative will expand into the vastness of the natural world, then pivot to the intricate details of human innovation, followed by a burst of communal energy, and finally settle into a peaceful, reflective conclusion. Each segment will be carefully crafted to include specific details about lighting, composition, and atmosphere, ensuring that the visual direction is clear and consistent. I will pay close attention to the transitions between these scenes, using the "hello" theme as a thread that ties them all together. The overall aesthetic will be cinematic and high-definition, focusing on rich textures and dynamic lighting to create a sense of depth and realism. By the end of this sequence, the user should feel as though they have been taken on a visual tour that celebrates the beauty and complexity of the world around us. This plan ensures that the response is not just a simple reply, but a meaningful and visually stunning exploration of the user's initial message.
+
+To begin our journey, we start with a scene that captures the essence of a warm, personal greeting. Imagine a cozy, sun-drenched living room during the late afternoon. A young woman, dressed in a soft, cream-colored knitted sweater, stands near a large window. She is holding a steaming ceramic mug in both hands, her face lit with a genuine, welcoming smile as she looks toward the camera. The sunlight streams through the window, creating a beautiful rim light around her hair and casting long, soft shadows across the room. In the background, a bookshelf filled with colorful volumes and a few trailing houseplants like ivy and pothos add a sense of life and comfort. The composition is a medium shot, focusing on her upper body and the immediate surroundings. The camera is positioned at eye level, creating a sense of intimacy and direct engagement with the viewer. The depth of field is shallow, so while the woman is in sharp focus, the background elements are softly blurred, emphasizing her presence. The color palette is dominated by warm tones—golds, ambers, and soft greens—which contribute to the overall feeling of peace and hospitality. This image serves as the perfect introduction to our "hello," representing the human connection that starts every interaction. Every detail, from the steam rising from the mug to the texture of the sweater, is designed to evoke a sense of comfort and familiarity, making the viewer feel as though they are being invited into a private, friendly moment.
+
+# Image Generation Prompt
+A medium shot of a smiling young woman with wavy brown hair, wearing a cream-colored ribbed knit sweater. She holds a steaming ceramic mug with both hands, looking directly at the camera with a warm expression. The scene is set in a sun-drenched living room during the golden hour. Bright sunlight streams through a large window, creating a soft rim light on her hair and casting long shadows across the wooden floor. In the background, a bookshelf filled with colorful books and trailing green ivy is visible, alongside a potted plant on the windowsill. The composition uses a shallow depth of field, keeping the woman in sharp focus while softly blurring the domestic interior. The color palette is dominated by warm ambers, golds, and soft greens, evoking a peaceful and cozy atmosphere.
+<image1>
+
+[image 1] preparing diffusion...
+image 1 (2048x1152):   0%|          | 0/5 [00:00<?, ?it/s]                                                          Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/SenseNova-U1.5-ROCm/src/sensenova_u1_rocm/__main__.py", line 26, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/src/sensenova_u1_rocm/__main__.py", line 21, in main
+    runpy.run_path(target, run_name="__main__")
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/interleave/inference.py", line 604, in <module>
+    main()
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/interleave/inference.py", line 500, in main
+    text, images = engine.generate(
+                   ^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/interleave/inference.py", line 194, in generate
+    text, image_tensors = offloaded.interleave_gen(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py", line 1266, in interleave_gen
+    out_cond = self._t2i_predict_v(image_embeds, indexes_image_condition, attention_mask_condition, past_key_values_cond_cfg, t, z, image_token_num=token_h*token_w, timestep_embeddings=timestep_embeddings)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py", line 614, in _t2i_predict_v
+    token_h = image_size[1] // (self.patch_size * merge_size)
+              ~~~~~~~~~~^^^
+TypeError: 'NoneType' object is not subscriptable
