@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Environments (recreated by scripts/01-setup-venv.sh)
+.venv/
+
+# Model weights and generated outputs (large, not source-controlled)
+outputs/
+models/
+
+# OS / editor
+.DS_Store
+*.swp
