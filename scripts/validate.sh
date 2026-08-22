@@ -105,7 +105,7 @@ run_block() {
         "command=$(printf '%q ' "$@")" \
         "log=logs/$name.log" \
         ${artifact_args[@]+"${artifact_args[@]}"} \
-        "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ -d @$t0)"
+        "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ -d "@$t0")"
     if [ "$rc" -ne 0 ]; then
         log "block '$name' FAILED (rc=$rc) — see $log_file"
         exit "$rc"

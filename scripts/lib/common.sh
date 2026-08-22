@@ -3,8 +3,10 @@
 # Sourced, not executed.
 
 PROJECT_NAME="SenseNova-U1.5-ROCm"
+# shellcheck disable=SC2034  # consumed by scripts that source this file
 MODEL_REPO="SenseNova/SenseNova-U1.5-8B-MoT"
 MODEL_DIR_NAME="SenseNova-U1.5-8B-MoT"
+# shellcheck disable=SC2034  # consumed by scripts that source this file
 UPSTREAM_PINNED_COMMIT="76c32c2"   # third_party/SenseNova-U1 @ feat/u1.5
 
 # Project root (scripts/ is always one level below it)

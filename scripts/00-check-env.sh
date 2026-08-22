@@ -47,8 +47,16 @@ if python3 -c "import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)"; th
 else
     hard_fail "python3 >= 3.10 required (found $pyver)"
 fi
-command -v git  >/dev/null 2>&1 && ok "git $(git --version | awk '{print $3}')"  || hard_fail "git not found"
-command -v curl >/dev/null 2>&1 && ok "curl $(curl --version | awk '{print $2}' | head -1)" || hard_fail "curl not found"
+if command -v git >/dev/null 2>&1; then
+    ok "git $(git --version | awk '{print $3}')"
+else
+    hard_fail "git not found"
+fi
+if command -v curl >/dev/null 2>&1; then
+    ok "curl $(curl --version | awk '{print $2}' | head -1)"
+else
+    hard_fail "curl not found"
+fi
 
 echo "== ROCm =="
 ROCM_PATH=""
@@ -62,8 +70,16 @@ if [ -n "$ROCM_PATH" ]; then
 else
     hard_fail "ROCm not found (looked in /opt/rocm, /usr/local/rocm)"
 fi
-[ -e /dev/kfd ] && ok "/dev/kfd present" || hard_fail "/dev/kfd missing (ROCm compute node)"
-[ -w /dev/kfd ] && ok "/dev/kfd writable" || warn "/dev/kfd not writable — GPU compute may fail (video/render group?)"
+if [ -e /dev/kfd ]; then
+    ok "/dev/kfd present"
+else
+    hard_fail "/dev/kfd missing (ROCm compute node)"
+fi
+if [ -w /dev/kfd ]; then
+    ok "/dev/kfd writable"
+else
+    warn "/dev/kfd not writable — GPU compute may fail (video/render group?)"
+fi
 
 echo "== GPU =="
 if command -v rocminfo >/dev/null 2>&1; then
@@ -94,14 +110,18 @@ fi
 
 echo "== disk =="
 free_workspace="$(df -Pk "$ROOT" 2>/dev/null | awk 'NR==2 {print $4}')"
-[ -n "$free_workspace" ] && [ "$free_workspace" -gt $(( 12 * 1024 * 1024 )) ] \
-    && ok "~$(( free_workspace / 1024 / 1024 )) GiB free under project root (venv needs ~10 GiB)" \
-    || warn "low disk under project root (venv needs ~10 GiB)"
+if [ -n "$free_workspace" ] && [ "$free_workspace" -gt $(( 12 * 1024 * 1024 )) ]; then
+    ok "~$(( free_workspace / 1024 / 1024 )) GiB free under project root (venv needs ~10 GiB)"
+else
+    warn "low disk under project root (venv needs ~10 GiB)"
+fi
 mkdir -p "$MODEL_BASE" 2>/dev/null || true
 free_model="$(df -Pk "$MODEL_BASE" 2>/dev/null | awk 'NR==2 {print $4}')"
-[ -n "$free_model" ] && [ "$free_model" -gt $(( 52 * 1024 * 1024 )) ] \
-    && ok "~$(( free_model / 1024 / 1024 )) GiB free at $MODEL_BASE (checkpoint needs ~51 GiB)" \
-    || warn "low disk at $MODEL_BASE — checkpoint needs ~51 GiB (override with MODEL_BASE=...)"
+if [ -n "$free_model" ] && [ "$free_model" -gt $(( 52 * 1024 * 1024 )) ]; then
+    ok "~$(( free_model / 1024 / 1024 )) GiB free at $MODEL_BASE (checkpoint needs ~51 GiB)"
+else
+    warn "low disk at $MODEL_BASE — checkpoint needs ~51 GiB (override with MODEL_BASE=...)"
+fi
 
 echo "== rocBLAS Tensile workaround =="
 # The torch rocm wheel's bundled rocBLAS segfaults on half-precision GEMMs
@@ -119,9 +139,13 @@ fi
 echo "== host RAM (layer-offload path) =="
 ram_kib="$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
 ram_gib=$(( ram_kib / 1024 / 1024 ))
-if   [ "$ram_gib" -ge 64 ]; then ok "${ram_gib} GiB RAM"
-elif [ "$ram_gib" -ge 48 ]; then warn "${ram_gib} GiB RAM — workable, but >= 64 GiB recommended for --vram_mode balanced"
-else hard_fail "only ${ram_gib} GiB RAM — the offload path needs the ~47 GiB bf16 checkpoint resident in host memory"; fi
+if   [ "$ram_gib" -ge 64 ]; then
+    ok "${ram_gib} GiB RAM"
+elif [ "$ram_gib" -ge 48 ]; then
+    warn "${ram_gib} GiB RAM — workable, but >= 64 GiB recommended for --vram_mode balanced"
+else
+    hard_fail "only ${ram_gib} GiB RAM — the offload path needs the ~47 GiB bf16 checkpoint resident in host memory"
+fi
 
 echo
 if [ "$fail_count" -gt 0 ]; then
