@@ -56,6 +56,6 @@ memory). Full receipts and logs:
 https://github.com/AIwork4me/SenseNova-U1.5-ROCm (see
 `docs/results/validation/interleave.json` and `patches/README.md`).
 
-Without the patch the same command fails with the `TypeError` above —
+Without the patch the same script fails with the `TypeError` above (short repro: prompt "hello", 5 steps) —
 pre-patch transcript:
 [interleave-prepatch-typeerror.txt](https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/docs/results/logs/interleave-prepatch-typeerror.txt).
