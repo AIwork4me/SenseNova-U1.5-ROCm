@@ -44,14 +44,10 @@ esac
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # shellcheck source=scripts/lib/common.sh
 source "$ROOT/scripts/lib/common.sh"
-add_rocm_path
-require_venv
-require_model
 
+# Validate the task name BEFORE touching venv/model — `run-task.sh nonsense`
+# must fail with a usage error even on a fresh clone (CI tests this).
 TASK="$1"; shift
-UPSTREAM="$ROOT/third_party/SenseNova-U1"
-VRAM_MODE="${VRAM_MODE:-balanced}"
-
 case "$TASK" in
     t2i)        SCRIPT="examples/t2i/inference.py" ;;
     edit)       SCRIPT="examples/editing/inference.py" ;;
@@ -59,6 +55,13 @@ case "$TASK" in
     interleave) SCRIPT="examples/interleave/inference.py" ;;
     *) die "unknown task '$TASK' (expected t2i | edit | vqa | interleave)" ;;
 esac
+
+add_rocm_path
+require_venv
+require_model
+
+UPSTREAM="$ROOT/third_party/SenseNova-U1"
+VRAM_MODE="${VRAM_MODE:-balanced}"
 
 mkdir -p "$OUT_DIR/$TASK"
 # Our ROCm fixes (MIOpen bypass; BLAS preloads come from common.sh) wrap the
