@@ -65,6 +65,15 @@ for the full flag surface: LoRA, think mode, JSONL batching, CFG, ...).
 | `--num_steps` | 50 | denoising steps; 20 halves time, costs detail |
 | `--width/--height` | 2048×2048 | trained buckets: 1:1, 16:9, 3:2, 4:3, 2:1, 3:1 (+ rotations) |
 | `MODEL_DIR` | `$HF_HOME/modelscope/SenseNova-U1.5-8B-MoT` | checkpoint location |
+| `ROCM_FULL_STACK` | `auto` | with a ROCm ≥ 7.14 install present (see `scripts/install-rocm-7.14-gfx110x.sh`), preload its MIOpen+comgr+BLAS and keep MIOpen enabled; `0` = BLAS-only workaround |
+
+**torch flavors**: the validated full-task path is `torch 2.8.0+rocm6.3`
++ this repo's workarounds. AMD's official `torch 2.12.0+rocm7.14.0`
+wheels (`pip ... --extra-index-url https://repo.amd.com/rocm/whl-multi-arch/`)
+need **zero workarounds and fix all three wheel bugs**, and the
+understanding/VQA path works — but image generation (`forward_gen`)
+currently fails on torch 2.12 (upstream code pins torch 2.8). Details:
+[findings](results/findings/rocm63-wheel-blas-on-gfx1100.md).
 
 ## Where things land
 

@@ -233,6 +233,12 @@ with your receipts — that's a bug in our claims.
   (`--max_pixels` upstream flag) for snappier understanding.
 - The production LightLLM/LightX2V serving stack is CUDA-only — not part of
   this project.
+- AMD's official `torch 2.12.0+rocm7.14.0` wheels fix all three wheel bugs
+  with zero workarounds and run the VQA path cleanly, but the image
+  generation path (`forward_gen`) fails there (upstream pins torch 2.8) —
+  measured in
+  [findings](docs/results/findings/rocm63-wheel-blas-on-gfx1100.md);
+  generation stays on torch 2.8 + the workarounds for now.
 
 ## Contributing hardware evidence
 
