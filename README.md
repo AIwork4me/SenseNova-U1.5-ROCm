@@ -166,8 +166,9 @@ KV cache grows.
 
 ### The VRAM story (why `--vram_mode` is the whole game)
 
-The checkpoint is **50.23 GB bf16**; the reference card has **48 GB VRAM**.
-`full` mode cannot even hold the weights, let alone activations. The
+The checkpoint's **46.8 GiB of bf16 weights** nearly fill the card's
+**48 GB VRAM** (~1.2 GiB to spare) — no headroom for activations, so
+`full` mode OOMs by construction. The
 upstream offload path streams layers over PCIe from host RAM. Measured
 (10-step probe, 2048×2048, seed 42 — receipts `vram-mode-*.json`):
 
@@ -237,7 +238,8 @@ with your receipts — that's a bug in our claims.
 
 **Known limitations**:
 
-- `--vram_mode full` OOMs by construction on 48 GB (checkpoint > VRAM).
+- `--vram_mode full` OOMs by construction on 48 GB (weights leave no
+  room for activations).
 - No flash-attn on ROCm → SDPA everywhere (`--attn_backend sdpa` forced).
   Per-step latency carries that cost; on CUDA the same code with flash-attn
   is faster.
