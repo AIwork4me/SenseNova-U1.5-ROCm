@@ -142,8 +142,10 @@ torch device table):
   `q`. Verified end-to-end: 2048×2048@50 = 687.7 s / 27.8 GiB
   (receipt `../validation/t2i-torch212-fixed.json`; torch-2.8 baseline
   420.1 s / 22.3 GiB — MATH costs ~64 % on this cell, correctness-first).
-  Filed upstream: pytorch/pytorch SDPA backend issue (link in
-  `docs/upstream/issue-pytorch-rocm-sdpa-backends.md`).
+  Filed upstream: [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)
+  (SDPA fused-backend launch failures) and
+  [OpenSenseNova/SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261)
+  (compatibility issue with the verified patch).
 - Practical guidance until upstream adapts to torch 2.12: **use torch
   2.8.0+rocm6.3 + this repo's workarounds for generation tasks**; torch
   2.12.0+rocm7.14.0 is a zero-workaround option for the understanding /
