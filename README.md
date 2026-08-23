@@ -187,7 +187,8 @@ Practical guidance (measured, see receipts):
 - **Batch of similar-size images** → `fast` (retention amortizes; parity
   with balanced on this host).
 - **Small card or sharing the GPU** → `low` — only **~5 % slower** while
-  fitting in **~14× less memory than the checkpoint** (3.7 GiB): the model
+  fitting in **~13× less memory than the checkpoint** (3.7 GiB vs its
+  46.8 GiB of bf16 weights): the model
   runs on much smaller GPUs than the checkpoint size suggests. On 8–16 GB
   cards, drop resolution/step count too.
 

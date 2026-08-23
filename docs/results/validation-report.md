@@ -31,7 +31,7 @@ the loop** (−4.2 to −9.6 % — the unfold+GEMM penalty is gone); decode-boun
 VQA and the short 10-step probes sit at +3.5 to +5.5 % (probe blocks are
 load-dominated, so the full-stack library preload shows up as small
 overhead). `low` mode's peak grew 3.39 → 3.67 GiB (MIOpen runtime resident)
-— still ~14× smaller than the 50.23 GB checkpoint.
+— still ~13× smaller than the checkpoint (46.8 GiB of bf16 weights).
 
 Determinism note: the full-stack sha256 (`49e9f9b8…`) differs from the
 BLAS baseline's (`d24ae824…`) — different math libraries, different

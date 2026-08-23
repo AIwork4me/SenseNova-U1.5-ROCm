@@ -93,7 +93,7 @@ bash scripts/run-task.sh vqa --image 你的图片.jpg --question "图里有什�
 模型加载（页缓存热）约 67 秒。**确定性**：同种子两次生成 sha256 逐字节一致。
 **vram_mode 对比**（10 步探针）：balanced 207.5s/22.3GiB ·
 fast 210.1s/22.3GiB · low 217.8s/**3.7GiB**（基线 200.5/199.2/208.4s，
-low 3.39GiB）——`low` 只慢约 5%、显存仅为模型体积的约 1/14，
+low 3.39GiB）——`low` 只慢约 5%、显存约为模型体积（46.8GiB）的 1/13，
 小显存卡的福音。
 
 生成样图（含确定性双图对比）：[gallery](docs/results/gallery/README.md)。
