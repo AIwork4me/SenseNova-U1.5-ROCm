@@ -58,11 +58,10 @@ for _patch in "$ROOT"/patches/*.patch; do
     if git -C "$UPSTREAM" apply --check "$_patch" 2>/dev/null; then
         git -C "$UPSTREAM" apply "$_patch"
         log "applied upstream patch: $_name"
-    elif git -C "$UPSTREAM" diff --quiet 2>/dev/null \
-         && ! grep -q "image_size=image_size" "$UPSTREAM/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py" 2>/dev/null; then
-        die "patch $_name does not apply to upstream @ $upstream_commit — investigate patches/README.md"
-    else
+    elif git -C "$UPSTREAM" apply --reverse --check "$_patch" 2>/dev/null; then
         log "upstream patch already applied: $_name"
+    else
+        die "patch $_name does not apply to upstream @ $upstream_commit — investigate patches/README.md"
     fi
 done
 

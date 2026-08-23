@@ -1,0 +1,17 @@
+{
+  "artifacts": {
+    "outputs/validation/t2i-torch212-fixed.png": {
+      "bytes": 10148633,
+      "sha256": "970cd11cd02e1d1f37fc0e0d4fabfeb28b118b432b449ffbdf5ad5e8f9bd7cee"
+    }
+  },
+  "block": "t2i-torch212-fixed",
+  "log": "logs/t2i-torch212-fixed.log",
+  "note": "zero BLAS workarounds + SDPA MATH-backend compat patch (patches/0002)",
+  "peak_vram_bytes": 29841985536,
+  "peak_vram_gib": 27.79,
+  "rocm_stack": "none-torch212+sdpa-math-patch",
+  "torch": "2.12.0+rocm7.14.0",
+  "vram_mode": "balanced",
+  "wall_seconds": 687.7
+}

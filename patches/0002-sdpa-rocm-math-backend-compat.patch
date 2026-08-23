@@ -1,0 +1,72 @@
+diff --git a/src/sensenova_u1/models/neo_unify/modeling_qwen3.py b/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
+index ebb961b..3d8da0f 100644
+--- a/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
++++ b/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
+@@ -1,6 +1,7 @@
+ from typing import Callable, Optional, Union
+ 
+ import torch
++import contextlib
+ import torch._dynamo
+ from torch import nn
+ 
+@@ -111,28 +112,44 @@ def _sdpa_attn_func(q, k, v, dropout_p: float = 0.0, softmax_scale=None, causal:
+         k_bhsd = k_bhsd.repeat_interleave(n_rep, dim=1)
+         v_bhsd = v_bhsd.repeat_interleave(n_rep, dim=1)
+ 
+-    # SDPA does not support an explicit `scale` argument on older torch
+-    # versions; fall back to the manual path in that case.
+-    try:
+-        out = torch.nn.functional.scaled_dot_product_attention(
+-            q_bhsd,
+-            k_bhsd,
+-            v_bhsd,
+-            dropout_p=dropout_p,
+-            is_causal=causal,
+-            scale=softmax_scale,
+-        )
+-    except TypeError:
+-        if softmax_scale is not None:
+-            q_bhsd = q_bhsd * softmax_scale
++    # ROCm workarounds (measured on gfx1100, torch 2.12.0+rocm7.14.0; see
++    # https://github.com/AIwork4me/SenseNova-U1.5-ROCm docs/results/findings):
++    #   (a) the FLASH SDPA backend fails launch (hipErrorInvalidValue) whenever
++    #       an explicit `scale` kwarg is passed — pre-scale q instead;
++    #   (b) the mem-efficient SDPA backend fails launch for several shapes on
++    #       this stack (kv_len not a power of two, head_dim 64, long causal
++    #       sequences) — keep it out of the dispatcher;
++    #   MATH is always healthy and remains the fallback. CUDA hosts are
++    #   unaffected and keep the stock behavior.
++    _on_hip = torch.version.hip is not None
++    _scale = softmax_scale
++    _sdpa_ctx = contextlib.nullcontext()
++    if _on_hip:
++        try:
++            from torch.nn.attention import SDPBackend, sdpa_kernel
++            # FLASH also fails in-model on this stack even without `scale`
++            # (cache-slice strides not reproduced standalone yet) — MATH only,
++            # proven end-to-end, until the ROCm SDPA backends are fixed.
++            _sdpa_ctx = sdpa_kernel([SDPBackend.MATH])
++        except ImportError:
++            pass
++        if _scale is not None:
++            q_bhsd = q_bhsd * _scale
++            _scale = None
++    with _sdpa_ctx:
++        try:
+             out = torch.nn.functional.scaled_dot_product_attention(
+                 q_bhsd,
+                 k_bhsd,
+                 v_bhsd,
+                 dropout_p=dropout_p,
+                 is_causal=causal,
++                scale=_scale,
+             )
+-        else:
++        except TypeError:
++            # older torch without the `scale` kwarg
++            if _scale is not None:
++                q_bhsd = q_bhsd * _scale
+             out = torch.nn.functional.scaled_dot_product_attention(
+                 q_bhsd,
+                 k_bhsd,

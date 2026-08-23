@@ -1,0 +1,16 @@
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.87it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  4.66it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.20s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:13<00:41,  4.62s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.41s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.88s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.18s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.38s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:47<00:26,  6.50s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.59s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.65s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.18s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.12s/it]
+[saved] outputs/validation/t2i-torch212-fixed.png
+
+================================================================
+Profile summary
+================================================================
+  config              : vram_mode=balanced, fast_vram_fraction=0.9, fast_vram_headroom_gib=2.0, fast_activation_reserve_gib=4.0, attn_backend=sdpa, dtype=bfloat16
+  model load          :   67.004 s
+  load peak memory    : cpu RSS 43.09 GiB
+  generations         : 1 call(s), 1 image(s) total, 607.459 s wall
+  avg per image       :  607.459 s
+  image tokens        : patch_size=32, avg 4096 tok/image (4096)
+  throughput          :     6.74 tok/s
+  generation peak mem : allocated 8.34 GiB, reserved 27.32 GiB, cpu RSS 50.01 GiB
+================================================================
