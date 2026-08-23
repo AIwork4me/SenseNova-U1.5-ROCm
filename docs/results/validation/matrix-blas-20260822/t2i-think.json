@@ -1,8 +1,8 @@
 {
   "artifacts": {
     "/workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.png": {
-      "bytes": 7417471,
-      "sha256": "eb6b3adc9ec829edae8c1069a7b92db458bf4baa78f545bbfa9a250ace920f8d"
+      "bytes": 7424985,
+      "sha256": "2be9d97921f2574e5df82de3132afeb77264a859faec0216e1f5cb6a885d27bd"
     },
     "/workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.think.txt": {
       "bytes": 1006,
@@ -11,12 +11,10 @@
   },
   "block": "t2i-think",
   "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh t2i --prompt A\\ male\\ peacock\\ trying\\ to\\ attract\\ a\\ female --width 2048 --height 2048 --cfg_scale 4.0 --cfg_norm none --timestep_shift 3.0 --seed 42 --profile --num_steps 50 --think --print_think --output /workspace/SenseNova-U1.5-ROCm/outputs/validation/t2i-think.png ",
-  "ld_preload": "/root/rocm-7.14-gfx110x/lib/libMIOpen.so:/root/rocm-7.14-gfx110x/lib/libamd_comgr.so:/root/rocm-7.14-gfx110x/lib/libhipblas.so:/root/rocm-7.14-gfx110x/lib/librocblas.so",
   "log": "logs/t2i-think.log",
-  "peak_vram_bytes": 23942660096,
-  "peak_vram_gib": 22.3,
-  "rocm_stack": "full-stack",
-  "started_at": "2026-08-23T11:00:56Z",
+  "peak_vram_bytes": 23982514176,
+  "peak_vram_gib": 22.34,
+  "started_at": "2026-08-22T09:21:16Z",
   "vram_mode": "balanced",
-  "wall_seconds": 504.6
+  "wall_seconds": 546.6
 }

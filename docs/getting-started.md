@@ -73,8 +73,8 @@ for the full flag surface: LoRA, think mode, JSONL batching, CFG, ...).
 (`pip ... --extra-index-url https://repo.amd.com/rocm/whl-multi-arch/`)
 need **zero workarounds and fix all three wheel bugs**; VQA works out of
 the box, and image generation works with
-[patches/0002](../patches/README.md) (2048×2048@50: 687.7 s vs 420.1 s on
-torch 2.8 — the gap is the ROCm SDPA fused-backend failure,
+[patches/0002](../patches/README.md) (2048×2048@50: 687.7 s vs 379.6 s on
+torch 2.8 full-stack — the gap is the ROCm SDPA fused-backend failure,
 [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)).
 Details: [findings](results/findings/rocm63-wheel-blas-on-gfx1100.md).
 

@@ -6,7 +6,8 @@
 原生统一多模态大模型（一个模型同时做"看图问答"和"文生图/改图"）。
 所有结论附带可复现的证据收据，每个数字都能溯源。**
 
-- ✅ 在 **gfx1100（48GB 显存）/ ROCm 7.2.1** 上全量验证四类任务：
+- ✅ 在 **gfx1100（48GB 显存）** 上以两种模式（BLAS workaround / 全栈
+  ROCm 7.14，MIOpen 开启）全量验证四类任务：
   文生图（t2i）、图像编辑（edit）、视觉理解（VQA）、图文交错生成（interleave），
   含 `--think` 推理模式
 - ✅ **48GB 显卡跑 50.2GB 的 bf16 全量模型**：走上游自带的分层卸载
@@ -73,23 +74,26 @@ bash scripts/run-task.sh t2i --prompt "山间日出的小村庄" --width 2048 --
 bash scripts/run-task.sh vqa --image 你的图片.jpg --question "图里有什么？"
 ```
 
-## 实测数据（gfx1100 / ROCm 7.2.1 / torch 2.8.0+rocm6.3）
+## 实测数据（gfx1100 / torch 2.8.0+rocm6.3 / 全栈 ROCm 7.14，2026-08-23）
 
 环境指纹：[docs/results/environment.json](docs/results/environment.json)。
-以下数字全部来自收据（`docs/results/validation/*.json`），
-`bash scripts/validate.sh` 可完整复现：
+以下数字全部来自收据（`docs/results/validation/*.json`，均含
+`rocm_stack: full-stack` 标记），`bash scripts/validate.sh` 可完整复现；
+括号内为 2026-08-22 BLAS 模式基线（归档于
+[matrix-blas-20260822/](docs/results/validation/matrix-blas-20260822/)）：
 
 | 任务 | 参数 | 端到端耗时 | 峰值显存 |
 |---|---|---|---|
-| VQA 视觉理解（greedy，1.6万 patch 菜单图） | ≤768 新 token | 602 s | 24.8 GiB |
-| 文生图 | 2048×2048 @ 50 步，seed 42 | 420 s（约 7 s/步） | 22.3 GiB |
-| 文生图 + 推理模式 | 同上 + `--think` | 547 s | 22.3 GiB |
-| 图像编辑 | 2048 级 @ 50 步 | 484 s | 29.8 GiB |
-| 图文交错教程 | 7 张 2048×1152 + 交错文本 | 3392 s | 47.7 GiB |
+| VQA 视觉理解（greedy，1.6万 patch 菜单图） | ≤768 新 token | 628 s（基线 602 s） | 25.3 GiB |
+| 文生图 | 2048×2048 @ 50 步，seed 42 | 380 s，约 6 s/步（基线 420 s） | 22.3 GiB |
+| 文生图 + 推理模式 | 同上 + `--think` | 505 s（基线 547 s） | 22.3 GiB |
+| 图像编辑 | 2048 级 @ 50 步 | 461 s（基线 484 s） | 29.9 GiB |
+| 图文交错教程 | 7 张 2048×1152 + 交错文本 | 3251 s（基线 3392 s） | 47.9 GiB |
 
-模型加载（页缓存热）约 66 秒。**确定性**：同种子两次生成 sha256 逐字节一致。
-**vram_mode 对比**（10 步探针）：balanced 200.5s/22.3GiB ·
-fast 199.2s/22.3GiB · low 208.4s/**3.4GiB**——`low` 只慢 4% 却省 15 倍显存，
+模型加载（页缓存热）约 67 秒。**确定性**：同种子两次生成 sha256 逐字节一致。
+**vram_mode 对比**（10 步探针）：balanced 207.5s/22.3GiB ·
+fast 210.1s/22.3GiB · low 217.8s/**3.7GiB**（基线 200.5/199.2/208.4s，
+low 3.39GiB）——`low` 只慢约 5%、显存仅为模型体积的约 1/14，
 小显存卡的福音。
 
 生成样图（含确定性双图对比）：[gallery](docs/results/gallery/README.md)。
@@ -104,21 +108,24 @@ OOM。上游为此内置了分层卸载：从内存经 PCIe 异步预取层权�
 ## 运行模式与 torch 版本
 
 - **BLAS 模式**（未检测到 ROCm ≥ 7.14 安装时的默认）：BLAS 经系统 ROCm
-  preload，conv 走 unfold+GEMM（绕过损坏的 MIOpen JIT）
+  preload，conv 走 unfold+GEMM（绕过损坏的 MIOpen JIT）；
+  2026-08-22 基线数据归档于
+  [matrix-blas-20260822/](docs/results/validation/matrix-blas-20260822/)
 - **全栈模式**（装有 ROCm ≥ 7.14 时自动，如
   `scripts/install-rocm-7.14-gfx110x.sh` 安装）：preload 7.14 的
   MIOpen+comgr+BLAS，**MIOpen 保持开启**（无 unfold+GEMM 性能损失）；
-  `ROCM_FULL_STACK=0|1` 可控
-- **torch 版本**：验证态主力为 2.8.0+rocm6.3+workaround（生成最快）。
+  `ROCM_FULL_STACK=0|1` 可控。**当前默认验证路径**（2026-08-23 全量复验，
+  四个生成任务较 BLAS 基线提速 4–10%）
+- **torch 版本**：验证态主力为 2.8.0+rocm6.3（全栈模式，生成最快）。
   AMD 官方 2.12.0+rocm7.14.0 轮子零 BLAS workaround、VQA 开箱即用，
   生成任务配 [补丁 0002](patches/README.md) 可用
-  （2048×2048@50：687.7s vs 2.8 的 420.1s，差距为 ROCm SDPA 融合后端失败所致）
+  （2048×2048@50：687.7s vs 2.8 全栈 379.6s，差距为 ROCm SDPA 融合后端失败所致）
 
 ## 常见问题
 
 - **`/dev/kfd` 不可写**：`sudo usermod -aG render,video $USER` 后重新登录。
 - **加载很慢/像卡住**：首次从磁盘读 50GiB 权重 + 内核预热，看 `rocm-smi`
-  等几分钟；页面缓存热了之后加载约 66 秒。
+  等几分钟；页面缓存热了之后加载约 67 秒。
 - **显存不够（OOM）**：别用 `VRAM_MODE=full`；默认 `balanced` 即为 48GB 卡调校。
 - **`torch.cuda.is_available()` 为假**：检查 ROCm 安装与 `rocminfo` 是否列出 gfx 设备。
 

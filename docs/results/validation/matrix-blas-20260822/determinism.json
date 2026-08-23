@@ -1,0 +1,13 @@
+{
+  "artifacts": {
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/determinism-a.png": {
+      "bytes": 5756113,
+      "sha256": "d24ae824c575492cb6c67f70c0885be13403e1341310b572ffc138c1d3d6e859"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/determinism-b.png": {
+      "bytes": 5756113,
+      "sha256": "d24ae824c575492cb6c67f70c0885be13403e1341310b572ffc138c1d3d6e859"
+    }
+  },
+  "identical": true
+}

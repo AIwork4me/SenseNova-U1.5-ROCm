@@ -2,12 +2,10 @@
   "artifacts": {},
   "block": "vram-mode-balanced",
   "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh t2i --prompt A\\ red\\ paper\\ lantern\\ hanging\\ in\\ a\\ snowy\\ street\\ at\\ dusk --width 2048 --height 2048 --cfg_scale 4.0 --cfg_norm none --timestep_shift 3.0 --seed 42 --profile --num_steps 10 --output /workspace/SenseNova-U1.5-ROCm/outputs/validation/vrammode-balanced.png ",
-  "ld_preload": "/root/rocm-7.14-gfx110x/lib/libMIOpen.so:/root/rocm-7.14-gfx110x/lib/libamd_comgr.so:/root/rocm-7.14-gfx110x/lib/libhipblas.so:/root/rocm-7.14-gfx110x/lib/librocblas.so",
   "log": "logs/vram-mode-balanced.log",
-  "peak_vram_bytes": 23893176320,
-  "peak_vram_gib": 22.25,
-  "rocm_stack": "full-stack",
-  "started_at": "2026-08-23T12:19:37Z",
+  "peak_vram_bytes": 23926104064,
+  "peak_vram_gib": 22.28,
+  "started_at": "2026-08-22T09:53:36Z",
   "vram_mode": "balanced",
-  "wall_seconds": 207.5
+  "wall_seconds": 200.5
 }

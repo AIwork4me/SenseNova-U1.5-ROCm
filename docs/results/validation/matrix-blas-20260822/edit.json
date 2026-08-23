@@ -1,18 +1,16 @@
 {
   "artifacts": {
     "/workspace/SenseNova-U1.5-ROCm/outputs/validation/edit-jacket.png": {
-      "bytes": 5041306,
-      "sha256": "671fd6b091daeee5fbad3580eb80fba416ed6b287af6bf65455bd10555962d93"
+      "bytes": 5032579,
+      "sha256": "273cbefd64187d661e20211201a20dfd1f06f4b7847d12cfc64814136b1dff27"
     }
   },
   "block": "edit",
   "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh edit --image /workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/editing/data/images/1.webp --prompt Change\\ the\\ jacket\\ of\\ the\\ person\\ on\\ the\\ left\\ to\\ bright\\ yellow. --cfg_scale 4.0 --img_cfg_scale 1.0 --cfg_norm none --timestep_shift 3.0 --num_steps 50 --seed 42 --profile --output /workspace/SenseNova-U1.5-ROCm/outputs/validation/edit-jacket.png ",
-  "ld_preload": "/root/rocm-7.14-gfx110x/lib/libMIOpen.so:/root/rocm-7.14-gfx110x/lib/libamd_comgr.so:/root/rocm-7.14-gfx110x/lib/libhipblas.so:/root/rocm-7.14-gfx110x/lib/librocblas.so",
   "log": "logs/edit.log",
-  "peak_vram_bytes": 32103800832,
-  "peak_vram_gib": 29.9,
-  "rocm_stack": "full-stack",
-  "started_at": "2026-08-23T11:09:22Z",
+  "peak_vram_bytes": 32015749120,
+  "peak_vram_gib": 29.82,
+  "started_at": "2026-08-22T09:30:24Z",
   "vram_mode": "balanced",
-  "wall_seconds": 460.9
+  "wall_seconds": 483.8
 }

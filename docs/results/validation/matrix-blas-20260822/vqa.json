@@ -2,12 +2,10 @@
   "artifacts": {},
   "block": "vqa",
   "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh vqa --image /workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/vqa/data/images/menu.jpg --question List\\ every\\ dish\\ you\\ can\\ read\\ on\\ this\\ menu\\ with\\ its\\ price.\\ Answer\\ as\\ a\\ plain\\ list. --max_new_tokens 768 --output /workspace/SenseNova-U1.5-ROCm/outputs/validation/vqa-menu.txt ",
-  "ld_preload": "/root/rocm-7.14-gfx110x/lib/libMIOpen.so:/root/rocm-7.14-gfx110x/lib/libamd_comgr.so:/root/rocm-7.14-gfx110x/lib/libhipblas.so:/root/rocm-7.14-gfx110x/lib/librocblas.so",
   "log": "logs/vqa.log",
-  "peak_vram_bytes": 27124473856,
-  "peak_vram_gib": 25.26,
-  "rocm_stack": "full-stack",
-  "started_at": "2026-08-23T10:44:06Z",
+  "peak_vram_bytes": 26576556032,
+  "peak_vram_gib": 24.75,
+  "started_at": "2026-08-22T08:59:25Z",
   "vram_mode": "balanced",
-  "wall_seconds": 628.0
+  "wall_seconds": 601.8
 }

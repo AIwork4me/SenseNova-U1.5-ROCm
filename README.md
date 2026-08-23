@@ -8,7 +8,8 @@ native unified multimodal model (understanding *and* image generation, one set
 of weights) — locally on AMD RDNA3 GPUs via ROCm. One command, fully measured,
 every claim linked to a receipt.**
 
-- ✅ **All four tasks validated on gfx1100 (48 GB, ROCm 7.2.1)**: text-to-image,
+- ✅ **All four tasks validated on gfx1100 (48 GB)** in both run modes —
+  BLAS workaround and full-stack ROCm 7.14 (MIOpen on): text-to-image,
   image editing, visual understanding (VQA), and interleaved text+image
   generation — including the `--think` reasoning mode.
 - ✅ **48 GB card runs a 50.2 GB bf16 checkpoint** through the upstream
@@ -112,26 +113,32 @@ bash scripts/run-task.sh t2i --prompt "A cinematic mountain village at sunrise" 
 ```
 
 Reproducibility of the one-command path itself: the quickstart t2i demo
-(same prompt/seed as the validation block) produced a **byte-identical
-PNG, sha256 `39688e22c66059aa…`** — matching
-[`t2i.json`](docs/results/validation/t2i.json).
+(same prompt/seed as the validation block, BLAS mode) produced a
+**byte-identical PNG, sha256 `39688e22c66059aa…`** — matching the archived
+baseline receipt
+[`matrix-blas-20260822/t2i.json`](docs/results/validation/matrix-blas-20260822/t2i.json).
 
 ## What was validated
 
 On the reference host — **AMD Radeon gfx1100 (48 GB) / ROCm 7.2.1 /
 PyTorch 2.8.0+rocm6.3 / transformers 4.57.1 / Python 3.12.3** (full
-fingerprint: [`docs/results/environment.json`](docs/results/environment.json)):
+fingerprint: [`docs/results/environment.json`](docs/results/environment.json)).
+Numbers below are the **2026-08-23 full-stack re-validation** — the current
+default mode (ROCm 7.14 MIOpen+comgr+BLAS preloaded over the torch 2.8
+wheel; every receipt tagged `rocm_stack: full-stack`). The 2026-08-22
+BLAS-mode baseline is kept as the comparison value and archived in
+[`matrix-blas-20260822/`](docs/results/validation/matrix-blas-20260822/).
 
 | # | Capability | Result | Evidence |
 |---|---|---|---|
 | 1 | Checkpoint integrity (24 files, 50.23 GB) | ✅ all SHA256-verified | [`configs/artifact-manifest.json`](configs/artifact-manifest.json) |
-| 2 | VQA / visual understanding (greedy, 16k-patch image) | ✅ 602 s wall, 24.8 GiB peak — reads a full bilingual menu with prices | [`vqa.json`](docs/results/validation/vqa.json) |
-| 3 | Text-to-image 2048×2048 @ 50 steps | ✅ 420 s wall (65.6 s load + 348 s gen ≈ 7.0 s/step), 22.3 GiB | [`t2i.json`](docs/results/validation/t2i.json) |
-| 4 | T2I with reasoning (`--think`) | ✅ 547 s, structured reasoning text + image | [`t2i-think.json`](docs/results/validation/t2i-think.json) |
-| 5 | Image editing (it2i) | ✅ 484 s, 29.8 GiB | [`edit.json`](docs/results/validation/edit.json) |
-| 6 | Interleaved text+image (7-image illustrated tutorial, 2048×1152) | ✅ 3392 s, 47.7 GiB peak | [`interleave.json`](docs/results/validation/interleave.json) |
-| 7 | Determinism (same seed twice) | ✅ byte-identical PNG, sha256 `d24ae824c575…` | [`determinism.json`](docs/results/validation/determinism.json) |
-| 8 | Layer-offload modes (10-step probe) | ✅ balanced 200.5 s / fast 199.2 s / low 208.4 s | [`vram-mode-*.json`](docs/results/validation/) |
+| 2 | VQA / visual understanding (greedy, 16k-patch image) | ✅ 628 s wall, 25.3 GiB peak — reads a full bilingual menu with prices (BLAS: 602 s) | [`vqa.json`](docs/results/validation/vqa.json) |
+| 3 | Text-to-image 2048×2048 @ 50 steps | ✅ 380 s wall (67 s load + 298 s gen ≈ 6.0 s/step), 22.3 GiB (BLAS: 420 s) | [`t2i.json`](docs/results/validation/t2i.json) |
+| 4 | T2I with reasoning (`--think`) | ✅ 505 s, structured reasoning text + image (BLAS: 547 s) | [`t2i-think.json`](docs/results/validation/t2i-think.json) |
+| 5 | Image editing (it2i) | ✅ 461 s, 29.9 GiB (BLAS: 484 s) | [`edit.json`](docs/results/validation/edit.json) |
+| 6 | Interleaved text+image (7-image illustrated tutorial, 2048×1152) | ✅ 3251 s, 47.9 GiB peak (BLAS: 3392 s) | [`interleave.json`](docs/results/validation/interleave.json) |
+| 7 | Determinism (same seed twice) | ✅ byte-identical PNG, sha256 `49e9f9b86160…` | [`determinism.json`](docs/results/validation/determinism.json) |
+| 8 | Layer-offload modes (10-step probe) | ✅ balanced 207.5 s / fast 210.1 s / low 217.8 s (BLAS: 200.5 / 199.2 / 208.4 s) | [`vram-mode-*.json`](docs/results/validation/) |
 | 9 | Upstream interleave bug found & fixed | ✅ minimal patch, all platforms | [`patches/README.md`](patches/README.md) |
 
 Generated images from these runs: [gallery](docs/results/gallery/README.md)
@@ -141,18 +148,21 @@ Generated images from these runs: [gallery](docs/results/gallery/README.md)
 
 Single gfx1100, bf16, SDPA attention, `--vram_mode balanced` unless noted.
 2048×2048 is the upstream's canonical bucket; 50 steps the default quality.
+Wall times are the 2026-08-23 full-stack run; the BLAS-mode baseline
+(2026-08-22) is shown for comparison.
 
-| Task | Config | Wall | Peak VRAM | Receipt |
-|---|---|---:|---:|---|
-| T2I | 2048×2048, 50 steps, seed 42 | 420 s | 22.3 GiB | `t2i.json` |
-| T2I + think | same + reasoning | 547 s | 22.3 GiB | `t2i-think.json` |
-| Edit | 2048-class, 50 steps | 484 s | 29.8 GiB | `edit.json` |
-| VQA | greedy, ≤768 new tokens, 16k-patch image | 602 s | 24.8 GiB | `vqa.json` |
-| Interleave | 7 × 2048×1152 + text | 3392 s | 47.7 GiB | `interleave.json` |
+| Task | Config | Wall | BLAS baseline | Peak VRAM | Receipt |
+|---|---|---:|---:|---:|---|
+| T2I | 2048×2048, 50 steps, seed 42 | 380 s | 420 s | 22.3 GiB | `t2i.json` |
+| T2I + think | same + reasoning | 505 s | 547 s | 22.3 GiB | `t2i-think.json` |
+| Edit | 2048-class, 50 steps | 461 s | 484 s | 29.9 GiB | `edit.json` |
+| VQA | greedy, ≤768 new tokens, 16k-patch image | 628 s | 602 s | 25.3 GiB | `vqa.json` |
+| Interleave | 7 × 2048×1152 + text | 3251 s | 3392 s | 47.9 GiB | `interleave.json` |
 
-Model load is ~66 s from warm page cache (first-ever load reads 50 GB from
-disk). Generation dominates: ~7 s/denoising-step at 2048×2048, rising to
-~5.5 s/step late in long interleave runs as the KV cache grows.
+Model load is ~67 s from warm page cache (first-ever load reads 50 GB from
+disk). Generation dominates: ~6 s/denoising-step at 2048×2048 (BLAS
+baseline ~7 s), rising to ~4.7 s/step late in long interleave runs as the
+KV cache grows.
 
 ### The VRAM story (why `--vram_mode` is the whole game)
 
@@ -163,19 +173,23 @@ upstream offload path streams layers over PCIe from host RAM. Measured
 
 | Mode | How it works | Wall (10 steps) | Peak VRAM |
 |---|---|---:|---:|
-| `balanced` (default) | async prefetch, H2D overlapped with compute | 200.5 s | 22.3 GiB |
-| `fast` | prefetch + retain generation layers in VRAM budget | 199.2 s | 22.3 GiB |
-| `low` | synchronous per-layer swap | 208.4 s | **3.4 GiB** |
+| `balanced` (default) | async prefetch, H2D overlapped with compute | 207.5 s | 22.3 GiB |
+| `fast` | prefetch + retain generation layers in VRAM budget | 210.1 s | 22.3 GiB |
+| `low` | synchronous per-layer swap | 217.8 s | **3.7 GiB** |
+
+BLAS-mode baseline for the same probes: 200.5 / 199.2 / 208.4 s
+(`low`: 3.39 GiB) — the ~4 % slower probes carry full-stack library
+load; `low`'s peak grew by MIOpen's resident footprint.
 
 Practical guidance (measured, see receipts):
 
 - **Interactive single images** → `balanced` (default).
 - **Batch of similar-size images** → `fast` (retention amortizes; parity
   with balanced on this host).
-- **Small card or sharing the GPU** → `low` — only **4 % slower** while
-  using 15× less VRAM (3.4 GiB): the model runs on much smaller GPUs than
-  the checkpoint size suggests. On 8–16 GB cards, drop resolution/step
-  count too.
+- **Small card or sharing the GPU** → `low` — only **~5 % slower** while
+  fitting in **~14× less memory than the checkpoint** (3.7 GiB): the model
+  runs on much smaller GPUs than the checkpoint size suggests. On 8–16 GB
+  cards, drop resolution/step count too.
 
 ## One-command inventory
 
@@ -203,10 +217,13 @@ bash scripts/validate.sh                       # ~2–3 h on gfx1100
 python3 scripts/summarize_results.py           # prints a table from the receipts
 ```
 
-The torch-2.8 receipts above were measured in BLAS mode before
-[patches/0002](patches/README.md) existed (0002 only activates on ROCm
-torch ≥ 2.9, so the 2.8 numbers are unaffected); the torch-2.12 receipts
-(`*-torch212*.json`) are zero-BLAS-workaround runs.
+The current default path is **full-stack mode**: the 2026-08-23 receipts
+above all carry `rocm_stack: full-stack` (ROCm 7.14 MIOpen+comgr+BLAS
+preloaded over the torch 2.8 wheel, MIOpen enabled, patch 0001 active —
+0002 only activates on ROCm torch ≥ 2.9, so 2.8 runs are unaffected).
+The 2026-08-22 BLAS-mode baseline is archived in
+[`matrix-blas-20260822/`](docs/results/validation/matrix-blas-20260822/);
+the torch-2.12 receipts (`*-torch212*.json`) are zero-BLAS-workaround runs.
 
 If your measured numbers differ wildly on the same hardware, open an issue
 with your receipts — that's a bug in our claims.
@@ -215,7 +232,7 @@ with your receipts — that's a bug in our claims.
 
 **Known good** (reference host, receipts linked above): all four tasks;
 2048×2048@50 generation; think mode; fixed-seed determinism; greedy VQA;
-`low` VRAM mode (3.4 GiB peak).
+`low` VRAM mode (3.7 GiB peak).
 
 **Known limitations**:
 
@@ -233,7 +250,7 @@ with your receipts — that's a bug in our claims.
   MIOpen+comgr+BLAS is preloaded and MIOpen stays **enabled** — the
   unfold+GEMM penalty disappears. Control with `ROCM_FULL_STACK=0|1`.
 - Interleave with many images is the memory-heavy path: 7 × 2048×1152
-  peaked at 47.7 GiB (GTT absorbs the spikes — don't try this on a card
+  peaked at 47.9 GiB (GTT absorbs the spikes — don't try this on a card
   with little GTT headroom).
 - VQA decode speed with the full 16k-patch context is ~1 tok/s — the
   offload path re-streams all 42 layers per token. Use smaller images
@@ -243,7 +260,8 @@ with your receipts — that's a bug in our claims.
 - AMD's official `torch 2.12.0+rocm7.14.0` wheels fix all three wheel bugs
   with zero workarounds; VQA works out of the box, and image generation
   works with [patches/0002](patches/0002-sdpa-rocm-math-backend-compat.patch)
-  (2048×2048@50 in 687.7 s / 27.8 GiB vs 420.1 s / 22.3 GiB on torch 2.8 —
+  (2048×2048@50 in 687.7 s / 27.8 GiB vs 379.6 s / 22.3 GiB on torch 2.8
+  full-stack —
   receipts `docs/results/validation/t2i-torch212-fixed.json` vs `t2i.json`).
   Root cause of the gap: both fused SDPA backends fail kernel launch on
   this stack — [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);

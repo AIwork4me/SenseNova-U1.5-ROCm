@@ -1,11 +1,42 @@
 {
-  "artifacts": {},
+  "artifacts": {
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave/tutorial_image_0.png": {
+      "bytes": 3193895,
+      "sha256": "6edee105acd37927f0f6ccb1e8fd1f5d529a93c45e9377d6d72fdf824f80c0a8"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave/tutorial_image_1.png": {
+      "bytes": 3273644,
+      "sha256": "b6a68a8c0b422bde0064b47d921cb60116270cd1f8cfc033ffffe0d2a0a56e68"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave/tutorial_image_2.png": {
+      "bytes": 3020123,
+      "sha256": "a14610421fe834d65be78a739151a99bfbe7fd94ab4c534a0900520c84b31c9f"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave/tutorial_image_3.png": {
+      "bytes": 3139416,
+      "sha256": "182b2856491edb78d7a72578762133ca19c62e470e9429b077dd5bc2a8690a29"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave/tutorial_image_4.png": {
+      "bytes": 3128654,
+      "sha256": "f36b707a98958d33d5fc53af6e018b7f638d40ac285e9331a60b3881d6851435"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave/tutorial_image_5.png": {
+      "bytes": 3287049,
+      "sha256": "233b08e46c98f08cc361cf17dc9ef240c6a7ec4705a8e02b1a1f52896d702276"
+    },
+    "/workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave/tutorial_image_6.png": {
+      "bytes": 3460667,
+      "sha256": "edce5e778cc69504f094e36410ab6e7011a4c43b1e3a647ea5ebbf63457caf15"
+    }
+  },
   "block": "interleave",
   "command": "bash /workspace/SenseNova-U1.5-ROCm/scripts/run-task.sh interleave --prompt I\\ want\\ to\\ learn\\ how\\ to\\ cook\\ tomato\\ and\\ egg\\ stir-fry.\\ Please\\ give\\ me\\ a\\ beginner-friendly\\ illustrated\\ tutorial. --resolution 16:9 --num_steps 50 --seed 42 --output_dir /workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave --stem tutorial ",
+  "ld_preload": "/root/rocm-7.14-gfx110x/lib/libMIOpen.so:/root/rocm-7.14-gfx110x/lib/libamd_comgr.so:/root/rocm-7.14-gfx110x/lib/libhipblas.so:/root/rocm-7.14-gfx110x/lib/librocblas.so",
   "log": "logs/interleave.log",
-  "peak_vram_bytes": 51172560896,
-  "peak_vram_gib": 47.66,
-  "started_at": "2026-08-22T10:06:24Z",
+  "peak_vram_bytes": 51419394048,
+  "peak_vram_gib": 47.89,
+  "rocm_stack": "full-stack",
+  "started_at": "2026-08-23T11:17:04Z",
   "vram_mode": "balanced",
-  "wall_seconds": 3392.0
+  "wall_seconds": 3250.5
 }

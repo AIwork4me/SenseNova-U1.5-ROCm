@@ -92,9 +92,6 @@ run_block() {
     log "=== block: $name ==="
     local log_file="$LOGS/$name.log"
     local t0 t1 rc
-    local artifact_args=()
-    for a in ${BLOCK_ARTIFACTS:-}; do artifact_args+=("sha256:$a"); done
-    BLOCK_ARTIFACTS=""
     start_vram_sampler
     t0=$(date +%s.%N)
     set +e
@@ -103,6 +100,13 @@ run_block() {
     set -e
     t1=$(date +%s.%N)
     stop_vram_sampler
+    # Expand artifact globs AFTER the run: interleave's png count is only
+    # known once the task has produced them (nullglob: empty glob -> none).
+    local artifact_args=() a
+    shopt -s nullglob
+    for a in ${BLOCK_ARTIFACTS:-}; do artifact_args+=("sha256:$a"); done
+    shopt -u nullglob
+    BLOCK_ARTIFACTS=""
     local wall peak
     wall=$("$PY" -c "print(f'{$t1 - $t0:.1f}')")
     peak=$(peak_vram_bytes)
@@ -159,6 +163,9 @@ run_block edit bash "$ROOT/scripts/run-task.sh" edit \
     --output "$OUT_DIR/validation/edit-jacket.png"
 
 # ---- 5. Interleave ----
+# clear stale outputs so the post-run glob registers only this run's images
+rm -f "$OUT_DIR"/validation/interleave/*.png
+BLOCK_ARTIFACTS="$OUT_DIR/validation/interleave/*.png" \
 run_block interleave bash "$ROOT/scripts/run-task.sh" interleave \
     --prompt "I want to learn how to cook tomato and egg stir-fry. Please give me a beginner-friendly illustrated tutorial." \
     --resolution "16:9" --num_steps 50 --seed 42 \

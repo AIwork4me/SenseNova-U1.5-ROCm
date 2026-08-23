@@ -1,18 +1,17 @@
 [SenseNova-U1.5-ROCm] task=t2i  model=/root/.cache/huggingface/modelscope/SenseNova-U1.5-8B-MoT  vram_mode=fast  attn=sdpa
-[sensenova_u1_rocm] MIOpen bypass active (conv via unfold+GEMM; SENU15_MIOPEN=1 to re-enable)
 [attn] backend='sdpa' (effective='sdpa')
-Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.24it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.93it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.25s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.65s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.89s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.19s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.38s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.51s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.59s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.65s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.17s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.13s/it]
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:02,  6.00it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.90it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.64s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.89s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.18s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.37s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.50s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.58s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.64s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.16s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.13s/it]
 [saved] /workspace/SenseNova-U1.5-ROCm/outputs/validation/vrammode-fast.png
 
 ================================================================
 Profile summary
 ================================================================
   config              : vram_mode=fast, fast_vram_fraction=0.9, fast_vram_headroom_gib=2.0, fast_activation_reserve_gib=4.0, attn_backend=sdpa, dtype=bfloat16
-  model load          :   67.174 s
-  load peak memory    : cpu RSS 43.05 GiB
-  generations         : 1 call(s), 1 image(s) total, 125.600 s wall
-  avg per image       :  125.600 s
+  model load          :   67.111 s
+  load peak memory    : cpu RSS 43.11 GiB
+  generations         : 1 call(s), 1 image(s) total, 128.024 s wall
+  avg per image       :  128.024 s
   image tokens        : patch_size=32, avg 4096 tok/image (4096)
-  throughput          :    32.61 tok/s
-  generation peak mem : allocated 17.38 GiB, reserved 21.87 GiB, cpu RSS 50.51 GiB
+  throughput          :    31.99 tok/s
+  generation peak mem : allocated 17.35 GiB, reserved 21.87 GiB, cpu RSS 50.57 GiB
 ================================================================
