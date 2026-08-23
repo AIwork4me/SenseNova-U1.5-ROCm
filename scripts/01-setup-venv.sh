@@ -8,6 +8,7 @@
 #     versions compatible with the pinned SenseNova-U1 checkout
 #   - the `sensenova_u1` package itself (editable, --no-deps) from
 #     third_party/SenseNova-U1 @ 76c32c2
+#   - every patch in patches/*.patch (idempotent; see patches/README.md)
 #
 # Ends with a GPU smoke test: torch must see the AMD GPU and run a matmul.
 #

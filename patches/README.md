@@ -29,25 +29,28 @@ TypeError: 'NoneType' object is not subscriptable
 
 ## 0002-sdpa-rocm-math-backend-compat.patch
 
-**Bug (ROCm, torch ≥ 2.9 SDPA backend bugs; reproduced on the official
-torch 2.12.0+rocm7.14.0 wheel, gfx1100):** the image-generation path
-crashes with `hipErrorInvalidValue` surfacing at the decoder residual add,
-far from the real site. Root cause (minimal repros in
-`docs/results/findings/`):
+**Bug (ROCm, torch ≥ 2.9; verified on the official torch 2.12.0+rocm7.14.0
+wheel, gfx1100 — [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)):**
+the image-generation path crashes with `hipErrorInvalidValue` surfacing
+at the decoder residual add, far from the real site (the launch error is
+deferred to the next checked CUDA call). Root cause, per fresh-process
+minimal repros: **both fused SDPA backends (FLASH and mem-efficient) fail
+kernel launch for every configuration tested** (bf16; kv 1024–4096,
+power-of-two or not; head_dim 64/128; causal or not; contiguous or
+transposed; with or without an explicit `scale`). Only the MATH backend
+is healthy. The understanding path is spared because its tensor layouts
+happen to be ineligible for the fused kernels — explicit masks alone do
+NOT prevent the failing dispatch — which is why VQA works unpatched.
+(Earlier "scale-dependent"/"shape-dependent" readings were artifacts of
+same-process probe contamination by the deferred error.)
 
-1. the **FLASH** SDPA backend fails launch whenever an explicit `scale`
-   kwarg is passed (the model always passes `scale = 1/sqrt(head_dim)`);
-2. the **mem-efficient** SDPA backend fails launch for several shapes on
-   this stack (`kv_len` not a power of two — e.g. the generation path's
-   `kv=1281`; `head_dim=64`; long causal sequences).
-
-The understanding path never hits either (transformers' standard SDPA
-path with explicit masks), which is why VQA works unpatched.
-
-**Fix:** in `_sdpa_attn_func`, on ROCm only, restrict the dispatcher to
-the MATH backend (proven healthy for every shape tested) and pre-scale
-`q` instead of passing `scale`. CUDA hosts keep the stock behavior.
+**Fix:** in `_sdpa_attn_func`, on ROCm with torch ≥ 2.9 only, restrict
+the dispatcher to the MATH backend (proven healthy for every shape
+tested) and pre-scale `q` instead of passing `scale`. torch 2.8 and CUDA
+hosts keep the stock (fast) behavior.
 Cost on the reference host: 2048×2048@50 steps runs 687.7 s vs 420.1 s
 on torch 2.8+BLAS-preload (receipt `docs/results/validation/t2i-torch212-fixed.json`)
 — a correctness-first trade until the ROCm SDPA backends are fixed
-upstream (pytorch/pytorch issue linked in the findings doc).
+upstream ([pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);
+compatibility write-up:
+[OpenSenseNova/SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261)).

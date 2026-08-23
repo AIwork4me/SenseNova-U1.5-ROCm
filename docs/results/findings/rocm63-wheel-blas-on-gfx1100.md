@@ -122,23 +122,23 @@ torch device table):
 - **The image-generation path (`forward_gen`) failed on torch 2.12 —
   root cause: two ROCm SDPA backend bugs** (found after per-op probes;
   final analysis 2026-08-23):
-  1. the FLASH SDPA backend fails kernel launch, and
-  2. the mem-efficient SDPA backend fails kernel launch —
-  on this stack **both fused backends fail for every configuration
-  tested** (bf16; kv 1024–4096 power-of-two or not; head_dim 64/128;
-  causal or not; contiguous or transposed inputs; with or without an
-  explicit `scale` kwarg — the generation path passes `1/sqrt(head_dim)`
-  and kv lengths like 1281). Fresh-process verification matters here:
-  the deferred launch error contaminates same-process probes and briefly
-  misled us into "scale-dependent" / "shape-dependent" hypotheses.
+  on this stack **both fused SDPA backends (FLASH and mem-efficient)
+  fail kernel launch for every configuration tested** (bf16; kv
+  1024–4096 power-of-two or not; head_dim 64/128; causal or not;
+  contiguous or transposed inputs; with or without an explicit `scale`
+  kwarg — the generation path passes `1/sqrt(head_dim)` and kv lengths
+  like 1281).
   Both are launch-time errors that surface at the next checked CUDA call
   (the decoder residual add) — misleading tracebacks; HIP_LAUNCH_BLOCKING
   does not relocate them and `hipGetLastError` is reset by intervening
-  successful calls. The understanding path (transformers' standard SDPA
-  with explicit masks) never selects the failing backends — hence VQA
-  worked unpatched. Fix shipped as
-  [`patches/0002`](../../patches/0002-sdpa-rocm-math-backend-compat.patch):
-  on ROCm restrict `_sdpa_attn_func` to the MATH backend and pre-scale
+  successful calls — and same-process probes contaminate each other,
+  which briefly produced false "scale/shape-dependent" readings. Neither
+  `torch.cuda.synchronize()` nor `AMD_SERIALIZE_KERNEL=3` relocates the
+  deferred error. The understanding path happens never to select a fused
+  backend on this stack (layout-eligibility dependent — explicit masks
+  alone do not prevent the failing dispatch) — hence VQA worked unpatched. Fix shipped as
+  [`patches/0002`](../../../patches/0002-sdpa-rocm-math-backend-compat.patch):
+  on ROCm torch ≥ 2.9 restrict `_sdpa_attn_func` to the MATH backend and pre-scale
   `q`. Verified end-to-end: 2048×2048@50 = 687.7 s / 27.8 GiB
   (receipt `../validation/t2i-torch212-fixed.json`; torch-2.8 baseline
   420.1 s / 22.3 GiB — MATH costs ~64 % on this cell, correctness-first).

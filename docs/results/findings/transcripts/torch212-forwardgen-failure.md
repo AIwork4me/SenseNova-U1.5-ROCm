@@ -33,15 +33,23 @@ official wheel can serve the generation tasks.
 
 ## UPDATE 2026-08-23 (later same day) — root cause found
 
-The probes above were misleading: the add/randn failures were launch-time
-`hipErrorInvalidValue` from SDPA backends surfacing at the next checked
-call. True root cause (standalone repros, see findings doc):
+The probes above were doubly misleading: (1) the add/randn failures were
+deferred launch-time `hipErrorInvalidValue` from SDPA surfacing at the
+next checked call, and (2) our same-process bisection was contaminated by
+that deferred error, which briefly produced false "scale-dependent" /
+"shape-dependent" hypotheses. Fresh-process standalone repros (final
+matrix in the findings doc and
+[pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)):
 
-- FLASH SDPA backend + explicit `scale` kwarg → launch fails;
-- EFFICIENT SDPA backend + non-power-of-two kv_len (1152/1281/1536),
-  head_dim 64, or long causal → launch fails;
-- MATH backend: healthy for all shapes.
+- **both fused backends — FLASH and mem-efficient — fail kernel launch
+  for every configuration tested** (bf16; kv 1024–4096 power-of-two or
+  not; head_dim 64/128; causal or not; contiguous or transposed; with or
+  without an explicit `scale` kwarg);
+- MATH backend: healthy for all shapes;
+- the error is deferred: it does not surface at the SDPA call, at
+  `torch.cuda.synchronize()`, with `AMD_SERIALIZE_KERNEL=3`, or with
+  `HIP_LAUNCH_BLOCKING=1`.
 
-Model-level fix: `patches/0002` (MATH-only on ROCm + q pre-scaling) —
-t2i 2048×2048@50 completes (687.7 s, receipt
+Model-level fix: `patches/0002` (MATH-only on ROCm torch ≥ 2.9 + q
+pre-scaling) — t2i 2048×2048@50 completes (687.7 s, receipt
 `../validation/t2i-torch212-fixed.json`).

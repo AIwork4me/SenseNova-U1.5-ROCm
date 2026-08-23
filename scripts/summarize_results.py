@@ -3,8 +3,8 @@
 
 Reads docs/results/validation/*.json and docs/results/logs/*.log, extracts
 per-step latency / throughput from the upstream profiler output, and prints
-a markdown table. Run after scripts/validate.sh; the README's measured
-numbers come from here so they can't drift from the receipts.
+a markdown table to stdout (the README was written from its output; this
+script does not write files).
 """
 import json
 import os

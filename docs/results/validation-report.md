@@ -5,6 +5,16 @@ ROCm 7.2.1 (`/opt/rocm`) · PyTorch 2.8.0+rocm6.3 (hip 6.3.42131) ·
 transformers 4.57.1 · accelerate 1.14.0 · Python 3.12.3 · 1 TiB host RAM.
 Full fingerprint: [`environment.json`](environment.json).
 
+> **Scope note (2026-08-23):** this report is the 2026-08-22 full-suite
+> run on torch 2.8.0+rocm6.3 in BLAS mode. Later same-host results live
+> alongside it: `vqa-torch212.json` (torch 2.12, zero workarounds, VQA
+> correct), `t2i-torch212.json` (torch 2.12 unpatched — generation fails;
+> root-caused to ROCm SDPA fused-backend launch bugs,
+> [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)),
+> and `t2i-torch212-fixed.json` (torch 2.12 + patches/0002: 687.7 s /
+> 27.8 GiB, zero BLAS workarounds). See the findings doc's 2026-08-23
+> updates for the full story.
+
 Executive summary: **all four SenseNova-U1.5-8B-MoT task families run
 correctly on a single 48 GB gfx1100 through the upstream transformers
 path with layer offload**, with three wheel-level ROCm bugs root-caused

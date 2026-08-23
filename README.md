@@ -116,8 +116,6 @@ Reproducibility of the one-command path itself: the quickstart t2i demo
 PNG, sha256 `39688e22c66059aa…`** — matching
 [`t2i.json`](docs/results/validation/t2i.json).
 
-<!-- VALIDATION_RESULTS: filled from docs/results/ by scripts/summarize_results.py -->
-
 ## What was validated
 
 On the reference host — **AMD Radeon gfx1100 (48 GB) / ROCm 7.2.1 /
@@ -186,6 +184,7 @@ Practical guidance (measured, see receipts):
 | `scripts/00-check-env.sh` | verifies ROCm, GPU arch, disk, RAM |
 | `scripts/01-setup-venv.sh` | builds `.venv` (ROCm torch 2.8.0, upstream stack, pinned `sensenova_u1`, upstream patches) + GPU smoke test |
 | `scripts/02-fetch-model.sh` | downloads + SHA256-verifies the checkpoint (resumable) |
+| `scripts/install-rocm-7.14-gfx110x.sh` | optional: AMD TheRock ROCm 7.14 gfx110X userspace for full-stack mode |
 | `scripts/run-task.sh` | `t2i \| edit \| vqa \| interleave` dispatcher with validated defaults + ROCm fixes |
 | `scripts/quickstart.sh` | the one command (env → venv → model → demo) |
 | `scripts/validate.sh` | full validation suite, writes receipts under `docs/results/` |
@@ -201,8 +200,13 @@ log (`docs/results/logs/*.log`). Regenerate everything:
 
 ```bash
 bash scripts/validate.sh                       # ~2–3 h on gfx1100
-python3 scripts/summarize_results.py           # prints the tables
+python3 scripts/summarize_results.py           # prints a table from the receipts
 ```
+
+The torch-2.8 receipts above were measured in BLAS mode before
+[patches/0002](patches/README.md) existed (0002 only activates on ROCm
+torch ≥ 2.9, so the 2.8 numbers are unaffected); the torch-2.12 receipts
+(`*-torch212*.json`) are zero-BLAS-workaround runs.
 
 If your measured numbers differ wildly on the same hardware, open an issue
 with your receipts — that's a bug in our claims.
@@ -219,12 +223,15 @@ with your receipts — that's a bug in our claims.
 - No flash-attn on ROCm → SDPA everywhere (`--attn_backend sdpa` forced).
   Per-step latency carries that cost; on CUDA the same code with flash-attn
   is faster.
-- Convolutions run through unfold+GEMM (`torch.backends.cudnn.enabled=False`,
-  applied by `src/sensenova_u1_rocm/`) because the wheel's MIOpen JIT
-  segfaults (see findings doc). Opt out with `SENU15_MIOPEN=1`.
-- BLAS calls are routed to the **system** ROCm's hipBLAS/rocBLAS via
-  `LD_PRELOAD` (applied by `scripts/lib/common.sh`); disable with
-  `BLAS_FIX=0` on hosts where the wheel works as-is.
+- **BLAS mode** (no ROCm ≥ 7.14 install found): BLAS calls are routed to
+  the system ROCm's hipBLAS/rocBLAS via `LD_PRELOAD` and convolutions run
+  through unfold+GEMM (MIOpen bypassed) because the torch-2.8 wheel's
+  MIOpen JIT segfaults — `scripts/lib/common.sh` + `src/sensenova_u1_rocm/`,
+  opt out with `BLAS_FIX=0`.
+- **Full-stack mode** (auto when an ROCm ≥ 7.14 install is present, e.g.
+  via `scripts/install-rocm-7.14-gfx110x.sh`): that stack's
+  MIOpen+comgr+BLAS is preloaded and MIOpen stays **enabled** — the
+  unfold+GEMM penalty disappears. Control with `ROCM_FULL_STACK=0|1`.
 - Interleave with many images is the memory-heavy path: 7 × 2048×1152
   peaked at 47.7 GiB (GTT absorbs the spikes — don't try this on a card
   with little GTT headroom).
@@ -234,11 +241,15 @@ with your receipts — that's a bug in our claims.
 - The production LightLLM/LightX2V serving stack is CUDA-only — not part of
   this project.
 - AMD's official `torch 2.12.0+rocm7.14.0` wheels fix all three wheel bugs
-  with zero workarounds and run the VQA path cleanly, but the image
-  generation path (`forward_gen`) fails there (upstream pins torch 2.8) —
-  measured in
-  [findings](docs/results/findings/rocm63-wheel-blas-on-gfx1100.md);
-  generation stays on torch 2.8 + the workarounds for now.
+  with zero workarounds; VQA works out of the box, and image generation
+  works with [patches/0002](patches/0002-sdpa-rocm-math-backend-compat.patch)
+  (2048×2048@50 in 687.7 s / 27.8 GiB vs 420.1 s / 22.3 GiB on torch 2.8 —
+  receipts `docs/results/validation/t2i-torch212-fixed.json` vs `t2i.json`).
+  Root cause of the gap: both fused SDPA backends fail kernel launch on
+  this stack — [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);
+  compatibility write-up with the patch:
+  [SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261).
+  torch 2.8 remains the faster generation path today.
 
 ## Contributing hardware evidence
 

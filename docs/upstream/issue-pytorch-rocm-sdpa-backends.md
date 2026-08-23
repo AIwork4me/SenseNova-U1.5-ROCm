@@ -1,4 +1,4 @@
-# [ROCm] SDPA fused backends (FLASH and mem-efficient) fail to launch on gfx1100 with torch 2.12.0+rocm7.14.0 — hipErrorInvalidValue, deferred to the next checked call
+# [ROCm] SDPA fused backends (FLASH and mem-efficient) fail to launch on gfx1100 with torch 2.12.0+rocm7.14.0 — deferred hipErrorInvalidValue
 
 ## 🐛 Describe the bug
 

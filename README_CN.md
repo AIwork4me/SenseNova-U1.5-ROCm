@@ -16,7 +16,11 @@
 - 🔧 **附赠社区贡献**：定位并绕过了 PyTorch 官方 rocm6.3 轮子在 gfx1100 上
   三处数学库原生崩溃（rocBLAS Tensile 段错误 / 7.x 数据格式不兼容 / MIOpen JIT
   编译器段错误），完整根因分析见
-  [findings 文档](docs/results/findings/rocm63-wheel-blas-on-gfx1100.md)
+  [findings 文档](docs/results/findings/rocm63-wheel-blas-on-gfx1100.md)；
+  另修复上游跨平台 interleave bug（补丁 0001，PR
+  [SenseNova-U1#260](https://github.com/OpenSenseNova/SenseNova-U1/pull/260)）与
+  ROCm SDPA 融合后端崩溃（补丁 0002，[pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)、
+  [SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261)）
 
 ```bash
 bash scripts/quickstart.sh          # 可选任务: t2i | vqa | edit | interleave
@@ -97,6 +101,19 @@ OOM。上游为此内置了分层卸载：从内存经 PCIe 异步预取层权�
 默认 `balanced`（异步预取）；`fast` 会把生成层常驻显存（批量出图更优）；
 `low` 同步换入换出（显存最省、最慢）。
 
+## 运行模式与 torch 版本
+
+- **BLAS 模式**（未检测到 ROCm ≥ 7.14 安装时的默认）：BLAS 经系统 ROCm
+  preload，conv 走 unfold+GEMM（绕过损坏的 MIOpen JIT）
+- **全栈模式**（装有 ROCm ≥ 7.14 时自动，如
+  `scripts/install-rocm-7.14-gfx110x.sh` 安装）：preload 7.14 的
+  MIOpen+comgr+BLAS，**MIOpen 保持开启**（无 unfold+GEMM 性能损失）；
+  `ROCM_FULL_STACK=0|1` 可控
+- **torch 版本**：验证态主力为 2.8.0+rocm6.3+workaround（生成最快）。
+  AMD 官方 2.12.0+rocm7.14.0 轮子零 BLAS workaround、VQA 开箱即用，
+  生成任务配 [补丁 0002](patches/README.md) 可用
+  （2048×2048@50：687.7s vs 2.8 的 420.1s，差距为 ROCm SDPA 融合后端失败所致）
+
 ## 常见问题
 
 - **`/dev/kfd` 不可写**：`sudo usermod -aG render,video $USER` 后重新登录。
@@ -115,10 +132,12 @@ OOM。上游为此内置了分层卸载：从内存经 PCIe 异步预取层权�
 | `scripts/00-check-env.sh` | 检查 ROCm / GPU / 磁盘 / 内存 |
 | `scripts/01-setup-venv.sh` | 建 venv（ROCm torch 2.8.0 + 上游推理栈 + GPU 冒烟测试） |
 | `scripts/02-fetch-model.sh` | 下载并 SHA256 校验模型（断点续传） |
+| `scripts/install-rocm-7.14-gfx110x.sh` | 可选：安装 ROCm 7.14 gfx110X 用户态（全栈模式用） |
 | `scripts/run-task.sh` | 四任务分发器（注入验证过的默认参数） |
 | `scripts/quickstart.sh` | 一键命令（环境→venv→模型→生成） |
 | `scripts/validate.sh` | 全量验证套件，产出收据 |
-| `scripts/summarize_results.py` | 从收据生成 README 证据表 |
+| `scripts/summarize_results.py` | 从收据打印证据表 |
+| `scripts/make_gallery.py` | 由验证输出生成 webp 图库 |
 
 ## 致谢
 

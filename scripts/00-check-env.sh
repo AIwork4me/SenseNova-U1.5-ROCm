@@ -128,12 +128,12 @@ echo "== rocBLAS Tensile workaround =="
 # routed through it (any bf16 Conv2d) on gfx1100 unless ROCBLAS_TENSILE_LIBPATH
 # points at a full system kernel set. scripts/lib/common.sh exports it; here
 # we check the system library actually exists. See
-# docs/results/findings/rocblas-tensile-segfault.md
+# docs/results/findings/rocm63-wheel-blas-on-gfx1100.md
 if ls /opt/rocm/lib/rocblas/library/*gfx*.dat >/dev/null 2>&1 \
    || ls /usr/local/rocm/lib/rocblas/library/*gfx*.dat >/dev/null 2>&1; then
     ok "system rocBLAS Tensile kernels present (workaround applicable)"
 else
-    warn "no system rocBLAS Tensile kernels found — bf16 conv may segfault with torch rocm wheels (see docs/results/findings/rocblas-tensile-segfault.md)"
+    warn "no system rocBLAS Tensile kernels found — bf16 conv may segfault with torch rocm wheels (see docs/results/findings/rocm63-wheel-blas-on-gfx1100.md)"
 fi
 
 echo "== host RAM (layer-offload path) =="

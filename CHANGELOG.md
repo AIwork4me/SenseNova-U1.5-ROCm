@@ -4,6 +4,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Full-stack ROCm 7.14 mode: `ROCM_FULL_STACK=auto|1|0` (arch-validated
+  prefix detection, idempotent preload of MIOpen+comgr+BLAS, MIOpen kept
+  enabled) + `scripts/install-rocm-7.14-gfx110x.sh` (SHA256-verified
+  TheRock gfx110X dist); receipts now record `rocm_stack`/`ld_preload`.
+- Patch 0002: ROCm torch ≥ 2.9 SDPA compatibility (both fused backends
+  fail launch — pytorch/pytorch#194498); MATH-only dispatch + q
+  pre-scaling; verified end-to-end on torch 2.12.0+rocm7.14.0
+  (t2i 2048×2048@50 = 687.7 s / 27.8 GiB, zero BLAS workarounds).
+- torch 2.12.0+rocm7.14.0 verification: all three wheel bugs absent with
+  zero workarounds; VQA healthy unpatched; receipts `*-torch212*.json`.
+- Upstream feedback filed: PR OpenSenseNova/SenseNova-U1#260 (interleave
+  image_size fix), issues pytorch/pytorch#194447 (rocm6.3 wheel math
+  stack), pytorch/pytorch#194498 (SDPA fused backends),
+  OpenSenseNova/SenseNova-U1#261 (torch 2.12 compatibility + patch).
+- Evidence artifacts: gdb transcripts for the three wheel bugs, repro
+  matrix, ROCm 7.14 verification matrix, torch-2.12 failure transcript;
+  poster showcase with reproducible prompts/seeds.
+
 ## [0.1.0] — 2026-08-22
 
 First release: full validation of SenseNova-U1.5-8B-MoT on AMD gfx1100

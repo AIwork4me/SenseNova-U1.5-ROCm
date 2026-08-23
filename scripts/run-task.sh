@@ -64,7 +64,8 @@ UPSTREAM="$ROOT/third_party/SenseNova-U1"
 VRAM_MODE="${VRAM_MODE:-balanced}"
 
 mkdir -p "$OUT_DIR/$TASK"
-# Our ROCm fixes (MIOpen bypass; BLAS preloads come from common.sh) wrap the
+# Our ROCm fixes (MIOpen bypass in BLAS mode; BLAS/full-stack preloads come
+# from common.sh — in full-stack mode MIOpen stays enabled) wrap the
 # upstream script without touching it.
 export PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
 log "task=$TASK  model=$MODEL_DIR  vram_mode=$VRAM_MODE  attn=sdpa"

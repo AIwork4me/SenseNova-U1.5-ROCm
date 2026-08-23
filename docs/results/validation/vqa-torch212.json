@@ -8,7 +8,7 @@
   "block": "vqa-torch212",
   "log": "logs/vqa-torch212.log",
   "note": "zero-workaround; correct answer; understanding path fully working",
-  "note2": "t2i (generation path) FAILS on torch 2.12: hipErrorInvalidValue in forward_gen, resolution/vram_mode independent \u2014 see t2i-torch212.json",
+  "note2": "t2i (generation path) FAILS on torch 2.12 unpatched: hipErrorInvalidValue in forward_gen (see t2i-torch212.json) \u2014 root-caused to ROCm SDPA fused-backend launch failures (pytorch/pytorch#194498); FIXED by patches/0002, see t2i-torch212-fixed.json (687.7s)",
   "rocm_stack": "none",
   "torch": "2.12.0+rocm7.14.0",
   "vram_mode": "balanced",

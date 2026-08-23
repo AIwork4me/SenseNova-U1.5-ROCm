@@ -28,8 +28,9 @@ unaffected at model level on the same host.)
 Both are launch-time errors, so they surface at the next checked CUDA
 call (the residual add), far from the real site. The understanding path
 (`forward_und`, transformers' standard SDPA with explicit masks) is
-unaffected — VQA works unpatched on the same stack. Filed upstream at
-pytorch/pytorch (SDPA backend bugs, minimal repros:
+unaffected — VQA works unpatched on the same stack. Filed upstream as
+[pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)
+(SDPA backend bugs, minimal repros:
 https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/docs/results/findings/rocm63-wheel-blas-on-gfx1100.md).
 
 ## Minimal compatibility patch (verified end-to-end)

@@ -1,5 +1,5 @@
 diff --git a/src/sensenova_u1/models/neo_unify/modeling_qwen3.py b/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
-index ebb961b..3d8da0f 100644
+index ebb961b..6427afc 100644
 --- a/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
 +++ b/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
 @@ -1,6 +1,7 @@
@@ -10,7 +10,7 @@ index ebb961b..3d8da0f 100644
  import torch._dynamo
  from torch import nn
  
-@@ -111,28 +112,44 @@ def _sdpa_attn_func(q, k, v, dropout_p: float = 0.0, softmax_scale=None, causal:
+@@ -111,28 +112,47 @@ def _sdpa_attn_func(q, k, v, dropout_p: float = 0.0, softmax_scale=None, causal:
          k_bhsd = k_bhsd.repeat_interleave(n_rep, dim=1)
          v_bhsd = v_bhsd.repeat_interleave(n_rep, dim=1)
  
@@ -28,24 +28,27 @@ index ebb961b..3d8da0f 100644
 -    except TypeError:
 -        if softmax_scale is not None:
 -            q_bhsd = q_bhsd * softmax_scale
-+    # ROCm workarounds (measured on gfx1100, torch 2.12.0+rocm7.14.0; see
++    # ROCm workaround (gfx1100, torch >= 2.9 — verified on the official
++    # 2.12.0+rocm7.14.0 wheel; see pytorch/pytorch#194498 and
 +    # https://github.com/AIwork4me/SenseNova-U1.5-ROCm docs/results/findings):
-+    #   (a) the FLASH SDPA backend fails launch (hipErrorInvalidValue) whenever
-+    #       an explicit `scale` kwarg is passed — pre-scale q instead;
-+    #   (b) the mem-efficient SDPA backend fails launch for several shapes on
-+    #       this stack (kv_len not a power of two, head_dim 64, long causal
-+    #       sequences) — keep it out of the dispatcher;
-+    #   MATH is always healthy and remains the fallback. CUDA hosts are
-+    #   unaffected and keep the stock behavior.
-+    _on_hip = torch.version.hip is not None
++    #   both fused SDPA backends (FLASH and mem-efficient) fail kernel launch
++    #   with hipErrorInvalidValue for EVERY configuration tested (bf16; kv
++    #   1024–4096 power-of-two or not; head_dim 64/128; causal or not;
++    #   contiguous or transposed; with or without an explicit `scale`). The
++    #   launch error is deferred and surfaces at the next checked CUDA call —
++    #   misleading tracebacks. Only the MATH backend is healthy, so on ROCm
++    #   torch >= 2.9 we restrict the dispatcher to MATH and pre-scale q
++    #   instead of passing `scale`. torch 2.8 and CUDA hosts keep the stock
++    #   (fast) behavior.
++    _torch_ver = tuple(int(x) for x in torch.__version__.split("+")[0].split(".")[:2])
++    _needs_fix = torch.version.hip is not None and _torch_ver >= (2, 9)
 +    _scale = softmax_scale
 +    _sdpa_ctx = contextlib.nullcontext()
-+    if _on_hip:
++    if _needs_fix:
 +        try:
 +            from torch.nn.attention import SDPBackend, sdpa_kernel
-+            # FLASH also fails in-model on this stack even without `scale`
-+            # (cache-slice strides not reproduced standalone yet) — MATH only,
-+            # proven end-to-end, until the ROCm SDPA backends are fixed.
++            # MATH only: proven healthy for every shape tested; both fused
++            # backends fail launch on this stack (see header comment).
 +            _sdpa_ctx = sdpa_kernel([SDPBackend.MATH])
 +        except ImportError:
 +            pass
