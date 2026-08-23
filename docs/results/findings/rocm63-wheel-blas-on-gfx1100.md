@@ -122,12 +122,15 @@ torch device table):
 - **The image-generation path (`forward_gen`) failed on torch 2.12 —
   root cause: two ROCm SDPA backend bugs** (found after per-op probes;
   final analysis 2026-08-23):
-  1. the FLASH SDPA backend fails launch whenever an explicit `scale`
-     kwarg is passed (the model always passes `1/sqrt(head_dim)`);
-  2. the mem-efficient SDPA backend fails launch for several shapes,
-     including the generation path's actual kv_len=1281
-     (prefix + image tokens, not a power of two), head_dim=64, and long
-     causal sequences.
+  1. the FLASH SDPA backend fails kernel launch, and
+  2. the mem-efficient SDPA backend fails kernel launch —
+  on this stack **both fused backends fail for every configuration
+  tested** (bf16; kv 1024–4096 power-of-two or not; head_dim 64/128;
+  causal or not; contiguous or transposed inputs; with or without an
+  explicit `scale` kwarg — the generation path passes `1/sqrt(head_dim)`
+  and kv lengths like 1281). Fresh-process verification matters here:
+  the deferred launch error contaminates same-process probes and briefly
+  misled us into "scale-dependent" / "shape-dependent" hypotheses.
   Both are launch-time errors that surface at the next checked CUDA call
   (the decoder residual add) — misleading tracebacks; HIP_LAUNCH_BLOCKING
   does not relocate them and `hipGetLastError` is reset by intervening

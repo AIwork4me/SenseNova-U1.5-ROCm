@@ -65,9 +65,12 @@ Full patch: https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/patches/0
 - t2i 2048×2048 @ 50 steps, seed 42: completes, 687.7 s wall, 27.8 GiB
   peak (receipt:
   `docs/results/validation/t2i-torch212-fixed.json` in the repo above)
-- VQA on the bundled menu.jpg: correct answer, unpatched (the
-  understanding path uses transformers' standard SDPA with explicit
-  masks and does not hit the failing dispatch)
+- VQA on the bundled menu.jpg: correct answer, unpatched (observed: the
+  understanding path never selected a fused backend on this stack; note
+  explicit masks alone do NOT prevent the failing fused dispatch —
+  standalone mask+SDPA still fails — the sparing is
+  layout/eligibility-dependent, e.g. the mask/attention layouts used by
+  the understanding path are ineligible for the fused kernels)
 
 Cost of the MATH restriction on this host: 687.7 s vs 420.1 s for the
 same canonical cell on torch 2.8+rocm6.3 with this project's BLAS
