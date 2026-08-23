@@ -36,7 +36,7 @@ SIZE=2313039793
 SHA256="e78a4445c52d879fbd0765f24e7fa9df1e262a8baf681b118a13e75340120127"  # recorded from the verified download used in docs/results/findings/transcripts/rocm714-verification.md
 ARCHIVE="${ROCM714_ARCHIVE:-${TMPDIR:-/tmp}/therock-dist-linux-gfx110X-all-7.14.0.tar.gz}"
 
-if [ -e "$PREFIX/lib/libMIOpen.so" ] && ls "$PREFIX"/lib/rocblas/library/*gfx*.dat >/dev/null 2>&1; then
+if [ -e "$PREFIX/lib/libMIOpen.so" ] && ls "$PREFIX"/lib/rocblas/library/*gfx1100*.dat >/dev/null 2>&1; then
     echo "[install-rocm-7.14] $PREFIX already valid; nothing to do."
     exit 0
 fi
@@ -51,7 +51,7 @@ actual_size=$(stat -c%s "$ARCHIVE")
 [ "$actual_size" = "$SIZE" ] || { echo "ERROR: size mismatch ($actual_size != $SIZE)" >&2; exit 1; }
 echo "$SHA256  $ARCHIVE" | sha256sum -c -
 
-mkdir -p "$(dirname "$PREFIX")"
+mkdir -p "$(dirname "$PREFIX")" "$PREFIX"
 echo "[install-rocm-7.14] extracting to $PREFIX ..."
 tar -xzf "$ARCHIVE" -C "$PREFIX"
 ls "$PREFIX"/lib/rocblas/library/*gfx1100*.dat >/dev/null 2>&1 \

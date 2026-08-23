@@ -114,7 +114,10 @@ if [ "${BLAS_FIX:-1}" = "1" ]; then
         _fs_prefix="$(_find_fullstack_prefix)" || _fs_prefix=""
     fi
     if [ -n "$_fs_prefix" ]; then
-        export LD_PRELOAD="$_fs_prefix/lib/libMIOpen.so:$_fs_prefix/lib/libamd_comgr.so:$_fs_prefix/lib/libhipblas.so:$_fs_prefix/lib/librocblas.so${LD_PRELOAD:+:$LD_PRELOAD}"
+        case ":${LD_PRELOAD:-}:" in
+            *":$_fs_prefix/lib/libMIOpen.so:"*) ;;   # already applied (double-sourced)
+            *) export LD_PRELOAD="$_fs_prefix/lib/libMIOpen.so:$_fs_prefix/lib/libamd_comgr.so:$_fs_prefix/lib/libhipblas.so:$_fs_prefix/lib/librocblas.so${LD_PRELOAD:+:$LD_PRELOAD}" ;;
+        esac
         export ROCBLAS_TENSILE_LIBPATH="$_fs_prefix/lib/rocblas/library"
         export SENU15_MIOPEN=1          # keep MIOpen enabled: 7.14 comgr JIT works
         export ROCM_FULL_STACK_ACTIVE=1

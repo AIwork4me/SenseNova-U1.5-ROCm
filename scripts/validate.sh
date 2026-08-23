@@ -70,6 +70,16 @@ peak_vram_bytes() {
     [ -s "$VRAM_LOG" ] && sort -n "$VRAM_LOG" | tail -1 || echo 0
 }
 
+stack_label() {
+    if [ "${ROCM_FULL_STACK_ACTIVE:-0}" = "1" ]; then
+        echo full-stack
+    elif [ "${BLAS_FIX:-1}" = "0" ]; then
+        echo off
+    else
+        echo blas
+    fi
+}
+
 # Wrap one task run: sampler + wall clock + receipt + log capture.
 # GROUP (optional) lets ONLY=<group> select a set of related blocks.
 # run_block <name> <cmd...>
@@ -102,7 +112,7 @@ run_block() {
         "peak_vram_bytes=$peak" \
         "peak_vram_gib=$("$PY" -c "print(round($peak / 2**30, 2))")" \
         "vram_mode=$VRAM_MODE" \
-        "rocm_stack=$([ "${ROCM_FULL_STACK_ACTIVE:-0}" = "1" ] && echo full-stack || echo blas)" \
+        "rocm_stack=$(stack_label)" \
         "ld_preload=${LD_PRELOAD:-}" \
         "command=$(printf '%q ' "$@")" \
         "log=logs/$name.log" \
