@@ -82,3 +82,17 @@ Primary evidence artifacts:
   costs some conv performance (unfold+GEMM instead of MIOpen's compiled
   kernels) — measured impact is dominated by the LLM/GEMM phases of this
   model either way.
+
+## Update 2026-08-23 — verified against ROCm 7.14.0
+
+All three bugs are **absent from the ROCm 7.14.0 stack itself** — they are
+properties of the torch rocm6.3 wheel's bundled libraries. Verified with
+the official TheRock `gfx110X-all-7.14.0` dist on this host: 7.14's
+rocBLAS runs every bf16 conv/GEMM repro with identical numerics (0.32 %
+median rel err), and preloading the full 7.14 stack (MIOpen + comgr +
+BLAS) lets the model run with **MIOpen enabled and no bypass at all**.
+Full matrix and verdicts:
+[`transcripts/rocm714-verification.md`](transcripts/rocm714-verification.md).
+Practical upshot: a torch wheel built against ROCm 7.14 should need none
+of the workarounds in this repo; until one ships, hosts with 7.14 can
+preload the full 7.14 stack and drop the `cudnn off` penalty.
