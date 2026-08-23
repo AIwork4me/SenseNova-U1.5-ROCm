@@ -128,9 +128,14 @@ def test_fullstack_mode_logic():
         # auto + valid prefix -> full stack (MIOpen preloaded too)
         active, preload = run_common("")
         assert active == "1" and "libMIOpen.so" in preload and "librocblas.so" in preload, preload
-        # explicit 0 -> falls back to BLAS-only preload (no MIOpen)
+        # explicit 0 -> falls back to BLAS-only preload (no MIOpen). The
+        # rocBLAS preload itself only appears when a system ROCm exists
+        # (GitHub runners have none) — assert MIOpen exclusion, and the
+        # rocBLAS presence only when /opt/rocm or /usr/local/rocm is present.
         active, preload = run_common("export ROCM_FULL_STACK=0")
-        assert active == "0" and "libMIOpen.so" not in preload and "librocblas.so" in preload, preload
+        assert active == "0" and "libMIOpen.so" not in preload, preload
+        if os.path.isdir("/opt/rocm") or os.path.isdir("/usr/local/rocm"):
+            assert "librocblas.so" in preload, preload
         # BLAS_FIX=0 -> no preload at all
         active, preload = run_common("export BLAS_FIX=0")
         assert preload == "", preload
