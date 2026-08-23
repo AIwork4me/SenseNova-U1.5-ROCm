@@ -1,80 +1,74 @@
-# [ROCm] SDPA on gfx1100: FLASH backend fails with explicit `scale` kwarg; mem-efficient backend fails several shapes — hipErrorInvalidValue (torch 2.12.0+rocm7.14.0)
+# [ROCm] SDPA fused backends (FLASH and mem-efficient) fail to launch on gfx1100 with torch 2.12.0+rocm7.14.0 — hipErrorInvalidValue, deferred to the next checked call
 
 ## 🐛 Describe the bug
 
-Two independent SDPA backend failures on the official
-`torch==2.12.0+rocm7.14.0` wheel (gfx1100 / Radeon Pro W7900D, 48 GB).
-Both return `hipErrorInvalidValue` at kernel launch. Because the error is
-a launch-time (non-sticky) error, it surfaces at the next checked CUDA
-call — in real models this appears far from the actual site (we first saw
-it blamed on a decoder residual add), which makes it very confusing to
-debug.
+On the official `torch==2.12.0+rocm7.14.0` wheel (gfx1100 / Radeon Pro
+W7900D, 48 GB), **both fused SDPA backends fail kernel launch for every
+configuration we tested** (bf16, various shapes: kv 1024–4096, power-of-two
+and non-power-of-two, head_dim 64/128, causal and not, contiguous and
+transposed-view inputs). Only the MATH backend works.
 
-### Bug A — FLASH backend + explicit `scale` kwarg
+Two properties make this especially confusing to debug:
+
+1. The `hipErrorInvalidValue` is a **launch-time error that is deferred**:
+  it surfaces at the *next* checked CUDA operation — not at the SDPA call,
+  not even at `torch.cuda.synchronize()` or with `AMD_SERIALIZE_KERNEL=3`.
+  In real models it appears at an innocent elementwise op (we first saw it
+  blamed on a decoder residual add).
+2. Within one process the error state can contaminate subsequent probes
+  (an unrelated follow-up op reports the deferred failure), which easily
+  produces misleading "shape-dependent" hypotheses during bisection.
+
+### Minimal repro (each case in a FRESH process)
 
 ```python
-import torch, torch.nn.functional as F, math
+# fresh python process
+import torch, torch.nn.functional as F
 from torch.nn.attention import SDPBackend, sdpa_kernel
+
 q = torch.randn(1, 32, 1024, 128, device="cuda", dtype=torch.bfloat16)
 k = torch.randn(1, 32, 1281, 128, device="cuda", dtype=torch.bfloat16)
 v = torch.randn(1, 32, 1281, 128, device="cuda", dtype=torch.bfloat16)
-with sdpa_kernel([SDPBackend.FLASH_ATTENTION]):
-    o = F.scaled_dot_product_attention(q, k, v, scale=1.0 / math.sqrt(128))
-    torch.cuda.synchronize()
-# -> torch.AcceleratorError: CUDA error: invalid argument (hipErrorInvalidValue)
-```
-
-The same call **without** `scale` succeeds. Non-contiguous
-(transpose-view) inputs behave the same way.
-
-### Bug B — mem-efficient backend, multiple shapes
-
-```python
-import torch, torch.nn.functional as F
-from torch.nn.attention import SDPBackend, sdpa_kernel
-q = torch.randn(1, 32, 1024, 128, device="cuda", dtype=torch.bfloat16)
-k = torch.randn(1, 32, 1281, 128, device="cuda", dtype=torch.bfloat16)   # kv_len NOT a power of two
-v = torch.randn(1, 32, 1281, 128, device="cuda", dtype=torch.bfloat16)
-with sdpa_kernel([SDPBackend.EFFICIENT_ATTENTION]):
+with sdpa_kernel([SDPBackend.FLASH_ATTENTION]):        # same for EFFICIENT_ATTENTION
     o = F.scaled_dot_product_attention(q, k, v)
-    torch.cuda.synchronize()
+    print(o.float().abs().sum().item())                # trailing checked op — raises here
 # -> torch.AcceleratorError: CUDA error: invalid argument (hipErrorInvalidValue)
 ```
 
-Fails for `kv_len` ∈ {1152, 1281, 1536} (works for 1024/2048/4096),
-`head_dim=64` (kv_len=1024), and causal with S=4096. Works for the
-power-of-two / head_dim-128 non-causal shapes.
+Swap in `SDPBackend.MATH` and the same call succeeds (and matches a CPU
+fp32 reference at ~1e-3). The trailing consumer op matters: without it
+the failing case can exit 0 because the launch error is deferred.
 
-## Backend matrix (gfx1100, torch 2.12.0+rocm7.14.0)
+## Backend matrix (gfx1100, torch 2.12.0+rocm7.14.0, bf16; per-case fresh process + trailing checked op)
 
 | Backend | result |
 |---|---|
-| FLASH, no `scale` | OK |
-| FLASH, `scale=1/√128` | **FAIL (Bug A)** |
-| EFFICIENT (several shapes) | **FAIL (Bug B)** |
-| MATH | OK (every shape tested) |
+| FLASH_ATTENTION | **FAIL — every config tested** (with and without explicit `scale`; kv 1024/1152/1281/1536/2048/4096; head_dim 64/128; causal/non-causal; contig/transposed) |
+| EFFICIENT_ATTENTION | **FAIL — every config tested** (same sweep) |
+| MATH | OK — every config tested; numerically sane vs CPU fp32 |
+
+Profiler output for a FLASH-only call shows **zero kernels launched** —
+the failure is at launch/argument validation, not inside a kernel.
 
 ## Impact
 
-The default dispatcher selects a failing backend for common
-decoder-style shapes, so any model passing `scale` (standard for
-GPT-style attention, `1/sqrt(head_dim)`) or hitting non-power-of-two
-kv lengths crashes on this stack. With a full multimodal
-model (SenseNova-U1.5-8B-MoT) the crash surfaces as
-`hipErrorInvalidValue` at an innocent elementwise add. Restricting the
-dispatcher to MATH makes the model run end-to-end (we carry that as a
-temporary compatibility patch).
+The default dispatcher picks a fused backend for ordinary decoder-style
+shapes, so attention crashes on this stack with a misleading traceback.
+We carry a temporary compatibility patch restricting the dispatcher to
+MATH on ROCm for one such model (SenseNova-U1.5-8B-MoT); with that, the
+full 50 GB model runs end-to-end on this card.
 
 ## Environment
 
 - GPU: AMD Radeon Pro W7900D (gfx1100, 48 GB)
 - torch 2.12.0+rocm7.14.0 (official AMD wheel,
-  `https://repo.amd.com/rocm/whl-multi-arch/`, plus the
-  `amd-torch-device-gfx1100` device wheel), Python 3.12
-- torch 2.8.0+rocm6.3 does not show either failure
+  `https://repo.amd.com/rocm/whl-multi-arch/` + `amd-torch-device-gfx1100`
+  device wheel), Python 3.12
+- Model-level comparison: the same model code with torch 2.8.0+rocm6.3
+  (SDPA path included) runs the equivalent workload to completion on the
+  same host
 
-Full debugging story, gdb/probe transcripts and the model-level
-verification of the MATH-backend workaround:
+Full debugging story and transcripts:
 https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/docs/results/findings/rocm63-wheel-blas-on-gfx1100.md
 
 Happy to run any further diagnostics on this hardware.

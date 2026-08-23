@@ -1,10 +1,11 @@
-# Compatibility: image generation crashes on ROCm with torch >= 2.9 (SDPA backend bugs) — patch included
+# Compatibility: image generation crashes on ROCm with torch 2.12 (SDPA fused-backend launch bugs) — verified patch included
 
 ## Summary
 
 With the official AMD `torch 2.12.0+rocm7.14.0` wheel on gfx1100
-(Radeon Pro W7900D), every image-generation task (t2i / editing /
-interleave) crashes early in denoising:
+(Radeon Pro W7900D), text-to-image generation crashes early in
+denoising (the same mechanism applies to the other generation tasks —
+they share the affected code path):
 
 ```
 File ".../modeling_qwen3.py", line 973, in forward_gen
@@ -16,11 +17,13 @@ The crash is **misleading**: the residual add is fine. Root cause (found
 by per-op probes + standalone minimal repros) is two ROCm SDPA backend
 bugs that the generation path hits through `_sdpa_attn_func`:
 
-1. the FLASH backend fails launch whenever an explicit `scale` kwarg is
-   passed — the model always passes `scale = 1/sqrt(head_dim)`;
-2. the mem-efficient backend fails launch for several shapes, including
-   the generation path's actual `kv_len` (e.g. 1281 = prefix + current
-   image tokens, not a power of two).
+on this stack **both fused SDPA backends fail kernel launch for every
+configuration tested** (bf16; kv 1024–4096, power-of-two or not;
+head_dim 64/128; causal or not; contiguous or transposed inputs) — and
+the generation path's `_sdpa_attn_func` always passes
+`scale = 1/sqrt(head_dim)` with kv lengths like 1281 (prefix + image
+tokens). Only the MATH backend is healthy. (torch 2.8.0+rocm6.3 is
+unaffected at model level on the same host.)
 
 Both are launch-time errors, so they surface at the next checked CUDA
 call (the residual add), far from the real site. The understanding path
@@ -62,8 +65,9 @@ Full patch: https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/patches/0
 - t2i 2048×2048 @ 50 steps, seed 42: completes, 687.7 s wall, 27.8 GiB
   peak (receipt:
   `docs/results/validation/t2i-torch212-fixed.json` in the repo above)
-- t2i 1024×1024 @ 2 steps: completes
-- VQA on the bundled menu.jpg: correct answer, unpatched
+- VQA on the bundled menu.jpg: correct answer, unpatched (the
+  understanding path uses transformers' standard SDPA with explicit
+  masks and does not hit the failing dispatch)
 
 Cost of the MATH restriction on this host: 687.7 s vs 420.1 s for the
 same canonical cell on torch 2.8+rocm6.3 with this project's BLAS
