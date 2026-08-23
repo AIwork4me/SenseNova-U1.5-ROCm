@@ -102,6 +102,8 @@ run_block() {
         "peak_vram_bytes=$peak" \
         "peak_vram_gib=$("$PY" -c "print(round($peak / 2**30, 2))")" \
         "vram_mode=$VRAM_MODE" \
+        "rocm_stack=$([ "${ROCM_FULL_STACK_ACTIVE:-0}" = "1" ] && echo full-stack || echo blas)" \
+        "ld_preload=${LD_PRELOAD:-}" \
         "command=$(printf '%q ' "$@")" \
         "log=logs/$name.log" \
         ${artifact_args[@]+"${artifact_args[@]}"} \

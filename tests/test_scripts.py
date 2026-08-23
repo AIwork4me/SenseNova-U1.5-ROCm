@@ -99,6 +99,48 @@ def test_receipt_writer():
         assert receipt["artifacts"][art]["bytes"] == 5
 
 
+def test_fullstack_mode_logic():
+    """common.sh ROCm_FULL_STACK mode selection, offline with fake prefixes."""
+    import tempfile
+    common = f"{ROOT}/scripts/lib/common.sh"
+    with tempfile.TemporaryDirectory() as td:
+        fake = os.path.join(td, "rocm-7.14-fake")
+        lib = os.path.join(fake, "lib", "rocblas", "library")
+        os.makedirs(lib)
+        for f in ("libMIOpen.so", "libamd_comgr.so", "libhipblas.so", "librocblas.so"):
+            open(os.path.join(fake, "lib", f), "w").close()
+        open(os.path.join(lib, "TensileLibrary_fake_gfx1100.dat"), "w").close()
+
+        probe = (
+            "export ROCM714_PREFIX=\'{p}\' {env}\n"
+            "source \'{c}\'\n"
+            "echo ${{ROCM_FULL_STACK_ACTIVE:-0}}\n"
+            "echo ${{LD_PRELOAD:-}}\n"
+            "echo END-PROBE\n"
+        )
+
+        def run_common(env):
+            r = subprocess.run(["bash", "-c", probe.format(p=fake, env=env, c=common)],
+                               capture_output=True, text=True)
+            out = r.stdout[:r.stdout.index("END-PROBE")] if "END-PROBE" in r.stdout else r.stdout
+            return out.split("\n")[:2]
+
+        # auto + valid prefix -> full stack (MIOpen preloaded too)
+        active, preload = run_common("")
+        assert active == "1" and "libMIOpen.so" in preload and "librocblas.so" in preload, preload
+        # explicit 0 -> falls back to BLAS-only preload (no MIOpen)
+        active, preload = run_common("export ROCM_FULL_STACK=0")
+        assert active == "0" and "libMIOpen.so" not in preload and "librocblas.so" in preload, preload
+        # BLAS_FIX=0 -> no preload at all
+        active, preload = run_common("export BLAS_FIX=0")
+        assert preload == "", preload
+        # ROCM_FULL_STACK=1 with a bogus prefix must fail loudly
+        r = subprocess.run(
+            ["bash", "-c", probe.format(p=os.path.join(td, "nope"), env="export ROCM_FULL_STACK=1", c=common)],
+            capture_output=True, text=True)
+        assert r.returncode != 0 and "ROCM_FULL_STACK=1" in r.stderr, r.stderr
+
+
 if __name__ == "__main__":
     failures = 0
     for name, fn in sorted(globals().items()):

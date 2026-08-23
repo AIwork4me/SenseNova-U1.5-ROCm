@@ -3,6 +3,10 @@
 # Sourced, not executed.
 
 PROJECT_NAME="SenseNova-U1.5-ROCm"
+
+log()  { echo "[$PROJECT_NAME] $*"; }
+warn() { echo "[$PROJECT_NAME] WARNING: $*" >&2; }
+die()  { echo "[$PROJECT_NAME] FAIL: $*" >&2; exit 1; }
 # shellcheck disable=SC2034  # consumed by scripts that source this file
 MODEL_REPO="SenseNova/SenseNova-U1.5-8B-MoT"
 MODEL_DIR_NAME="SenseNova-U1.5-8B-MoT"
@@ -26,41 +30,116 @@ MODEL_DIR="${MODEL_DIR:-$MODEL_BASE/$MODEL_DIR_NAME}"
 OUT_DIR="${OUT_DIR:-$ROOT/outputs}"
 
 # --- ROCm math-library workaround (measured on the reference host) ---------
-# The PyTorch rocm6.3 wheel's bundled BLAS stack is broken on gfx1100:
+# The PyTorch rocm6.3 wheel's bundled math stack is broken on gfx1100:
 #   (a) rocBLAS segfaults in Tensile::PlaceholderLibrary::loadPlaceholderLibrary()
 #       on any half-precision GEMM routed through it (repro: any bf16 Conv2d);
 #   (b) even redirected to the system kernel set, its 6.3-era decompressor
 #       cannot read ROCm 7.x Tensile .dat files ("Unbundle Objects Error:
 #       ... Unknown frame descriptor") and large bf16 GEMMs (the first LLM
-#       q_proj) fail with HIPBLAS_STATUS_INTERNAL_ERROR.
-# Fix: route ALL BLAS calls through the system ROCm install by preloading
-# its hipBLAS + rocBLAS (symbol interposition beats the wheel's bundled
-# copies) and pointing rocBLAS at the system Tensile kernels. Verified
-# numerically: bf16 conv/GEMM outputs match CPU fp32 references at bf16
-# rounding level. See docs/results/findings/rocm6.3-wheel-blas-on-gfx1100.md
-# Override: set BLAS_FIX=0 to disable (e.g. on CUDA hosts or a future fixed
-# wheel), or point ROCM_HOME at a different ROCm install.
-if [ "${BLAS_FIX:-1}" = "1" ]; then
-    _rocm_home="${ROCM_HOME:-}"
-    if [ -z "$_rocm_home" ]; then
-        for _p in /opt/rocm /usr/local/rocm; do
-            [ -e "$_p/lib/librocblas.so" ] && _rocm_home="$_p" && break
-        done
+#       q_proj) fail with HIPBLAS_STATUS_INTERNAL_ERROR;
+#   (c) the wheel's MIOpen JIT-compiles kernels through a comgr that
+#       segfaults mid-model (ViT dense_embedding).
+# Fix (verified 2026-08-22/23; see docs/results/findings/):
+#   - BLAS mode: preload the system ROCm's hipBLAS+rocBLAS and point rocBLAS
+#     at the system Tensile kernels; bypass MIOpen convs (cudnn off) due to (c).
+#   - FULL-STACK mode (auto when a ROCm >= 7.14 install is found, e.g. from
+#     scripts/install-rocm-7.14-gfx110x.sh): preload that stack's
+#     MIOpen+comgr+hipBLAS+rocBLAS — bug (c) is fixed in 7.14's comgr, so
+#     MIOpen convs stay ENABLED (no unfold+GEMM penalty). Verified: the model
+#     runs end-to-end with cudnn on; numerics identical at bf16 level.
+# Knobs:
+#   ROCM_FULL_STACK=auto|1|0   default auto — engages when a valid prefix is
+#                              found; 0 forces BLAS mode; 1 requires it
+#   ROCM714_PREFIX=/path       explicit full-stack prefix
+#   BLAS_FIX=0                 disable the workaround entirely (CUDA hosts /
+#                              a future fixed wheel)
+_gpu_arch_cached() {
+    # Detect the host GPU arch once (rocminfo), cache in $TMPDIR. Prints e.g.
+    # gfx1100. Returns 1 when undetectable (caller falls back to any-gfx).
+    local cache arch
+    if [ -n "${GPU_ARCH:-}" ]; then printf '%s' "$GPU_ARCH"; return 0; fi
+    cache="${TMPDIR:-/tmp}/senu15-gpu-arch"
+    if [ -s "$cache" ]; then printf '%s' "$(cat "$cache")"; return 0; fi
+    arch=""
+    if command -v rocminfo >/dev/null 2>&1; then
+        arch="$(rocminfo 2>/dev/null | awk '/^ *Name: *gfx/ {gsub(/ /,"",$2); print $2; exit}')"
     fi
-    if [ -n "$_rocm_home" ] && [ -e "$_rocm_home/lib/librocblas.so" ]; then
-        case ":${LD_PRELOAD:-}:" in
-            *":$_rocm_home/lib/librocblas.so:"*) ;;
-            *) export LD_PRELOAD="$_rocm_home/lib/libhipblas.so:$_rocm_home/lib/librocblas.so${LD_PRELOAD:+:$LD_PRELOAD}" ;;
-        esac
-        if [ -z "${ROCBLAS_TENSILE_LIBPATH:-}" ] && [ -d "$_rocm_home/lib/rocblas/library" ]; then
-            export ROCBLAS_TENSILE_LIBPATH="$_rocm_home/lib/rocblas/library"
+    if [ -n "$arch" ]; then
+        printf '%s' "$arch" > "$cache"
+        printf '%s' "$arch"
+        return 0
+    fi
+    return 1
+}
+
+_rocm_prefix_valid() {
+    # $1 = prefix: needs the full preload set + Tensile kernels for THIS
+    # GPU arch (a gfx1151-only dist must not be picked on a gfx1100 host).
+    [ -e "$1/lib/libMIOpen.so" ] && [ -e "$1/lib/libamd_comgr.so" ] \
+        && [ -e "$1/lib/libhipblas.so" ] && [ -e "$1/lib/librocblas.so" ] || return 1
+    local arch
+    if arch="$(_gpu_arch_cached)"; then
+        ls "$1"/lib/rocblas/library/*"${arch}"*.dat >/dev/null 2>&1
+    else
+        # arch undetectable: accept any gfx kernels (best effort)
+        ls "$1"/lib/rocblas/library/*gfx*.dat >/dev/null 2>&1
+    fi
+}
+
+_find_fullstack_prefix() {
+    local p
+    # An explicit ROCM714_PREFIX is authoritative: use it or fail (no
+    # silent fallback to wildcard candidates).
+    if [ -n "${ROCM714_PREFIX:-}" ]; then
+        if _rocm_prefix_valid "$ROCM714_PREFIX"; then
+            printf '%s' "$ROCM714_PREFIX"
+            return 0
+        fi
+        return 1
+    fi
+    for p in "$HOME"/rocm-7.14* /root/rocm-7.14* /opt/rocm-7.14*; do
+        [ -n "$p" ] || continue
+        if _rocm_prefix_valid "$p"; then
+            printf '%s' "$p"
+            return 0
+        fi
+    done
+    return 1
+}
+
+if [ "${BLAS_FIX:-1}" = "1" ]; then
+    _fs_mode="${ROCM_FULL_STACK:-auto}"
+    _fs_prefix=""
+    if [ "$_fs_mode" != "0" ]; then
+        _fs_prefix="$(_find_fullstack_prefix)" || _fs_prefix=""
+    fi
+    if [ -n "$_fs_prefix" ]; then
+        export LD_PRELOAD="$_fs_prefix/lib/libMIOpen.so:$_fs_prefix/lib/libamd_comgr.so:$_fs_prefix/lib/libhipblas.so:$_fs_prefix/lib/librocblas.so${LD_PRELOAD:+:$LD_PRELOAD}"
+        export ROCBLAS_TENSILE_LIBPATH="$_fs_prefix/lib/rocblas/library"
+        export SENU15_MIOPEN=1          # keep MIOpen enabled: 7.14 comgr JIT works
+        export ROCM_FULL_STACK_ACTIVE=1
+    elif [ "$_fs_mode" = "1" ]; then
+        die "ROCM_FULL_STACK=1 but no valid ROCm >=7.14 prefix found (looked at \$ROCM714_PREFIX, ~/rocm-7.14*, /root/rocm-7.14*, /opt/rocm-7.14*) — run scripts/install-rocm-7.14-gfx110x.sh or set ROCM_FULL_STACK=0"
+    else
+        # BLAS mode: system hipBLAS/rocBLAS only; MIOpen bypassed (see (c))
+        _rocm_home="${ROCM_HOME:-}"
+        if [ -z "$_rocm_home" ]; then
+            for _p in /opt/rocm /usr/local/rocm; do
+                [ -e "$_p/lib/librocblas.so" ] && _rocm_home="$_p" && break
+            done
+        fi
+        if [ -n "$_rocm_home" ] && [ -e "$_rocm_home/lib/librocblas.so" ]; then
+            case ":${LD_PRELOAD:-}:" in
+                *":$_rocm_home/lib/librocblas.so:"*) ;;
+                *) export LD_PRELOAD="$_rocm_home/lib/libhipblas.so:$_rocm_home/lib/librocblas.so${LD_PRELOAD:+:$LD_PRELOAD}" ;;
+            esac
+            if [ -z "${ROCBLAS_TENSILE_LIBPATH:-}" ] && [ -d "$_rocm_home/lib/rocblas/library" ]; then
+                export ROCBLAS_TENSILE_LIBPATH="$_rocm_home/lib/rocblas/library"
+            fi
         fi
     fi
 fi
 
-log()  { echo "[$PROJECT_NAME] $*"; }
-warn() { echo "[$PROJECT_NAME] WARNING: $*" >&2; }
-die()  { echo "[$PROJECT_NAME] FAIL: $*" >&2; exit 1; }
 
 require_venv() {
     [ -x "$PY" ] || die "virtualenv missing at $VENV — run: bash scripts/01-setup-venv.sh"
