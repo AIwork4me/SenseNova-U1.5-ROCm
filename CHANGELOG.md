@@ -4,7 +4,10 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] — 2026-08-23
+
+Full-stack ROCm 7.14 mode as the validated default path, torch 2.12
+support (patched), and five upstream filings.
 
 ### Added
 - Full-stack ROCm 7.14 mode: `ROCM_FULL_STACK=auto|1|0` (arch-validated
@@ -24,6 +27,18 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - Evidence artifacts: gdb transcripts for the three wheel bugs, repro
   matrix, ROCm 7.14 verification matrix, torch-2.12 failure transcript;
   poster showcase with reproducible prompts/seeds.
+- Full-stack re-validation (2026-08-23): the entire suite re-run under
+  full-stack ROCm 7.14 — every generation path 4.2–9.6 % faster than the
+  BLAS baseline (t2i 2048×2048@50: 379.6 s / 22.3 GiB; interleave 7-img:
+  3250.5 s / 47.9 GiB); `low` vram mode at 3.7 GiB; determinism holds
+  (byte-identical within the stack); BLAS-mode baseline archived under
+  `docs/results/validation/matrix-blas-20260822/`.
+
+### Fixed
+- `validate.sh` interleave block now registers its output images in the
+  receipt (artifact glob expanded after the run, stale outputs cleared
+  first); `make_gallery.py` labels the run mode from the receipt's
+  `rocm_stack` field.
 
 ## [0.1.0] — 2026-08-22
 
