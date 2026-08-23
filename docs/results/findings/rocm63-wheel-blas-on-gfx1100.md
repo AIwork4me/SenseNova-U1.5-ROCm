@@ -119,15 +119,28 @@ torch device table):
   bf16 conv (incl. N=16060) OK, large bf16 GEMM OK (4e-4), numerics
   identical (0.32 % median rel err), and full-model VQA answers correctly
   (receipt `../validation/vqa-torch212.json`).
-- **The image-generation path (`forward_gen`) fails on torch 2.12**:
-  `hipErrorInvalidValue` surfacing at the decoder residual add
-  (modeling_qwen3.py forward_gen), reproduced with AMD_SERIALIZE_KERNEL=3,
-  independent of resolution (1024²..2048²), vram_mode (balanced/low) and
-  CFG branch — while the understanding path (forward_und / VQA) is fully
-  healthy. This is a torch-2.12 compatibility issue in the upstream model
-  code (upstream pins torch 2.8), not a ROCm stack problem — the same
-  code path works on this host with torch 2.8 + the BLAS/full-stack
-  preload.
+- **The image-generation path (`forward_gen`) failed on torch 2.12 —
+  root cause: two ROCm SDPA backend bugs** (found after per-op probes;
+  final analysis 2026-08-23):
+  1. the FLASH SDPA backend fails launch whenever an explicit `scale`
+     kwarg is passed (the model always passes `1/sqrt(head_dim)`);
+  2. the mem-efficient SDPA backend fails launch for several shapes,
+     including the generation path's actual kv_len=1281
+     (prefix + image tokens, not a power of two), head_dim=64, and long
+     causal sequences.
+  Both are launch-time errors that surface at the next checked CUDA call
+  (the decoder residual add) — misleading tracebacks; HIP_LAUNCH_BLOCKING
+  does not relocate them and `hipGetLastError` is reset by intervening
+  successful calls. The understanding path (transformers' standard SDPA
+  with explicit masks) never selects the failing backends — hence VQA
+  worked unpatched. Fix shipped as
+  [`patches/0002`](../../patches/0002-sdpa-rocm-math-backend-compat.patch):
+  on ROCm restrict `_sdpa_attn_func` to the MATH backend and pre-scale
+  `q`. Verified end-to-end: 2048×2048@50 = 687.7 s / 27.8 GiB
+  (receipt `../validation/t2i-torch212-fixed.json`; torch-2.8 baseline
+  420.1 s / 22.3 GiB — MATH costs ~64 % on this cell, correctness-first).
+  Filed upstream: pytorch/pytorch SDPA backend issue (link in
+  `docs/upstream/issue-pytorch-rocm-sdpa-backends.md`).
 - Practical guidance until upstream adapts to torch 2.12: **use torch
   2.8.0+rocm6.3 + this repo's workarounds for generation tasks**; torch
   2.12.0+rocm7.14.0 is a zero-workaround option for the understanding /

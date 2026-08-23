@@ -29,3 +29,19 @@ kernel-serialization; the understanding path (`forward_und`) completes
 correctly in the same environment. Upstream model code pins torch 2.8 —
 `forward_gen` needs upstream adaptation for torch 2.12 before the AMD
 official wheel can serve the generation tasks.
+
+
+## UPDATE 2026-08-23 (later same day) — root cause found
+
+The probes above were misleading: the add/randn failures were launch-time
+`hipErrorInvalidValue` from SDPA backends surfacing at the next checked
+call. True root cause (standalone repros, see findings doc):
+
+- FLASH SDPA backend + explicit `scale` kwarg → launch fails;
+- EFFICIENT SDPA backend + non-power-of-two kv_len (1152/1281/1536),
+  head_dim 64, or long causal → launch fails;
+- MATH backend: healthy for all shapes.
+
+Model-level fix: `patches/0002` (MATH-only on ROCm + q pre-scaling) —
+t2i 2048×2048@50 completes (687.7 s, receipt
+`../validation/t2i-torch212-fixed.json`).
