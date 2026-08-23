@@ -1,0 +1,72 @@
+[SenseNova-U1.5-ROCm] task=t2i  model=/root/.cache/huggingface/modelscope/SenseNova-U1.5-8B-MoT  vram_mode=balanced  attn=sdpa
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.27it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.96it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.65s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.43s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.90s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.20s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.39s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.51s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.60s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.66s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.18s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.14s/it]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/SenseNova-U1.5-ROCm/src/sensenova_u1_rocm/__main__.py", line 26, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/src/sensenova_u1_rocm/__main__.py", line 21, in main
+    runpy.run_path(target, run_name="__main__")
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/t2i/inference.py", line 514, in <module>
+    main()
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/t2i/inference.py", line 437, in main
+    images = engine.generate(
+             ^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/examples/t2i/inference.py", line 148, in generate
+    out = offloaded.t2i_generate(
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py", line 1818, in t2i_generate
+    v_pred_condition = self._t2i_predict_v(image_embeds, indexes_image_condition, attention_mask_condition, past_key_values_condition, t, z, image_token_num=token_h*token_w, timestep_embeddings=timestep_embeddings, image_size=image_size)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py", line 602, in _t2i_predict_v
+    outputs = self.language_model.model(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/transformers/utils/generic.py", line 1064, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_qwen3.py", line 1169, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/transformers/modeling_layers.py", line 94, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1884, in _call_impl
+    return inner()
+           ^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1832, in inner
+    result = forward_call(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_qwen3.py", line 1000, in forward
+    return self.forward_gen(hidden_states, image_gen_indicators, exist_non_image_gen_tokens, exist_image_gen_tokens, indexes, attention_mask, position_ids, past_key_values, use_cache, cache_position, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_qwen3.py", line 973, in forward_gen
+    hidden_states = residual + hidden_states
+                    ~~~~~~~~~^~~~~~~~~~~~~~~
+torch.AcceleratorError: CUDA error: invalid argument
+Search for `hipErrorInvalidValue' in https://rocm.docs.amd.com/projects/HIP/en/latest/index.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing AMD_SERIALIZE_KERNEL=3
+Device-side assertion tracking was not enabled by user.

@@ -1,0 +1,16 @@
+{
+  "artifacts": {
+    "outputs/validation/vqa-torch212.txt": {
+      "bytes": 181,
+      "sha256": "932a102af5995f289ff160cdba94c0ad20ce1734eb64ecd554bc2c106d63adf6"
+    }
+  },
+  "block": "vqa-torch212",
+  "log": "logs/vqa-torch212.log",
+  "note": "zero-workaround; correct answer; understanding path fully working",
+  "note2": "t2i (generation path) FAILS on torch 2.12: hipErrorInvalidValue in forward_gen, resolution/vram_mode independent \u2014 see t2i-torch212.json",
+  "rocm_stack": "none",
+  "torch": "2.12.0+rocm7.14.0",
+  "vram_mode": "balanced",
+  "wall_seconds": 655
+}

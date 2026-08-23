@@ -96,3 +96,39 @@ Full matrix and verdicts:
 Practical upshot: a torch wheel built against ROCm 7.14 should need none
 of the workarounds in this repo; until one ships, hosts with 7.14 can
 preload the full 7.14 stack and drop the `cudnn off` penalty.
+
+## Update 2026-08-23 (b) — AMD official torch 2.12.0+rocm7.14.0 wheels
+
+AMD now ships torch wheels built against ROCm 7.14 via
+`https://repo.amd.com/rocm/whl-multi-arch/` (pip-distribution model:
+`rocm`/`rocm-sdk-core`/`rocm-sdk-libraries` metapackages + a per-arch
+`amd-torch-device-gfx1100` device wheel that carries the gfx1100 kernels).
+Install (cp312):
+
+```bash
+pip install "torch==2.12.0+rocm7.14.0" "torchvision==0.27.0+rocm7.14.0" \
+            "amd-torch-device-gfx1100==2.12.0+rocm7.14.0" \
+            --extra-index-url https://repo.amd.com/rocm/whl-multi-arch/
+```
+
+Measured on the reference host (W7900D, correctly identified by the new
+torch device table):
+
+- **All three wheel-6.3 bugs are absent — with ZERO workarounds** (no
+  LD_PRELOAD, no ROCBLAS_TENSILE_LIBPATH, MIOpen enabled by default):
+  bf16 conv (incl. N=16060) OK, large bf16 GEMM OK (4e-4), numerics
+  identical (0.32 % median rel err), and full-model VQA answers correctly
+  (receipt `../validation/vqa-torch212.json`).
+- **The image-generation path (`forward_gen`) fails on torch 2.12**:
+  `hipErrorInvalidValue` surfacing at the decoder residual add
+  (modeling_qwen3.py forward_gen), reproduced with AMD_SERIALIZE_KERNEL=3,
+  independent of resolution (1024²..2048²), vram_mode (balanced/low) and
+  CFG branch — while the understanding path (forward_und / VQA) is fully
+  healthy. This is a torch-2.12 compatibility issue in the upstream model
+  code (upstream pins torch 2.8), not a ROCm stack problem — the same
+  code path works on this host with torch 2.8 + the BLAS/full-stack
+  preload.
+- Practical guidance until upstream adapts to torch 2.12: **use torch
+  2.8.0+rocm6.3 + this repo's workarounds for generation tasks**; torch
+  2.12.0+rocm7.14.0 is a zero-workaround option for the understanding /
+  VQA path.

@@ -1,0 +1,12 @@
+{
+  "artifacts": {},
+  "block": "t2i-torch212",
+  "log": "logs/t2i-torch212.log",
+  "note": "zero-workaround: no LD_PRELOAD, no TENSILE_LIBPATH, MIOpen enabled",
+  "peak_vram_bytes": 23598551040,
+  "peak_vram_gib": 21.98,
+  "rocm_stack": "none-torch212",
+  "torch": "2.12.0+rocm7.14.0",
+  "vram_mode": "balanced",
+  "wall_seconds": 182.7
+}
