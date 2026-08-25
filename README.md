@@ -305,8 +305,8 @@ with your receipts — that's a bug in our claims.
   this project.
 - AMD's official `torch 2.12.0+rocm7.14.0` wheels fix all three wheel bugs
   with zero workarounds; VQA works out of the box. **Update (2026-08-25):
-  the fused-SDPA launch failure is a wheel-metadata bug, root-caused and
-  fixed upstream** — `amd-torch-device-gfx1100` was missing its dependency
+  the fused-SDPA launch failure is a wheel-metadata bug, root-caused
+  upstream (fix PR open)** — `amd-torch-device-gfx1100` was missing its dependency
   on the `amd-torch-device-gfx11` family wheel (AOTriton images); verified
   A/B on this host ([pytorch#194498 comment by
   liminfei-amd](https://github.com/pytorch/pytorch/issues/194498#issuecomment-5406837588),

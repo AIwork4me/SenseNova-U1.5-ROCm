@@ -151,9 +151,16 @@ judge 为本地 int8 运行（配对设计抵消 judge 偏差）。完整数据�
   `ROCM_FULL_STACK=0|1` 可控。**当前默认验证路径**（2026-08-23 全量复验，
   四个生成任务较 BLAS 基线提速 4–10%）
 - **torch 版本**：验证态主力为 2.8.0+rocm6.3（全栈模式，生成最快）。
-  AMD 官方 2.12.0+rocm7.14.0 轮子零 BLAS workaround、VQA 开箱即用，
-  生成任务配 [补丁 0002](patches/README.md) 可用
-  （2048×2048@50：687.7s vs 2.8 全栈 379.6s，差距为 ROCm SDPA 融合后端失败所致）
+  AMD 官方 2.12.0+rocm7.14.0 轮子零 BLAS workaround、VQA 开箱即用。
+  **更新（2026-08-25）**：SDPA 融合后端崩溃已在上游定位根因——
+  `amd-torch-device-gfx1100` 叶子轮子漏声明对家族轮子
+  `amd-torch-device-gfx11`（AOTriton 镜像）的依赖（诊断见
+  [pytorch#194498 评论](https://github.com/pytorch/pytorch/issues/194498#issuecomment-5406837588)，
+  修复 PR [rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685)）。
+  本机 A/B 验证（单包差异）：加装 gfx11 后融合后端 0/8→8/8，且去掉
+  [补丁 0002](patches/README.md) 后 t2i 2048×2048@50 仅 **355s**（对比 0002
+  MATH 方案的 687.7s，整脚本 1.94×）。已装 gfx11 的环境无需补丁 0002；
+  收据 `docs/results/validation/sdpa-gfx11/`。
 
 ## 常见问题
 
