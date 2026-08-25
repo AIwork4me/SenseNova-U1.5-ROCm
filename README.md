@@ -304,14 +304,22 @@ with your receipts — that's a bug in our claims.
 - The production LightLLM/LightX2V serving stack is CUDA-only — not part of
   this project.
 - AMD's official `torch 2.12.0+rocm7.14.0` wheels fix all three wheel bugs
-  with zero workarounds; VQA works out of the box, and image generation
-  works with [patches/0002](patches/0002-sdpa-rocm-math-backend-compat.patch)
-  (2048×2048@50 in 687.7 s / 27.8 GiB vs 379.6 s / 22.3 GiB on torch 2.8
-  full-stack —
-  receipts `docs/results/validation/t2i-torch212-fixed.json` vs `t2i.json`).
-  Root cause of the gap: both fused SDPA backends fail kernel launch on
-  this stack — [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);
-  compatibility write-up with the patch:
+  with zero workarounds; VQA works out of the box. **Update (2026-08-25):
+  the fused-SDPA launch failure is a wheel-metadata bug, root-caused and
+  fixed upstream** — `amd-torch-device-gfx1100` was missing its dependency
+  on the `amd-torch-device-gfx11` family wheel (AOTriton images); verified
+  A/B on this host ([pytorch#194498 comment by
+  liminfei-amd](https://github.com/pytorch/pytorch/issues/194498#issuecomment-5406837588),
+  fix [ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685),
+  receipts `docs/results/validation/sdpa-gfx11/`): installing
+  `amd-torch-device-gfx11==2.12.0+rocm7.14.0` flips fused SDPA from 0/8
+  (hipErrorInvalidValue) to 8/8, and t2i 2048×2048@50 drops to **355 s**
+  (1.94× whole-script vs the MATH-patch 687.7 s, 2.22× generation-only)
+  with [patches/0002](patches/0002-sdpa-rocm-math-backend-compat.patch)
+  removed. On installs that already carry the gfx11 wheel, patch 0002 is
+  unnecessary; keep it for broken installs. Baseline receipts:
+  `docs/results/validation/t2i-torch212-fixed.json` vs `sdpa-gfx11/`;
+  compatibility write-up:
   [SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261).
   torch 2.8 remains the faster generation path today.
 

@@ -1,0 +1,132 @@
+{
+ "phase": "phaseB-withgfx11",
+ "torch": null,
+ "total": 11,
+ "ok": 11,
+ "by_backend": {
+  "EFFICIENT_ATTENTION": {
+   "total": 4,
+   "ok": 4
+  },
+  "FLASH_ATTENTION": {
+   "total": 4,
+   "ok": 4
+  },
+  "MATH": {
+   "total": 3,
+   "ok": 3
+  }
+ },
+ "cases": [
+  {
+   "case": "EFFICIENT_ATTENTION_kv1024_hd128_c0_s0",
+   "backend": "EFFICIENT_ATTENTION",
+   "kv": 1024,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=171437.7500"
+  },
+  {
+   "case": "EFFICIENT_ATTENTION_kv1024_hd128_c0_s1",
+   "backend": "EFFICIENT_ATTENTION",
+   "kv": 1024,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": true,
+   "ok": true,
+   "result": "RESULT ok sum=171437.7500"
+  },
+  {
+   "case": "EFFICIENT_ATTENTION_kv1281_hd128_c0_s0",
+   "backend": "EFFICIENT_ATTENTION",
+   "kv": 1281,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=153318.5938"
+  },
+  {
+   "case": "EFFICIENT_ATTENTION_kv2048_hd64_c1_s0",
+   "backend": "EFFICIENT_ATTENTION",
+   "kv": 2048,
+   "head_dim": 64,
+   "causal": true,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=232085.9062"
+  },
+  {
+   "case": "FLASH_ATTENTION_kv1024_hd128_c0_s0",
+   "backend": "FLASH_ATTENTION",
+   "kv": 1024,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=171437.7500"
+  },
+  {
+   "case": "FLASH_ATTENTION_kv1024_hd128_c0_s1",
+   "backend": "FLASH_ATTENTION",
+   "kv": 1024,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": true,
+   "ok": true,
+   "result": "RESULT ok sum=171437.7500"
+  },
+  {
+   "case": "FLASH_ATTENTION_kv1281_hd128_c0_s0",
+   "backend": "FLASH_ATTENTION",
+   "kv": 1281,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=153318.5938"
+  },
+  {
+   "case": "FLASH_ATTENTION_kv2048_hd64_c1_s0",
+   "backend": "FLASH_ATTENTION",
+   "kv": 2048,
+   "head_dim": 64,
+   "causal": true,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=232085.9062"
+  },
+  {
+   "case": "MATH_kv1024_hd128_c0_s0",
+   "backend": "MATH",
+   "kv": 1024,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=171437.9062"
+  },
+  {
+   "case": "MATH_kv1281_hd128_c0_s0",
+   "backend": "MATH",
+   "kv": 1281,
+   "head_dim": 128,
+   "causal": false,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=153318.8438"
+  },
+  {
+   "case": "MATH_kv2048_hd64_c1_s0",
+   "backend": "MATH",
+   "kv": 2048,
+   "head_dim": 64,
+   "causal": true,
+   "explicit_scale": false,
+   "ok": true,
+   "result": "RESULT ok sum=232085.9062"
+  }
+ ]
+}

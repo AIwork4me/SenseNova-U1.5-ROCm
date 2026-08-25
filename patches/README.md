@@ -38,6 +38,19 @@ TypeError: 'NoneType' object is not subscriptable
 
 ## 0002-sdpa-rocm-math-backend-compat.patch
 
+> **STATUS UPDATE 2026-08-25 — root cause found upstream; this patch is a
+> fallback, not a requirement, on fixed installs.** The fused-backend
+> failures are a wheel-metadata defect: `amd-torch-device-gfx1100` was
+> missing its dependency on the family wheel `amd-torch-device-gfx11`
+> (AOTriton images). Installing
+> `amd-torch-device-gfx11==2.12.0+rocm7.14.0` fixes FLASH and
+> mem-efficient outright (verified A/B on this host — fused 0/8 → 8/8,
+> t2i 2048²@50 687.7 s → 355 s with this patch REMOVED; receipts
+> [../docs/results/validation/sdpa-gfx11/](../docs/results/validation/sdpa-gfx11/)).
+> Upstream fix: [ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685).
+> Keep this patch only for torch ≥ 2.9 installs you cannot repair; on
+> torch 2.8 it is inert by construction.
+
 **Bug (ROCm, torch ≥ 2.9; verified on the official torch 2.12.0+rocm7.14.0
 wheel, gfx1100 — [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)):**
 the image-generation path crashes with `hipErrorInvalidValue` surfacing

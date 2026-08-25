@@ -1,0 +1,27 @@
+{
+ "block": "t2i-torch212-flash-gfx11",
+ "note": "torch 2.12.0+rocm7.14.0 + amd-torch-device-gfx11 installed, patch 0002 REMOVED (stock SDPA dispatcher, fused backends eligible); same prompt/seed/steps/mode as t2i-torch212-fixed baseline",
+ "torch": "2.12.0+rocm7.14.0",
+ "gfx11_installed": true,
+ "patch_0002": "removed",
+ "rocm_stack": "none-torch212+gfx11",
+ "vram_mode": "balanced",
+ "wall_seconds_total": 355,
+ "model_load_seconds": 68.1,
+ "generation_wall_seconds": 273.2,
+ "generation_peak_alloc_gib": 3.71,
+ "generation_peak_reserved_gib": 21.55,
+ "baseline_math_wall_seconds": 687.7,
+ "baseline": "docs/results/validation/t2i-torch212-fixed.json (0002 active => MATH)",
+ "speedup_vs_math_baseline": 1.94,
+ "artifact": {
+  "path": "outputs/validation/sdpa-gfx11/t2i-2048-flash.png",
+  "sha256": "56a58cf342ecdb8784c3d83a964805202275ecce51f29f045cf16054afd4e68b"
+ },
+ "log": "outputs/validation/sdpa-gfx11/t2i-flash.log",
+ "prompt": "A cinematic mountain village at sunrise, golden light over slate roofs, drifting mist between timber houses, ultra detailed",
+ "seed": 42,
+ "num_steps": 50,
+ "size": "2048x2048",
+ "recorded_at": "2026-08-25T11:51:23Z"
+}

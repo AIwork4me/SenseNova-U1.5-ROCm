@@ -72,3 +72,16 @@ Full debugging story and transcripts:
 https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/docs/results/findings/rocm63-wheel-blas-on-gfx1100.md
 
 Happy to run any further diagnostics on this hardware.
+
+## Resolution (2026-08-25)
+
+Root-caused by liminfei-amd
+([comment](https://github.com/pytorch/pytorch/issues/194498#issuecomment-5406837588)):
+wheel metadata — the `amd-torch-device-gfx1100` leaf lacks its dependency
+on the `amd-torch-device-gfx11` family wheel (AOTriton images). Fix:
+[ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685).
+Independently verified A/B on the reporting host with a single package
+delta: fused 0/8 → 8/8, and the real-model t2i workload that motivated
+this issue completes 1.94× faster than the MATH fallback with the gfx11
+wheel installed. Receipts:
+[../results/validation/sdpa-gfx11/README.md](../results/validation/sdpa-gfx11/README.md).

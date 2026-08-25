@@ -1,0 +1,16 @@
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.08it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.90it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.65s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.89s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.19s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.38s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.52s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:55<00:20,  6.68s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:02<00:13,  6.90s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:07<00:06,  6.36s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:07<00:00,  5.21s/it]
+[saved] outputs/validation/sdpa-gfx11/t2i-2048-flash.png
+
+================================================================
+Profile summary
+================================================================
+  config              : vram_mode=balanced, fast_vram_fraction=0.9, fast_vram_headroom_gib=2.0, fast_activation_reserve_gib=4.0, attn_backend=sdpa, dtype=bfloat16
+  model load          :   68.056 s
+  load peak memory    : cpu RSS 43.09 GiB
+  generations         : 1 call(s), 1 image(s) total, 273.247 s wall
+  avg per image       :  273.247 s
+  image tokens        : patch_size=32, avg 4096 tok/image (4096)
+  throughput          :    14.99 tok/s
+  generation peak mem : allocated 3.71 GiB, reserved 21.55 GiB, cpu RSS 50.06 GiB
+================================================================

@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- pytorch#194498 root cause verified on-host: SDPA fused-backend launch
+  failures are a wheel-metadata defect (amd-torch-device-gfx1100 missing
+  its amd-torch-device-gfx11 family dependency; diagnosis by liminfei-amd,
+  fix ROCm/rocm-systems#10685). Controlled A/B: single package delta flips
+  the fresh-process matrix from fused 0/8 (hipErrorInvalidValue) to 11/11;
+  real-model t2i 2048²@50 with patch 0002 removed: 355 s (1.94× whole-
+  script / 2.22× generation-only vs the 687.7 s MATH baseline). Patch 0002
+  reclassified as fallback-only; receipts docs/results/validation/sdpa-gfx11/.
+
 ## [0.2.0] — 2026-08-23
 
 Full-stack ROCm 7.14 mode as the validated default path, torch 2.12

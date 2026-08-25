@@ -150,3 +150,38 @@ torch device table):
   2.8.0+rocm6.3 + this repo's workarounds for generation tasks**; torch
   2.12.0+rocm7.14.0 is a zero-workaround option for the understanding /
   VQA path.
+
+## Update 2026-08-25 — ROOT CAUSE FOUND & VERIFIED (wheel metadata, not kernels)
+
+liminfei-amd root-caused the SDPA fused-backend launch failures
+([pytorch#194498 comment](https://github.com/pytorch/pytorch/issues/194498#issuecomment-5406837588)):
+the pip multi-arch leaf wheel `amd-torch-device-gfx1100` does not declare
+its dependency on the **family wheel** `amd-torch-device-gfx11`, which
+carries the AOTriton images FLASH/mem-efficient need. Leaf-only installs
+(those following the published recipe — including this host's) therefore
+lack those images: fused launches are rejected (`hipErrorInvalidValue`,
+deferred), MATH (plain PyTorch kernels) is unaffected — exactly matching
+every observation above, including "zero kernels launched". Fix:
+[ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685)
+(leaf wheels gain family `Requires-Dist`); the published `2.13.0+rocm7.14.0`
+leaf still lacked it at comment time.
+
+**Verified A/B on this host** (single package delta, fresh process per
+case; receipts [`../validation/sdpa-gfx11/`](../validation/sdpa-gfx11/)):
+
+- Phase A — faithful rebuild of the original install (no gfx11): fused
+  **0/8** (`AcceleratorError: CUDA error: invalid argument` /
+  hipErrorInvalidValue at the trailing checked op), MATH 3/3.
+- Phase B — `+ amd-torch-device-gfx11==2.12.0+rocm7.14.0` ONLY: **11/11**
+  ok; fused outputs match MATH to bf16 tolerance (rel diff ≤ 2e-6); MATH
+  sums bit-identical across phases.
+- Real model, stock dispatcher, **patch 0002 removed**: t2i 2048×2048@50
+  completes in **355 s** (1.94× whole-script / 2.22× generation-only vs
+  the 687.7 s MATH-patch baseline; peak reserved 21.6 vs 27.3 GiB).
+
+**Guidance update:** on torch 2.12 multi-arch installs, install the gfx11
+family wheel (or use a leaf wheel ≥ the #10685 fix); then patch 0002 is
+unnecessary and fused backends are much faster than the MATH fallback.
+The earlier "two ROCm SDPA backend bugs" framing is superseded — one
+packaging defect explains all of it. torch 2.8+rocm6.3 remains this
+repo's validated default stack.
