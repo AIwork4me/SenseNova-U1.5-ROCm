@@ -1,0 +1,20 @@
+[sensenova_u1_rocm] MIOpen bypass active (conv via unfold+GEMM; SENU15_MIOPEN=1 to re-enable)
+[v1-prefix-list] attn='sdpa' mode=list image_size=[(256, 256), (320, 256)] steps=5 seed=42 vram_mode=balanced
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.05it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.89it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.64s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.41s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.88s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.18s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.39s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.51s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.60s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.66s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.19s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.14s/it]
+[v1-prefix-list] model loaded in 67.3s
+Sure, here you go. <image>image 1 ((256, 256)x(320, 256)):   0%|          | 0/5 [00:00<?, ?it/s]                                                                      [v1-prefix-list] EXCEPTION (expected TypeError for list mode on pre-fix code):
+Traceback (most recent call last):
+  File "/workspace/SenseNova-U1.5-ROCm/scripts/interleave-image-only-check.py", line 151, in main
+    images = offloaded.interleave_gen_image_only(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py", line 921, in interleave_gen_image_only
+    out_cond = self._t2i_predict_v(image_embeds, indexes_image_condition, attention_mask_condition, past_key_values_cond_cfg, t, z, image_token_num=token_h*token_w, timestep_embeddings=timestep_embeddings, image_size=image_size)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py", line 614, in _t2i_predict_v
+    token_h = image_size[1] // (self.patch_size * merge_size)
+              ~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for //: 'tuple' and 'int'
+[v1-prefix-list] summary -> /workspace/SenseNova-U1.5-ROCm/outputs/validation/interleave-image-size/v1-prefix-list/summary.json

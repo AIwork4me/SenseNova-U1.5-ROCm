@@ -38,13 +38,35 @@ description uses it a few lines above each call:
 step_iter = _tqdm(step_iter, desc=f"image {img_count + 1} ({image_size[0]}x{image_size[1]})", ...)
 ```
 
-One-line-per-call-site change; no behavior change for the paths that
-already passed it. One caveat reviewers may want to weigh: in
-`interleave_gen_image_only` the per-image size lives in `cur_image_size`
-while this passes the `image_size` parameter — identical for the tuple
-input `examples/interleave/inference.py` uses (and consistent with the
-existing tqdm description, which also uses `image_size`); only a caller
-passing a list of per-image tuples would see a difference.
+## Review follow-up (2026-08-24/25, yl-1993) — APPLIED
+
+Reviewer yl-1993 confirmed the direction but caught one real issue
+([comment](https://github.com/OpenSenseNova/SenseNova-U1/pull/260#issuecomment-5399345254)):
+in `interleave_gen_image_only` the calls should pass the per-image
+`cur_image_size`, not the `image_size` parameter — the function accepts
+`image_size` as a `list[tuple]` (modeling_neo_chat.py:691-698), and with a
+list the pixel-head branch still crashes (`image_size[1]` is then a tuple).
+`interleave_gen` was already correct (rebinds `image_size` per loop).
+
+Follow-up commit `e2f2c865` ("interleave_gen_image_only: pass
+cur_image_size to _t2i_predict_v", pushed 2026-08-25): the five call sites
+plus the progress-bar description (which printed tuple reprs for list
+input) now use `cur_image_size`. CI green, PR MERGEABLE.
+
+Verified on the real model (U1.5-8B-MoT, pixel head, gfx1100/ROCm) with a
+direct driver — the list input has no in-repo caller:
+
+| code | `image_size` | result |
+|------|--------------|--------|
+| PR 80991edd | list `[(256,256),(320,256)]` | `TypeError: unsupported operand type(s) for //: 'tuple' and 'int'` at L614 via the L921 call (first step of first image) |
+| follow-up `e2f2c865` | same list | completes; images `[1,3,256,256]` + `[1,3,256,320]`, per-image tqdm |
+| PR 80991edd | tuple `(256,256)` | completes (baseline) |
+| follow-up `e2f2c865` | same tuple | **byte-identical** to baseline (raw+PNG sha256) |
+
+Full matrix and hashes:
+[../results/validation/interleave-image-size/README.md](../results/validation/interleave-image-size/README.md).
+Local patch `patches/0001` regenerated to match the new PR head (applies
+cleanly on pinned `76c32c2`).
 
 ## Validation
 

@@ -16,7 +16,16 @@ correctly, which is why those tasks work unpatched.
 
 **Fix:** pass `image_size=image_size` at the 10 call sites inside the two
 interleave functions (the variable is already in scope — the progress-bar
-description uses it a few lines above).
+description uses it a few lines above). **2026-08-25 follow-up (upstream
+review by yl-1993, PR#260):** in `interleave_gen_image_only` the five
+calls (and the progress-bar description) now pass the per-image
+`cur_image_size` instead of the `image_size` parameter — the function
+accepts `image_size` as a `list[tuple]`, and forwarding the original
+list still crashed the pixel-head branch (`image_size[1] // int` on a
+tuple). `interleave_gen` is unaffected: it rebinds `image_size` to the
+current tuple inside its loop. Same-seed tuple outputs are byte-identical
+before/after the follow-up; list input now completes. Full V1–V4 matrix:
+[../docs/results/validation/interleave-image-size/README.md](../docs/results/validation/interleave-image-size/README.md).
 
 **Symptom before the patch** (pre-patch run transcript:
 [../docs/results/logs/interleave-prepatch-typeerror.txt](../docs/results/logs/interleave-prepatch-typeerror.txt)):

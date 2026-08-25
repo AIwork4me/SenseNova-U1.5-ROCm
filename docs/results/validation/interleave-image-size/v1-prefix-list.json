@@ -1,0 +1,37 @@
+{
+ "tag": "v1-prefix-list",
+ "mode": "list",
+ "image_size": [
+  [
+   256,
+   256
+  ],
+  [
+   320,
+   256
+  ]
+ ],
+ "prompt": "Give me a simple illustration.",
+ "gt_text": "Sure, here you go. <image> And a second one. <image> All done.",
+ "num_steps": 5,
+ "seed": 42,
+ "cfg_scale": 1.0,
+ "img_cfg_scale": 1.0,
+ "max_images": 2,
+ "vram_mode": "balanced",
+ "prefetch_count": 2,
+ "torch": "2.8.0+rocm6.3",
+ "hip": "6.3.42131-fa1d09cbd",
+ "code": {
+  "modeling_neo_chat_sha256": "c02073d118b920e1d0115bbc50ffbaad05ea75c020d00204a2aecda94f79b628",
+  "upstream_commit": "76c32c2fb0bb325f0116c6120b518a7df6a93430",
+  "upstream_dirty": true
+ },
+ "load_seconds": 67.3,
+ "status": "crashed",
+ "exception_type": "TypeError",
+ "exception": "unsupported operand type(s) for //: 'tuple' and 'int'",
+ "traceback": "Traceback (most recent call last):\n  File \"/workspace/SenseNova-U1.5-ROCm/scripts/interleave-image-only-check.py\", line 151, in main\n    images = offloaded.interleave_gen_image_only(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py\", line 120, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py\", line 921, in interleave_gen_image_only\n    out_cond = self._t2i_predict_v(image_embeds, indexes_image_condition, attention_mask_condition, past_key_values_cond_cfg, t, z, image_token_num=token_h*token_w, timestep_embeddings=timestep_embeddings, image_size=image_size)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py\", line 614, in _t2i_predict_v\n    token_h = image_size[1] // (self.patch_size * merge_size)\n              ~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for //: 'tuple' and 'int'\n",
+ "expected_list_crash": true,
+ "wall_seconds": 65.2
+}

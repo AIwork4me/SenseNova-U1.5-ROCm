@@ -1,0 +1,66 @@
+{
+ "tag": "v2-postfix-list",
+ "mode": "list",
+ "image_size": [
+  [
+   256,
+   256
+  ],
+  [
+   320,
+   256
+  ]
+ ],
+ "prompt": "Give me a simple illustration.",
+ "gt_text": "Sure, here you go. <image> And a second one. <image> All done.",
+ "num_steps": 5,
+ "seed": 42,
+ "cfg_scale": 1.0,
+ "img_cfg_scale": 1.0,
+ "max_images": 2,
+ "vram_mode": "balanced",
+ "prefetch_count": 2,
+ "torch": "2.8.0+rocm6.3",
+ "hip": "6.3.42131-fa1d09cbd",
+ "code": {
+  "modeling_neo_chat_sha256": "5cd285131de1ab1ddc92d5d8f83d12dc7820f1c1b5823d5963dde644028e1953",
+  "upstream_commit": "76c32c2fb0bb325f0116c6120b518a7df6a93430",
+  "upstream_dirty": true
+ },
+ "load_seconds": 67.2,
+ "status": "ok",
+ "wall_seconds": 79.2,
+ "peak_alloc_gib": 3.78,
+ "images": [
+  {
+   "shape": [
+    1,
+    3,
+    256,
+    256
+   ],
+   "png": "v2-postfix-list_image_0.png",
+   "png_sha256": "a2e45fa5ee4c19d0840bc135499815a41b1f679804ad039052af9b2f0f08ca76",
+   "raw_sha256": "c869cbae695c61b8fc5aaf54a7fca9be4194bb4b4c539f86daaf505da60990d5",
+   "raw_min_max": [
+    -0.390625,
+    0.5546875
+   ]
+  },
+  {
+   "shape": [
+    1,
+    3,
+    256,
+    320
+   ],
+   "png": "v2-postfix-list_image_1.png",
+   "png_sha256": "bb5ca34525088fbf1f0997ea800140e9a5645043c08375bc20a98602c759ca34",
+   "raw_sha256": "a3f32121e5663f4419acd6c381b8770c91bf27c6b80813a15e173aa96bdfc2c8",
+   "raw_min_max": [
+    -0.11328125,
+    0.451171875
+   ]
+  }
+ ]
+}
