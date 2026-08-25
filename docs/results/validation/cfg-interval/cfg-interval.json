@@ -1,0 +1,58 @@
+{
+  "block": "t2i",
+  "validated_at": "2026-08-25",
+  "finding": "cfg_interval speeds up t2i 20-32% with no measurable quality loss on Qwen-Image-Bench (10-prompt paired, judge = Qwen3.5 27B Q-Judger, official params)",
+  "method": {
+    "generation": "SenseNova-U1.5-8B-MoT via this repo's module path, 2048x2048, 50 steps, seed fixed per prompt (gen10.jsonl, 10 prompts), vram_mode balanced, sdpa",
+    "quality": "Qwen/Qwen-Image-Bench judge (27B, Qwen3_5 VL), local int8 weight-only inference, official judge params (temperature 0, thinking on, max_new_tokens 4096, repetition_penalty 1.05); 39 judge tasks per set; paired per-prompt comparison, t_crit(df=9)=2.262"
+  },
+  "commands": {
+    "baseline": "bin/run-bench.sh bench/imgs-baseline50",
+    "v2": "bin/run-bench.sh bench/imgs-int02 --cfg_interval 0 0.2",
+    "v3": "bin/run-bench.sh bench/imgs-int07 --cfg_interval 0.7 1.0",
+    "command_template": "python -m sensenova_u1_rocm third_party/SenseNova-U1/examples/t2i/inference.py --model_path <ckpt> --vram_mode balanced --attn_backend sdpa --jsonl <prompts> --cfg_scale 4.0 --cfg_norm none --timestep_shift 3.0 --num_steps 50 [--cfg_interval LO HI]"
+  },
+  "semantics_note": "cfg_interval is checked against the timestep_shift=3.0-warped t' = 1 - 3(1-t)/(3-2t), not raw t. At 50 steps: (0,0.2) keeps CFG on first 22 steps (56% skipped); (0.7,1.0) keeps CFG only on last 6 steps (88% skipped). (0,0.7) is nearly a no-op - do not use.",
+  "results": {
+    "baseline_c0": {
+      "extra_args": "",
+      "wall_s_per_image": 295.448,
+      "level1": { "Quality": 48.44, "Aesthetics": 54.2, "Alignment": 56.94, "Real-world Fidelity": 42.22, "Creative Generation": 65.0 },
+      "bench_total": 52.82
+    },
+    "v2_cfg_interval_0_0.2": {
+      "extra_args": "--cfg_interval 0 0.2",
+      "wall_s_per_image": 235.68,
+      "speedup_pct": -20.2,
+      "level1": { "Quality": 52.56, "Aesthetics": 52.4, "Alignment": 61.39, "Real-world Fidelity": 44.72, "Creative Generation": 56.67 },
+      "bench_total": 54.33,
+      "paired_t_vs_baseline": { "total": 0.88, "max_abs_dim": 1.77 },
+      "verdict": "no significant shift"
+    },
+    "v3_cfg_interval_0.7_1.0": {
+      "extra_args": "--cfg_interval 0.7 1.0",
+      "wall_s_per_image": 201.352,
+      "speedup_pct": -31.9,
+      "level1": { "Quality": 51.67, "Aesthetics": 46.1, "Alignment": 54.64, "Real-world Fidelity": 46.39, "Creative Generation": 75.0 },
+      "bench_total": 52.47,
+      "paired_t_vs_baseline": { "total": -0.14, "max_abs_dim": 1.47 },
+      "verdict": "no significant shift"
+    }
+  },
+  "recommendation": "v3_cfg_interval_0.7_1.0",
+  "limitations": "n=10 prompts (paired) detects ~5-point total shifts; 95% CI on the V3 total delta is about -0.35 +/- 5.5. Judge is local int8 (paired design cancels judge bias). Validated at 2048x2048/50 steps only.",
+  "receipts": {
+    "generation_logs": [
+      "logs/cfg-interval-baseline50.log",
+      "logs/cfg-interval-int02.log",
+      "logs/cfg-interval-int07.log"
+    ],
+    "quality_scores": [
+      "validation/cfg-interval/quality-scores-baseline50.json",
+      "validation/cfg-interval/quality-scores-int02.json",
+      "validation/cfg-interval/quality-scores-int07.json"
+    ],
+    "full_report": "validation/cfg-interval/REPORT.md"
+  },
+  "environment": "single gfx1100 48GB, bf16, vram_mode balanced, sdpa; judge on same host (int8, CPU vision tower)"
+}

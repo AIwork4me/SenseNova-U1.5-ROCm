@@ -1,0 +1,45 @@
+{
+  "level1": {
+    "Aesthetics": 54.2,
+    "Real-world Fidelity": 42.22222222222222,
+    "Quality": 48.44444444444444,
+    "Alignment": 56.93666666666667,
+    "Creative Generation": 65.0
+  },
+  "level2": {
+    "Aesthetics": {
+      "Composition": 54.0,
+      "Color Harmony": 68.0,
+      "Lighting": 58.0,
+      "Anatomical Portraiture": 10.0,
+      "Emotional Expression": 51.42857142857143,
+      "Style Control": 73.33333333333333
+    },
+    "Real-world Fidelity": {
+      "Fairness": 60.0,
+      "Safety & Compliance": 60.0,
+      "World Knowledge": 20.0
+    },
+    "Quality": {
+      "Realism": 38.0,
+      "Detail": 47.33333333333333,
+      "Resolution": 60.0
+    },
+    "Alignment": {
+      "Attributes": 64.93333333333334,
+      "Actions": 48.57142857142857,
+      "Layout": 56.25,
+      "Relations": 49.0,
+      "Scene": 64.0
+    },
+    "Creative Generation": {
+      "Imagination": 100.0,
+      "Feature Matching": 60.0,
+      "Logical Resolution": 60.0,
+      "Design Applications": 60.0,
+      "Text Rendering": 100.0,
+      "Visual Storytelling": 30.0
+    }
+  },
+  "total": 52.81842592592593
+}

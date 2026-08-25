@@ -1,0 +1,28 @@
+[sensenova_u1_rocm] MIOpen bypass active (conv via unfold+GEMM; SENU15_MIOPEN=1 to re-enable)
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:02,  5.98it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.90it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.64s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.88s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.18s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.37s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.50s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.59s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.65s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.19s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.14s/it]
+T2I:   0%|          | 0/10 [00:00<?, ?it/s]T2I:  10%|█         | 1/10 [05:49<52:25, 349.54s/it]T2I:  20%|██        | 2/10 [10:36<41:42, 312.77s/it]T2I:  30%|███       | 3/10 [15:23<35:05, 300.84s/it]T2I:  40%|████      | 4/10 [20:08<29:28, 294.81s/it]T2I:  50%|█████     | 5/10 [24:56<24:20, 292.14s/it]T2I:  60%|██████    | 6/10 [29:42<19:20, 290.06s/it]T2I:  70%|███████   | 7/10 [35:15<15:12, 304.12s/it]T2I:  80%|████████  | 8/10 [40:01<09:56, 298.34s/it]T2I:  90%|█████████ | 9/10 [44:47<04:54, 294.61s/it]T2I: 100%|██████████| 10/10 [49:33<00:00, 291.96s/it]T2I: 100%|██████████| 10/10 [49:33<00:00, 297.37s/it]
+
+================================================================
+Profile summary
+================================================================
+  config              : vram_mode=balanced, fast_vram_fraction=0.9, fast_vram_headroom_gib=2.0, fast_activation_reserve_gib=4.0, attn_backend=sdpa, dtype=bfloat16
+  model load          :   67.272 s
+  load peak memory    : cpu RSS 43.00 GiB
+  generations         : 10 call(s), 10 image(s) total, 2954.484 s wall
+  avg per image       :  295.448 s
+  image tokens        : patch_size=32, avg 4096 tok/image (4096)
+  throughput          :    13.86 tok/s
+  generation peak mem : allocated 3.73 GiB, reserved 22.49 GiB, cpu RSS 50.48 GiB
+  per-call breakdown  :
+    [  1] 2048x2048 x1  347.850 s  (  4096 tok,    11.78 tok/s, allocated 3.67 GiB, reserved 21.87 GiB, cpu RSS 50.48 GiB)
+    [  2] 2048x2048 x1  285.170 s  (  4096 tok,    14.36 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+    [  3] 2048x2048 x1  284.872 s  (  4096 tok,    14.38 tok/s, allocated 3.73 GiB, reserved 22.49 GiB, cpu RSS 50.48 GiB)
+    [  4] 2048x2048 x1  283.956 s  (  4096 tok,    14.42 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+    [  5] 2048x2048 x1  285.295 s  (  4096 tok,    14.36 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+    [  6] 2048x2048 x1  284.092 s  (  4096 tok,    14.42 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+    [  7] 2048x2048 x1  331.033 s  (  4096 tok,    12.37 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+    [  8] 2048x2048 x1  283.841 s  (  4096 tok,    14.43 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+    [  9] 2048x2048 x1  284.480 s  (  4096 tok,    14.40 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+    [ 10] 2048x2048 x1  283.896 s  (  4096 tok,    14.43 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.48 GiB)
+================================================================

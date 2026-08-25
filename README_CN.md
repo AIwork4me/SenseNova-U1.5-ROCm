@@ -12,6 +12,10 @@
   含 `--think` 推理模式
 - ✅ **48GB 显卡跑 50.2GB 的 bf16 全量模型**：走上游自带的分层卸载
   （`--vram_mode`），权衡全部实测
+- ✅ **文生图提速 31.9%，品质经 bench 验证**：`--cfg_interval 0.7 1.0`
+  跳过 88% 步数的 CFG；10 提示词配对 + 27B judge（Qwen-Image-Bench
+  官方参数）评分无统计差异
+  （[收据](docs/results/validation/cfg-interval/cfg-interval.json)）
 - ✅ **模型权重逐文件 SHA256 校验**（24 个文件对照清单）
 - ✅ **该定的地方确定**：同种子两次生成逐字节一致（sha256 证明）
 - 🔧 **附赠社区贡献**：定位并绕过了 PyTorch 官方 rocm6.3 轮子在 gfx1100 上
@@ -95,6 +99,36 @@ bash scripts/run-task.sh vqa --image 你的图片.jpg --question "图里有什�
 fast 210.1s/22.3GiB · low 217.8s/**3.7GiB**（基线 200.5/199.2/208.4s，
 low 3.39GiB）——`low` 只慢约 5%、显存约为模型体积（46.8GiB）的 1/13，
 小显存卡的福音。
+
+### 文生图提速：`--cfg_interval`（−32%，品质已验证）
+
+CFG 每步要把模型跑两遍（cond + uncond），在计算受限的卸载路径上
+`--cfg_interval LO HI` 可把 CFG 限制在 `[LO, HI]` 内的时间步、其余步只跑
+uncond——最多直接省掉 88% 的每步计算。**注意区间是按 `timestep_shift=3.0`
+扭曲后的 t′ = 1 − 3(1−t)/(3−2t) 判断的**，不是原始 t：50 步时步点被压向
+低噪声端，凭原始 t 直觉会选错（例如 `(0, 0.7)` 实际只跳 6 步，等于没用）。
+
+实测（2026-08-24/25，2048²×50 步、10 提示词同种子批量；品质由
+Qwen-Image-Bench 官方 judge（27B、temperature 0、thinking 开）对同 10
+提示词逐对评分，t_crit(df=9)=2.262）：
+
+| 配置 | s/张 | vs 基线 | bench 总分 | paired-t | 结论 |
+|---|---:|---:|---:|---:|---|
+| 基线（50 步全 CFG） | 295.4 | — | 52.82 | — | — |
+| `--cfg_interval 0 0.2`（前 22 步有 CFG） | 235.7 | −20.2% | 54.33 | +0.88 | 无差异 |
+| `--cfg_interval 0.7 1.0`（仅最后 6 步有 CFG） | **201.4** | **−31.9%** | 52.47 | −0.14 | 无差异 |
+
+两档的所有维度均不显著（max |t| = 1.77 / 1.47）。批量出图推荐默认加：
+
+```bash
+bash scripts/run-task.sh t2i --jsonl examples/posters-2026-08.jsonl \
+    --output_dir outputs/posters/ --cfg_scale 4.0 --cfg_norm none \
+    --timestep_shift 3.0 --num_steps 50 --cfg_interval 0.7 1.0
+```
+
+限定条件：验证于 2048²/50 步、n=10 提示词（可检测约 5 分的总分漂移）；
+judge 为本地 int8 运行（配对设计抵消 judge 偏差）。完整数据与逐维分数：
+[`docs/results/validation/cfg-interval/`](docs/results/validation/cfg-interval/cfg-interval.json)。
 
 生成样图（含确定性双图对比）：[gallery](docs/results/gallery/README.md)。
 
