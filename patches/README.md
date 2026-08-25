@@ -72,7 +72,9 @@ tested) and pre-scale `q` instead of passing `scale`. torch 2.8 and CUDA
 hosts keep the stock (fast) behavior.
 Cost on the reference host: 2048×2048@50 steps runs 687.7 s vs 420.1 s
 on torch 2.8+BLAS-preload (receipt `docs/results/validation/t2i-torch212-fixed.json`)
-— a correctness-first trade until the ROCm SDPA backends are fixed
-upstream ([pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);
+— a correctness-first trade for installs lacking the gfx11 family wheel
+(upstream packaging fix
+[ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685)
+still open; [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);
 compatibility write-up:
 [OpenSenseNova/SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261)).

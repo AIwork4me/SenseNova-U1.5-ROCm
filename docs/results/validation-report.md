@@ -5,7 +5,7 @@ ROCm 7.2.1 (`/opt/rocm`) · PyTorch 2.8.0+rocm6.3 (hip 6.3.42131) ·
 transformers 4.57.1 · accelerate 1.14.0 · Python 3.12.3 · 1 TiB host RAM.
 Full fingerprint: [`environment.json`](environment.json).
 
-## 2026-08-23 — full-stack ROCm 7.14 re-validation (current default mode)
+## 2026-08-23 — full-stack ROCm 7.14 re-validation (repo default mode)
 
 Same host, same torch 2.8.0+rocm6.3 wheel, **full-stack mode**
 (`ROCM_FULL_STACK=auto` → detected `/root/rocm-7.14-gfx110x`): that stack's
@@ -51,12 +51,18 @@ all pre-2026-08-23 interleave receipts) have an empty `artifacts` map.
 > table links below now point at the current (full-stack) receipts.
 > Later same-host results also live alongside: `vqa-torch212.json`
 > (torch 2.12, zero workarounds, VQA correct), `t2i-torch212.json`
-> (torch 2.12 unpatched — generation fails; root-caused to ROCm SDPA
-> fused-backend launch bugs,
-> [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)),
-> and `t2i-torch212-fixed.json` (torch 2.12 + patches/0002: 687.7 s /
-> 27.8 GiB, zero BLAS workarounds). See the findings doc's 2026-08-23
-> updates for the full story.
+> (torch 2.12 unpatched — generation fails; initially attributed to
+> fused-backend launch bugs
+> ([pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)),
+> since root-caused to a wheel-packaging defect: the gfx1100 leaf wheel
+> omits the `amd-torch-device-gfx11` family dependency — fix
+> [ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685)
+> still open), and `t2i-torch212-fixed.json` (torch 2.12 + patches/0002:
+> 687.7 s / 27.8 GiB, zero BLAS workarounds).
+> **2026-08-25:** with the gfx11 wheel installed and NO patch, the same
+> t2i runs in **355 s — the fastest measured t2i on this host** (vs 379.6 s
+> full-stack torch 2.8): see
+> [`validation/sdpa-gfx11/`](validation/sdpa-gfx11/README.md).
 
 Executive summary: **all four SenseNova-U1.5-8B-MoT task families run
 correctly on a single 48 GB gfx1100 through the upstream transformers

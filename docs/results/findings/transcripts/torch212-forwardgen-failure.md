@@ -52,4 +52,20 @@ matrix in the findings doc and
 
 Model-level fix: `patches/0002` (MATH-only on ROCm torch ≥ 2.9 + q
 pre-scaling) — t2i 2048×2048@50 completes (687.7 s, receipt
-`../validation/t2i-torch212-fixed.json`).
+`../../validation/t2i-torch212-fixed.json`).
+
+## UPDATE 2026-08-25 — actual root cause (wheel metadata)
+
+The "both fused backends broken / model needs adaptation" reading above is
+superseded. Root cause
+([pytorch#194498 comment by liminfei-amd](https://github.com/pytorch/pytorch/issues/194498#issuecomment-5406837588)):
+the `amd-torch-device-gfx1100` leaf wheel omits its dependency on the
+`amd-torch-device-gfx11` family wheel (AOTriton images) — one packaging
+defect explains everything logged here. With
+`amd-torch-device-gfx11==2.12.0+rocm7.14.0` installed, a controlled A/B
+(single package delta) flips the fresh-process matrix from fused 0/8 to
+8/8, and the same t2i workload completes with the STOCK dispatcher — no
+model adaptation, no patch — in 355 s (vs 687.7 s under patch 0002).
+Upstream fix: [ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685)
+(open). Patch 0002 is now fallback-only. Receipts:
+[../../validation/sdpa-gfx11/](../../validation/sdpa-gfx11/README.md).

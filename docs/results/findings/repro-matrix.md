@@ -24,4 +24,4 @@ median rel err **0.32 %** (bf16 rounding level); GEMM median abs diff
 **4e-4**. The preloaded system libraries produce correct results.
 
 Full-model pre-patch interleave failure (upstream bug, not ROCm):
-`logs/interleave-prepatch-typeerror.txt`.
+`../logs/interleave-prepatch-typeerror.txt`.

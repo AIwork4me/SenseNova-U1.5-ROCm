@@ -77,3 +77,24 @@ Cost of the MATH restriction on this host: 687.7 s vs 420.1 s for the
 same canonical cell on torch 2.8+rocm6.3 with this project's BLAS
 preloads — a correctness-first trade until the ROCm SDPA backends are
 fixed. Once fixed upstream, the backend restriction can be lifted.
+
+## Update (2026-08-25 — root cause: wheel metadata; patch demoted to fallback)
+
+Superseding the "two ROCm SDPA backend bugs" reading above: root-caused by
+liminfei-amd
+([pytorch#194498 comment](https://github.com/pytorch/pytorch/issues/194498#issuecomment-5406837588))
+— the `amd-torch-device-gfx1100` leaf wheel was missing its dependency on
+the `amd-torch-device-gfx11` **family wheel** (AOTriton images the fused
+backends need). Upstream fix:
+[ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685)
+(open at the time of writing; the published 2.13.0 leaf still lacked the
+dependency).
+
+Verified A/B on this host (single package delta — receipts
+[../results/validation/sdpa-gfx11/](../results/validation/sdpa-gfx11/README.md)):
+installing `amd-torch-device-gfx11==2.12.0+rocm7.14.0` fixes FLASH and
+mem-efficient outright (fused 0/8 → 8/8), and t2i 2048²@50 completes in
+**355 s** with patch 0002 REMOVED (vs 687.7 s with it — 1.94× whole
+script). **Patch 0002 is now a fallback only** for installs you cannot
+repair; with the gfx11 wheel present it is unnecessary and forgoes the
+fused-backend speedup.

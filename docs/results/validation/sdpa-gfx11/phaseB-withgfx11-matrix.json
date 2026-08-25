@@ -1,6 +1,6 @@
 {
  "phase": "phaseB-withgfx11",
- "torch": null,
+ "torch": "2.12.0+rocm7.14.0",
  "total": 11,
  "ok": 11,
  "by_backend": {

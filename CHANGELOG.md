@@ -6,6 +6,17 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `--cfg_interval` t2i speedup: skip CFG inside a timestep interval —
+  −20.2% (interval 0–0.2) / −31.9% (0.7–1.0) per 2048²×50-step image;
+  Qwen-Image-Bench paired scoring shows no significant quality shift;
+  receipts docs/results/validation/cfg-interval/.
+- PR#260 review follow-up: `interleave_gen_image_only` now passes the
+  per-image `cur_image_size` (review by yl-1993); patch 0001 regenerated
+  to PR head e2f2c865; V1–V4 on-model verification (list input fixed,
+  tuple output byte-identical) — receipts
+  docs/results/validation/interleave-image-size/.
+
 ### Changed
 - pytorch#194498 root cause verified on-host: SDPA fused-backend launch
   failures are a wheel-metadata defect (amd-torch-device-gfx1100 missing
@@ -19,7 +30,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [0.2.0] — 2026-08-23
 
 Full-stack ROCm 7.14 mode as the validated default path, torch 2.12
-support (patched), and five upstream filings.
+support (patched), and four upstream filings.
 
 ### Added
 - Full-stack ROCm 7.14 mode: `ROCM_FULL_STACK=auto|1|0` (arch-validated

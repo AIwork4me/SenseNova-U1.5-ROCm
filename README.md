@@ -127,9 +127,11 @@ baseline receipt
 On the reference host — **AMD Radeon gfx1100 (48 GB) / ROCm 7.2.1 /
 PyTorch 2.8.0+rocm6.3 / transformers 4.57.1 / Python 3.12.3** (full
 fingerprint: [`docs/results/environment.json`](docs/results/environment.json)).
-Numbers below are the **2026-08-23 full-stack re-validation** — the current
-default mode (ROCm 7.14 MIOpen+comgr+BLAS preloaded over the torch 2.8
-wheel; every receipt tagged `rocm_stack: full-stack`). The 2026-08-22
+Numbers below are the **2026-08-23 full-stack re-validation** — the repo's
+default mode (`ROCM_FULL_STACK=auto`: full-stack when an ROCm ≥ 7.14
+install is present, BLAS fallback otherwise; ROCm 7.14 MIOpen+comgr+BLAS
+preloaded over the torch 2.8 wheel; every receipt tagged
+`rocm_stack: full-stack`). The 2026-08-22
 BLAS-mode baseline is kept as the comparison value and archived in
 [`matrix-blas-20260822/`](docs/results/validation/matrix-blas-20260822/).
 
@@ -137,7 +139,7 @@ BLAS-mode baseline is kept as the comparison value and archived in
 |---|---|---|---|
 | 1 | Checkpoint integrity (24 files, 50.23 GB) | ✅ all SHA256-verified | [`configs/artifact-manifest.json`](configs/artifact-manifest.json) |
 | 2 | VQA / visual understanding (greedy, 16k-patch image) | ✅ 628 s wall, 25.3 GiB peak — reads a full bilingual menu with prices (BLAS: 602 s) | [`vqa.json`](docs/results/validation/vqa.json) |
-| 3 | Text-to-image 2048×2048 @ 50 steps | ✅ 380 s wall (67 s load + 298 s gen ≈ 6.0 s/step), 22.3 GiB (BLAS: 420 s) | [`t2i.json`](docs/results/validation/t2i.json) |
+| 3 | Text-to-image 2048×2048 @ 50 steps | ✅ 380 s wall (67 s load + 298 s gen + ~15 s overhead ≈ 6.0 s/step), 22.3 GiB (BLAS: 420 s) | [`t2i.json`](docs/results/validation/t2i.json) |
 | 4 | T2I with reasoning (`--think`) | ✅ 505 s, structured reasoning text + image (BLAS: 547 s) | [`t2i-think.json`](docs/results/validation/t2i-think.json) |
 | 5 | Image editing (it2i) | ✅ 461 s, 29.9 GiB (BLAS: 484 s) | [`edit.json`](docs/results/validation/edit.json) |
 | 6 | Interleaved text+image (7-image illustrated tutorial, 2048×1152) | ✅ 3251 s, 47.9 GiB peak (BLAS: 3392 s) | [`interleave.json`](docs/results/validation/interleave.json) |
@@ -181,7 +183,9 @@ step points toward the low-noise end, so intuitions from raw t mislead
 (e.g. `(0, 0.7)` skips only 6 of 50 steps; do not use it).
 
 Measured (2026-08-24/25, gfx1100, 2048×2048 × 50 steps, 10-prompt jsonl
-batch, same seeds; quality scored by the official
+batch, same seeds; s/image is per-image generation time in the batch run
+with the model load amortized — see the Performance table above for
+whole-script wall including ~67 s load; quality scored by the official
 [Qwen-Image-Bench](https://github.com/QwenLM/Qwen-Image-Bench) judge —
 27B Qwen3.5 VL, temperature 0, thinking on — over the same 10 prompts,
 paired per-prompt, t_crit(df=9)=2.262):
@@ -262,7 +266,8 @@ bash scripts/validate.sh                       # ~2–3 h on gfx1100
 python3 scripts/summarize_results.py           # prints a table from the receipts
 ```
 
-The current default path is **full-stack mode**: the 2026-08-23 receipts
+The repo's default path is **full-stack mode** (`ROCM_FULL_STACK=auto`,
+BLAS fallback when no ROCm ≥ 7.14 install is present): the 2026-08-23 receipts
 above all carry `rocm_stack: full-stack` (ROCm 7.14 MIOpen+comgr+BLAS
 preloaded over the torch 2.8 wheel, MIOpen enabled, patch 0001 active —
 0002 only activates on ROCm torch ≥ 2.9, so 2.8 runs are unaffected).
@@ -321,7 +326,9 @@ with your receipts — that's a bug in our claims.
   `docs/results/validation/t2i-torch212-fixed.json` vs `sdpa-gfx11/`;
   compatibility write-up:
   [SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261).
-  torch 2.8 remains the faster generation path today.
+  torch 2.8 remains the fully validated default stack (all tasks,
+  determinism, VRAM modes); on t2i alone, 2.12+gfx11 is now the faster
+  path (355 s vs 379.6 s).
 
 ## Contributing hardware evidence
 

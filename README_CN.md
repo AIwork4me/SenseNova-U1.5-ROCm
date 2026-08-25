@@ -148,9 +148,11 @@ judge 为本地 int8 运行（配对设计抵消 judge 偏差）。完整数据�
 - **全栈模式**（装有 ROCm ≥ 7.14 时自动，如
   `scripts/install-rocm-7.14-gfx110x.sh` 安装）：preload 7.14 的
   MIOpen+comgr+BLAS，**MIOpen 保持开启**（无 unfold+GEMM 性能损失）；
-  `ROCM_FULL_STACK=0|1` 可控。**当前默认验证路径**（2026-08-23 全量复验，
+  `ROCM_FULL_STACK=0|1` 可控。**仓库默认验证路径**（`ROCM_FULL_STACK=auto`，
+  无 ROCm ≥7.14 前缀时自动回落 BLAS；2026-08-23 全量复验，
   四个生成任务较 BLAS 基线提速 4–10%）
-- **torch 版本**：验证态主力为 2.8.0+rocm6.3（全栈模式，生成最快）。
+- **torch 版本**：验证态默认栈为 2.8.0+rocm6.3（全栈模式，全量任务已验证）；
+  t2i 单任务上 2.12+gfx11 更快（355s 对 379.6s）。
   AMD 官方 2.12.0+rocm7.14.0 轮子零 BLAS workaround、VQA 开箱即用。
   **更新（2026-08-25）**：SDPA 融合后端崩溃已在上游定位根因——
   `amd-torch-device-gfx1100` 叶子轮子漏声明对家族轮子
@@ -160,6 +162,7 @@ judge 为本地 int8 运行（配对设计抵消 judge 偏差）。完整数据�
   本机 A/B 验证（单包差异）：加装 gfx11 后融合后端 0/8→8/8，且去掉
   [补丁 0002](patches/README.md) 后 t2i 2048×2048@50 仅 **355s**（对比 0002
   MATH 方案的 687.7s，整脚本 1.94×）。已装 gfx11 的环境无需补丁 0002；
+  无法修复的安装（如未修复的 ≥2.13 叶子轮子）才保留 0002 作 fallback。
   收据 `docs/results/validation/sdpa-gfx11/`。
 
 ## 常见问题

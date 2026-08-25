@@ -9,11 +9,12 @@ From a bare Linux host with an AMD GPU to your first SenseNova-U1.5 output.
 | AMD GPU, RDNA3-class (gfx1100 tested) | compute | Radeon W7900-class, 48 GB |
 | ROCm ≥ 6.x userspace + `/dev/kfd` access | HIP runtime | ROCm 7.2.1 at `/opt/rocm` |
 | Python 3.10–3.13 | inference stack | 3.12.3 |
-| ~62 GiB free disk | 10 GiB venv + 51 GiB checkpoint | — |
+| ~62 GiB free disk | 10 GiB venv + 50.2 GB checkpoint | — |
 | ≥ 64 GiB host RAM (128+ better) | layer offload streams the 47 GiB bf16 weights through host memory | 1 TiB |
 
-The checkpoint is bf16 and **larger than the reference card's 48 GB VRAM**,
-so all tasks run through the upstream layer-offload path (`--vram_mode`).
+The checkpoint's 46.8 GiB of bf16 weights nearly fill the reference card's
+48 GB VRAM (~1.2 GiB spare), leaving no headroom for activations, so all
+tasks run through the upstream layer-offload path (`--vram_mode`).
 More VRAM still helps: `fast` mode pins the generation layers that fit.
 
 ## The one-command path
@@ -67,16 +68,20 @@ for the full flag surface: LoRA, think mode, JSONL batching, CFG, ...).
 | `MODEL_DIR` | `$HF_HOME/modelscope/SenseNova-U1.5-8B-MoT` | checkpoint location |
 | `ROCM_FULL_STACK` | `auto` | with a ROCm ≥ 7.14 install present (see `scripts/install-rocm-7.14-gfx110x.sh`), preload its MIOpen+comgr+BLAS and keep MIOpen enabled; `0` = BLAS-only workaround |
 
-**torch flavors**: the validated full-task path is `torch 2.8.0+rocm6.3`
-+ this repo's workarounds (fastest generation). AMD's official
-`torch 2.12.0+rocm7.14.0` wheels
-(`pip ... --extra-index-url https://repo.amd.com/rocm/whl-multi-arch/`)
-need **zero workarounds and fix all three wheel bugs**; VQA works out of
-the box, and image generation works with
-[patches/0002](../patches/README.md) (2048×2048@50: 687.7 s vs 379.6 s on
-torch 2.8 full-stack — the gap is the ROCm SDPA fused-backend failure,
-[pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)).
-Details: [findings](results/findings/rocm63-wheel-blas-on-gfx1100.md).
+**torch flavors**: the fully validated stack is `torch 2.8.0+rocm6.3`
++ this repo's workarounds. On AMD's official `torch 2.12.0+rocm7.14.0`
+wheels (`pip ... --extra-index-url https://repo.amd.com/rocm/whl-multi-arch/`)
+the three rocm6.3 wheel bugs are gone and VQA works out of the box. For
+image generation, install
+`amd-torch-device-gfx11==2.12.0+rocm7.14.0` (the gfx1100 leaf wheel omits
+this dependency — [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);
+fix [ROCm/rocm-systems#10685](https://github.com/ROCm/rocm-systems/pull/10685)
+still open) and nothing else is needed: t2i 2048×2048@50 = 355 s, faster
+than 379.6 s on torch 2.8 full-stack.
+[patches/0002](../patches/README.md) (687.7 s, MATH-forced) is a fallback
+only for installs lacking the gfx11 wheel (e.g. unfixed ≥ 2.13 leaf
+wheels). Details:
+[findings](results/findings/rocm63-wheel-blas-on-gfx1100.md).
 
 ## Where things land
 
