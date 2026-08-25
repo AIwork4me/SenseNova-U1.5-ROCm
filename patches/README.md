@@ -55,9 +55,9 @@ TypeError: 'NoneType' object is not subscriptable
 wheel, gfx1100 — [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)):**
 the image-generation path crashes with `hipErrorInvalidValue` surfacing
 at the decoder residual add, far from the real site (the launch error is
-deferred to the next checked CUDA call). Root cause, per fresh-process
-minimal repros: **both fused SDPA backends (FLASH and mem-efficient) fail
-kernel launch for every configuration tested** (bf16; kv 1024–4096,
+deferred to the next checked CUDA call). Observed on leaf-only installs
+(pre-gfx11; see the status note above): **both fused SDPA backends (FLASH
+and mem-efficient) fail kernel launch for every configuration tested** (bf16; kv 1024–4096,
 power-of-two or not; head_dim 64/128; causal or not; contiguous or
 transposed; with or without an explicit `scale`). Only the MATH backend
 is healthy. The understanding path is spared because its tensor layouts
