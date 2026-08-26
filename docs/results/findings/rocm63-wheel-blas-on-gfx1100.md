@@ -204,15 +204,4 @@ Full evidence:
 
 ## Update 2026-08-26 (b) — nightly SDPA probes pass; nightly t2i silently corrupts
 
-Follow-up on the same nightly venv: the #194498 fused-SDPA launch failures
-are **absent** on the upstream nightly packaging (it bundles
-`aotriton.images/` in the wheel; fresh-process matrix 11/11, fused-vs-MATH
-norm_rel ≤ 5.4e-6). However the **t2i/generation path silently produces
-corrupted output** on this nightly build — exits 0, saves a washed-out
-repeating grid, bit-identical with fused SDPA disabled, while the identical
-config on the torch 2.8 stack renders correctly and nightly VQA is correct.
-Fused kernels exonerated; generation-path-only, op not yet bisected.
-Full isolation chain and receipts:
-[`pytorch-nightly-rocm714-sdpa-t2i.md`](pytorch-nightly-rocm714-sdpa-t2i.md).
-Guidance unchanged: torch 2.8 (default) or AMD 2.12+gfx11 for generation;
-upstream nightly currently for the understanding path only.
+Follow-up on the same nightly venv: the #194498 fused-SDPA launch failures are **absent** on the upstream nightly packaging (it bundles `aotriton.images/` in the wheel; fresh-process matrix 11/11, fused-vs-MATH norm_rel ≤ 5.4e-6). However the **t2i/generation path silently produces corrupted output** on this nightly build — exits 0, saves a washed-out repeating grid, bit-identical with fused SDPA disabled, while the identical config on the torch 2.8 stack renders correctly and nightly VQA is correct. Fused kernels exonerated; generation-path-specific, op not yet bisected. Full isolation chain and receipts: [`pytorch-nightly-rocm714-sdpa-t2i.md`](pytorch-nightly-rocm714-sdpa-t2i.md). Guidance unchanged: torch 2.8 (default) or AMD 2.12+gfx11 for generation; upstream nightly currently for the understanding path only.
