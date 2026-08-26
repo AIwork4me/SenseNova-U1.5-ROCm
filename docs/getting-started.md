@@ -63,6 +63,7 @@ for the full flag surface: LoRA, think mode, JSONL batching, CFG, ...).
 | Knob | Default | Meaning |
 |---|---|---|
 | `VRAM_MODE` | `balanced` | `full` (needs > 52 GB VRAM), `fast` (prefetch + retain gen layers), `balanced` (async prefetch), `low` (sync swap, smallest VRAM) |
+| `--cfg_interval` | — | restrict CFG to a timestep interval: `0 0.2` gives a quality-neutral −20.6% wall speedup (n=36 bench-verified; note the interval is checked against the timestep-shift-warped t′ — see README). `0.7 1.0` is faster but was retracted for a significant quality cost |
 | `--num_steps` | 50 | denoising steps; 20 halves time, costs detail |
 | `--width/--height` | 2048×2048 | trained buckets: 1:1, 16:9, 3:2, 4:3, 2:1, 3:1 (+ rotations) |
 | `MODEL_DIR` | `$HF_HOME/modelscope/SenseNova-U1.5-8B-MoT` | checkpoint location |

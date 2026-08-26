@@ -1,4 +1,6 @@
 {
+  "status": "SUPERSEDED 2026-08-26 by cfg-interval36.json — v3 (0.7-1.0) recommendation RETRACTED by the n=36 expanded validation (significant quality regression -6.06 +/- 3.85, p=0.003); v2 (0 0.2) confirmed quality-neutral. See cfg-interval36.json for the authoritative verdict.",
+  "finding_superseded_note": "the n=10 sample (CI +/-5.5 on the total delta) could not resolve v3's true effect; original fields below are preserved unchanged as the historical record",
   "block": "t2i",
   "validated_at": "2026-08-25",
   "finding": "cfg_interval speeds up t2i 20-32% with no measurable quality loss on Qwen-Image-Bench (10-prompt paired, judge = Qwen3.5 27B Q-Judger, official params)",
@@ -17,29 +19,53 @@
     "baseline_c0": {
       "extra_args": "",
       "wall_s_per_image": 295.448,
-      "level1": { "Quality": 48.44, "Aesthetics": 54.2, "Alignment": 56.94, "Real-world Fidelity": 42.22, "Creative Generation": 65.0 },
+      "level1": {
+        "Quality": 48.44,
+        "Aesthetics": 54.2,
+        "Alignment": 56.94,
+        "Real-world Fidelity": 42.22,
+        "Creative Generation": 65.0
+      },
       "bench_total": 52.82
     },
     "v2_cfg_interval_0_0.2": {
       "extra_args": "--cfg_interval 0 0.2",
       "wall_s_per_image": 235.68,
       "speedup_pct": -20.2,
-      "level1": { "Quality": 52.56, "Aesthetics": 52.4, "Alignment": 61.39, "Real-world Fidelity": 44.72, "Creative Generation": 56.67 },
+      "level1": {
+        "Quality": 52.56,
+        "Aesthetics": 52.4,
+        "Alignment": 61.39,
+        "Real-world Fidelity": 44.72,
+        "Creative Generation": 56.67
+      },
       "bench_total": 54.33,
-      "paired_t_vs_baseline": { "total": 0.88, "max_abs_dim": 1.77 },
+      "paired_t_vs_baseline": {
+        "total": 0.88,
+        "max_abs_dim": 1.77
+      },
       "verdict": "no significant shift"
     },
     "v3_cfg_interval_0.7_1.0": {
       "extra_args": "--cfg_interval 0.7 1.0",
       "wall_s_per_image": 201.352,
       "speedup_pct": -31.9,
-      "level1": { "Quality": 51.67, "Aesthetics": 46.1, "Alignment": 54.64, "Real-world Fidelity": 46.39, "Creative Generation": 75.0 },
+      "level1": {
+        "Quality": 51.67,
+        "Aesthetics": 46.1,
+        "Alignment": 54.64,
+        "Real-world Fidelity": 46.39,
+        "Creative Generation": 75.0
+      },
       "bench_total": 52.47,
-      "paired_t_vs_baseline": { "total": -0.14, "max_abs_dim": 1.47 },
+      "paired_t_vs_baseline": {
+        "total": -0.14,
+        "max_abs_dim": 1.47
+      },
       "verdict": "no significant shift"
     }
   },
-  "recommendation": "v3_cfg_interval_0.7_1.0",
+  "recommendation": "v2_cfg_interval_0_0.2 (updated 2026-08-26; original n=10 recommendation was v3_cfg_interval_0.7_1.0, since retracted)",
   "limitations": "n=10 prompts (paired) detects ~5-point total shifts; 95% CI on the V3 total delta is about -0.35 +/- 5.5. Judge is local int8 (paired design cancels judge bias). Validated at 2048x2048/50 steps only.",
   "receipts": {
     "generation_logs": [

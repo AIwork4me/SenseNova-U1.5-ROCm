@@ -46,9 +46,18 @@
 ## 产物清单
 
 ```
+（验证工作区 /workspace/speedup/）
 bench/gen36.jsonl                                   36 提示词（选样验核确定性）
 bench/imgs36-{baseline,int02,int07}/                三套图 ×36
 bench/judge-input-{baseline36,int0236,int0736}_*    三套分数与逐任务输出
 logs/gen36-*.log / judge-*36.log / monitor36.log    全程日志与看护心跳
 REPORT.md / HANDOFF.md                              本报告与工程记录
+
+（仓库内对应收据 SenseNova-U1.5-ROCm/docs/results/）
+validation/cfg-interval/cfg-interval36.json         主收据（终版）
+validation/cfg-interval/gen36-prompts.jsonl         题集副本
+validation/cfg-interval/judge-input-*36_judged.jsonl 逐任务输出副本（459 任务）
+validation/cfg-interval/quality-scores-*36.json     三套分数副本
+logs/cfg-interval36-{baseline,int02,int07}.log      生成日志副本
+validation/cfg-interval/cfg-interval.json           n=10 历史收据（已标 superseded）
 ```

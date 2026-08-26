@@ -60,9 +60,12 @@ all pre-2026-08-23 interleave receipts) have an empty `artifacts` map.
 > still open), and `t2i-torch212-fixed.json` (torch 2.12 + patches/0002:
 > 687.7 s / 27.8 GiB, zero BLAS workarounds).
 > **2026-08-25:** with the gfx11 wheel installed and NO patch, the same
-> t2i runs in **355 s — the fastest measured t2i on this host** (vs 379.6 s
-> full-stack torch 2.8): see
+> t2i runs in **355 s — the fastest measured *whole-script, no-cfg-interval*
+> t2i on this host** (vs 379.6 s full-stack torch 2.8): see
 > [`validation/sdpa-gfx11/`](validation/sdpa-gfx11/README.md).
+> With the quality-validated `--cfg_interval 0 0.2` speedup (n=36 paired
+> bench verdict), generation drops to **234.8 s/image** — see
+> [`validation/cfg-interval/`](validation/cfg-interval/cfg-interval36.json).
 
 Executive summary: **all four SenseNova-U1.5-8B-MoT task families run
 correctly on a single 48 GB gfx1100 through the upstream transformers

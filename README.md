@@ -148,7 +148,7 @@ BLAS-mode baseline is kept as the comparison value and archived in
 | 7 | Determinism (same seed twice) | ✅ byte-identical PNG, sha256 `49e9f9b86160…` | [`determinism.json`](docs/results/validation/determinism.json) |
 | 8 | Layer-offload modes (10-step probe) | ✅ balanced 207.5 s / fast 210.1 s / low 217.8 s (BLAS: 200.5 / 199.2 / 208.4 s) | [`vram-mode-*.json`](docs/results/validation/) |
 | 9 | Upstream interleave bug found & fixed | ✅ minimal patch, all platforms | [`patches/README.md`](patches/README.md) |
-| 10 | CFG-interval speedup, quality-verified (n=10) | ✅ `--cfg_interval 0 0.2`: 295.4→235.7 s/img (−20.2%), n=10 paired-t +0.88 (n.s.); `0.7 1.0` n.s. at n=10 | [`cfg-interval.json`](docs/results/validation/cfg-interval/cfg-interval.json) |
+| 10 | CFG-interval speedup, quality-verified (n=10) *(superseded by #11)* | ✅ `--cfg_interval 0 0.2`: 295.4→235.7 s/img (−20.2%), n=10 paired-t +0.88 (n.s.); `0.7 1.0` n.s. at n=10 | [`cfg-interval.json`](docs/results/validation/cfg-interval/cfg-interval.json) |
 | 11 | CFG-interval **expanded re-validation (n=36, authoritative)** | ✅ `0 0.2`: −20.6%, paired +0.34 ± 2.57 (n.s., all dims n.s.) → **recommended**; `0.7 1.0`: −32.4% but **−6.06 ± 3.85 (t=−3.19, p=0.003; Quality & Aesthetics sig. drop) → retracted** | [`cfg-interval36.json`](docs/results/validation/cfg-interval/cfg-interval36.json) |
 
 Generated images from these runs: [gallery](docs/results/gallery/README.md)
@@ -174,7 +174,7 @@ disk). Generation dominates: ~6 s/denoising-step at 2048×2048 (BLAS
 baseline ~7 s), rising to ~4.7 s/step late in long interleave runs as the
 KV cache grows.
 
-### Faster t2i: `--cfg_interval` (−21%, quality-verified at n=36)
+### Faster t2i: `--cfg_interval` (−20.6%, quality-verified at n=36)
 
 The t2i head re-runs the model twice per step for classifier-free guidance
 (cond + uncond). The upstream `--cfg_interval LO HI` restricts CFG to

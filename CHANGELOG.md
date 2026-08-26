@@ -7,10 +7,17 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- `--cfg_interval` t2i speedup: skip CFG inside a timestep interval —
-  −20.2% (interval 0–0.2) / −31.9% (0.7–1.0) per 2048²×50-step image;
-  Qwen-Image-Bench paired scoring shows no significant quality shift;
-  receipts docs/results/validation/cfg-interval/.
+- `--cfg_interval` t2i speedup, validated in two rounds (36-prompt paired
+  Qwen-Image-Bench scoring, 27B judge, official params):
+  - **`0 0.2` recommended**: −20.6% per 2048²×50-step image, paired total
+    delta +0.34 ± 2.57 (all five dimensions n.s.) — quality-neutral;
+  - **`0.7 1.0` retracted**: −32.4% wall but a significant quality cost
+    (−6.06 ± 3.85, t=−3.19, p=0.003; Quality −6.5* and Aesthetics −10.8*
+    individually significant). An initial n=10 pass missed it (CI ±5.5);
+    the expanded n=36 set resolved the effect and the earlier "no loss"
+    claim for this interval was withdrawn.
+  Receipts: docs/results/validation/cfg-interval/ (authoritative:
+  `cfg-interval36.json`; superseded n=10: `cfg-interval.json`).
 - PR#260 review follow-up: `interleave_gen_image_only` now passes the
   per-image `cur_image_size` (review by yl-1993); patch 0001 regenerated
   to PR head e2f2c865; V1–V4 on-model verification (list input fixed,
