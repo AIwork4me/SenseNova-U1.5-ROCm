@@ -25,6 +25,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   GTT-spill runs.
 - `scripts/rocm_check.py`: env sanity check (HIP build, wheel gfx
   coverage, bf16 matmul + SDPA smoke, optional GTT-spill alloc test).
+- Hardware profile `docs/hardware/strix-halo/` (EN+CN): GTT-spill
+  memory model, HSA runtime shim (`hsa_fix.sh`, now CI-shellchecked),
+  gfx1151 wheel guidance, AOTriton hd72 caveat — the umbrella's first
+  APU profile, ported from the 8060S repo.
 
 ### Changed
 - pytorch#194498 root cause verified on-host: SDPA fused-backend launch
