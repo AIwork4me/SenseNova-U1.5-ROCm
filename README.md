@@ -36,6 +36,17 @@ bash scripts/quickstart.sh          # t2i | vqa | edit | interleave
 [Troubleshooting](docs/getting-started.md#troubleshooting) ·
 [Contributing](CONTRIBUTING.md)
 
+## Hardware coverage
+
+| hardware | status | where |
+|---|---|---|
+| gfx1100 (RDNA3 dGPU) | fully validated — receipts in [docs/results/](docs/results/) | this repo |
+| gfx1151 (Strix Halo APU) | fully validated — evidence in the [8060S repo](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S); profile: [docs/hardware/strix-halo/](docs/hardware/strix-halo/) | this repo + Strix Halo lab |
+
+Other AMD GPUs: the pipeline is hardware-generic (see
+[Porting Notes](docs/porting.md)) — validation reports welcome
+(issue template `validation_report`).
+
 ## Showcase: movie-poster style
 
 Generated on the reference gfx1100 host with this repo's pipeline
