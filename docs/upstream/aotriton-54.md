@@ -94,8 +94,8 @@ SenseNova's own attention (head_dim 64/128) needs no action. For
 
 - Verification chain (V2 root-cause closure, failure envelope, upstream
   filing; commits `d0af6efc` / `987015a1` / `28e4f3af`):
-  [evidence/speedup2/VERIFICATION.md §V2](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S/blob/main/evidence/speedup2/VERIFICATION.md)
+  [evidence/speedup2/VERIFICATION.md §V2](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S/blob/master/evidence/speedup2/VERIFICATION.md)
   (directory:
-  [evidence/speedup2/](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S/tree/main/evidence/speedup2))
+  [evidence/speedup2/](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S/tree/master/evidence/speedup2))
 - User-facing caveat (exact guidance quoted above):
-  [docs/TROUBLESHOOTING.md §5](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S/blob/main/docs/TROUBLESHOOTING.md)
+  [docs/TROUBLESHOOTING.md §5](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S/blob/master/docs/TROUBLESHOOTING.md)
