@@ -87,13 +87,15 @@ def test_receipt_writer():
         out = os.path.join(td, "receipt.json")
         r = subprocess.run(
             [sys.executable, f"{ROOT}/scripts/receipt.py", out,
-             "block=t2i", "wall_seconds=12.5", f"sha256:{art}", "note=plain text"],
+             "block=t2i", "wall_seconds=12.5", "hardware=gfx1151",
+             f"sha256:{art}", "note=plain text"],
             capture_output=True, text=True)
         assert r.returncode == 0, r.stderr
         receipt = json.load(open(out))
         assert receipt["block"] == "t2i"
         assert receipt["wall_seconds"] == 12.5      # parsed as number
         assert receipt["note"] == "plain text"       # kept as string
+        assert receipt["hardware"] == "gfx1151"
         import hashlib
         assert receipt["artifacts"][art]["sha256"] == hashlib.sha256(b"hello").hexdigest()
         assert receipt["artifacts"][art]["bytes"] == 5
