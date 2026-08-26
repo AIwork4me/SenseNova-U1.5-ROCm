@@ -1,0 +1,39 @@
+{
+  "block": "t2i",
+  "validated_at": "2026-08-26",
+  "finding": "EXPANDED VALIDATION (n=36, supersedes the n=10 cfg-interval.json recommendation): cfg_interval 0-0.2 keeps -20.6% speedup with no detectable quality loss (paired t=+0.26, CI ±2.57); cfg_interval 0.7-1.0 shows a SIGNIFICANT quality regression (-6.06, t=-3.19, p=0.003; Quality and Aesthetics individually significant). Recommendation changed from v3 to v2.",
+  "why_the_n10_verdict_changed": "The n=10 prompt set (CI ±5.5 on the total delta) could not resolve V3's true effect and under-sampled the content types V3 damages most. The n=36 set (10 originals kept byte-identical by generation determinism + 26 stratified additions; Q/A/Al=36, RWF=24, CG=21) resolves it.",
+  "method": {
+    "generation": "same as cfg-interval.json but over gen36-prompts.jsonl (36 prompts, same seeds 1000+ID, 2048x2048, 50 steps); runs 2026-08-25 13:11-20:36 UTC, zero interruptions",
+    "determinism_crosscheck": "the 10 original IDs' images are sha256 byte-identical to the n=10 run in all three sets (30/30 pairs) - old and new evidence directly corroborate",
+    "quality": "same judge and official params as cfg-interval.json; 153 tasks per set, 0 parse failures across all three sets",
+    "stats": "per-prompt paired t-tests, two aggregation conventions (flat leaf-mean and bench hierarchical) - verdicts identical under both; independently recomputed by a separate verifier (max deviation <=0.01)"
+  },
+  "results": {
+    "baseline_c0": { "wall_s_per_image": 295.886, "bench_total": 49.59 },
+    "v2_cfg_interval_0_0.2": {
+      "wall_s_per_image": 234.803, "speedup_pct": -20.64,
+      "bench_total": 50.31,
+      "paired_total_flat": { "delta": 0.34, "ci95": 2.57, "t": 0.26, "significant": false },
+      "dims": { "Quality": "+0.46 (t=+0.17)", "Aesthetics": "-3.06 (t=-1.33)", "Alignment": "+1.69 (t=+1.12)", "Real-world Fidelity": "+1.06 (t=+0.36)", "Creative Generation": "+1.33 (t=+0.32)" },
+      "verdict": "no detectable quality loss; CI tight"
+    },
+    "v3_cfg_interval_0.7_1.0": {
+      "wall_s_per_image": 199.996, "speedup_pct": -32.41,
+      "bench_total": 44.06,
+      "paired_total_flat": { "delta": -6.06, "ci95": 3.85, "t": -3.19, "p": 0.003, "significant": true },
+      "dims": { "Quality": "-6.54 (t=-2.15, SIG)", "Aesthetics": "-10.76 (t=-3.01, SIG)", "Alignment": "-3.64 (t=-1.48)", "Real-world Fidelity": "-6.33 (t=-1.89)", "Creative Generation": "-3.44 (t=-0.67)" },
+      "verdict": "RETRACTED: significant quality cost; do not use as default"
+    }
+  },
+  "recommendation": "v2_cfg_interval_0_0.2",
+  "receipts": {
+    "prompt_set": "validation/cfg-interval/gen36-prompts.jsonl",
+    "generation_logs": ["logs/cfg-interval36-baseline.log", "logs/cfg-interval36-int02.log", "logs/cfg-interval36-int07.log"],
+    "quality_scores": ["validation/cfg-interval/quality-scores-baseline36.json", "validation/cfg-interval/quality-scores-int0236.json", "validation/cfg-interval/quality-scores-int0736.json"],
+    "per_task_outputs": ["validation/cfg-interval/judge-input-baseline36_judged.jsonl", "validation/cfg-interval/judge-input-int0236_judged.jsonl", "validation/cfg-interval/judge-input-int0736_judged.jsonl"],
+    "full_report": "validation/cfg-interval/REPORT.md",
+    "superseded_n10_receipt": "validation/cfg-interval/cfg-interval.json"
+  },
+  "environment": "single gfx1100 48GB, bf16, vram_mode balanced, sdpa; judge int8 on same host (CPU vision tower)"
+}

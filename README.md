@@ -14,10 +14,12 @@ every claim linked to a receipt.**
   generation — including the `--think` reasoning mode.
 - ✅ **48 GB card runs a 50.2 GB bf16 checkpoint** through the upstream
   layer-offload path (`--vram_mode`), with the trade-offs measured, not guessed.
-- ✅ **31.9% faster t2i with quality verified** — `--cfg_interval 0.7 1.0`
-  skips CFG on 88% of steps; paired Qwen-Image-Bench scoring (10 prompts,
-  27B judge) shows no measurable quality loss
-  ([receipt](docs/results/validation/cfg-interval/cfg-interval.json)).
+- ✅ **20.6% faster t2i, quality verified at n=36** — `--cfg_interval 0 0.2`
+  skips CFG on 56% of steps; paired Qwen-Image-Bench scoring (36 prompts,
+  27B judge) shows no detectable loss (+0.34 ± 2.57). The more aggressive
+  `-32%` interval was **rejected** by the same expanded validation
+  (significant Quality/Aesthetics regression) —
+  [receipt](docs/results/validation/cfg-interval/cfg-interval36.json).
 - ✅ **SHA256-verified checkpoint** — the fetch script checks every one of the
   24 files against a committed manifest.
 - ✅ **Deterministic where it claims to be**: fixed-seed t2i is byte-identical
@@ -146,7 +148,8 @@ BLAS-mode baseline is kept as the comparison value and archived in
 | 7 | Determinism (same seed twice) | ✅ byte-identical PNG, sha256 `49e9f9b86160…` | [`determinism.json`](docs/results/validation/determinism.json) |
 | 8 | Layer-offload modes (10-step probe) | ✅ balanced 207.5 s / fast 210.1 s / low 217.8 s (BLAS: 200.5 / 199.2 / 208.4 s) | [`vram-mode-*.json`](docs/results/validation/) |
 | 9 | Upstream interleave bug found & fixed | ✅ minimal patch, all platforms | [`patches/README.md`](patches/README.md) |
-| 10 | CFG-interval speedup, quality-verified | ✅ `--cfg_interval 0.7 1.0`: 295.4→201.4 s/img (−31.9%), bench total 52.82→52.47, paired-t −0.14 (n.s.) | [`cfg-interval.json`](docs/results/validation/cfg-interval/cfg-interval.json) |
+| 10 | CFG-interval speedup, quality-verified (n=10) | ✅ `--cfg_interval 0 0.2`: 295.4→235.7 s/img (−20.2%), n=10 paired-t +0.88 (n.s.); `0.7 1.0` n.s. at n=10 | [`cfg-interval.json`](docs/results/validation/cfg-interval/cfg-interval.json) |
+| 11 | CFG-interval **expanded re-validation (n=36, authoritative)** | ✅ `0 0.2`: −20.6%, paired +0.34 ± 2.57 (n.s., all dims n.s.) → **recommended**; `0.7 1.0`: −32.4% but **−6.06 ± 3.85 (t=−3.19, p=0.003; Quality & Aesthetics sig. drop) → retracted** | [`cfg-interval36.json`](docs/results/validation/cfg-interval/cfg-interval36.json) |
 
 Generated images from these runs: [gallery](docs/results/gallery/README.md)
 (thumbnail pairs in `determinism-*.webp` are byte-identical too).
@@ -171,45 +174,52 @@ disk). Generation dominates: ~6 s/denoising-step at 2048×2048 (BLAS
 baseline ~7 s), rising to ~4.7 s/step late in long interleave runs as the
 KV cache grows.
 
-### Faster t2i: `--cfg_interval` (−32%, quality-verified)
+### Faster t2i: `--cfg_interval` (−21%, quality-verified at n=36)
 
 The t2i head re-runs the model twice per step for classifier-free guidance
 (cond + uncond). The upstream `--cfg_interval LO HI` restricts CFG to
 timesteps inside `[LO, HI]` and runs uncond-only elsewhere — on this
-compute-bound offload path that directly removes up to 88% of per-step
-compute. **The interval is checked against the `timestep_shift=3.0`-warped
+compute-bound offload path that directly removes per-step compute.
+**The interval is checked against the `timestep_shift=3.0`-warped
 t′ = 1 − 3(1−t)/(3−2t)**, not raw t — at 50 steps that warping compresses
 step points toward the low-noise end, so intuitions from raw t mislead
 (e.g. `(0, 0.7)` skips only 6 of 50 steps; do not use it).
 
-Measured (2026-08-24/25, gfx1100, 2048×2048 × 50 steps, 10-prompt jsonl
-batch, same seeds; s/image is per-image generation time in the batch run
-with the model load amortized — see the Performance table above for
-whole-script wall including ~67 s load; quality scored by the official
-[Qwen-Image-Bench](https://github.com/QwenLM/Qwen-Image-Bench) judge —
-27B Qwen3.5 VL, temperature 0, thinking on — over the same 10 prompts,
-paired per-prompt, t_crit(df=9)=2.262):
+Two validation rounds, same judge (official
+[Qwen-Image-Bench](https://github.com/QwenLM/Qwen-Image-Bench), 27B
+Qwen3.5 VL, temperature 0, thinking on), same seeds, paired per-prompt:
 
-| Config | s/image | vs baseline | Bench total | paired-t | Verdict |
-|---|---:|---:|---:|---:|---|
-| baseline (CFG all 50 steps) | 295.4 | — | 52.82 | — | — |
-| `--cfg_interval 0 0.2` (CFG on first 22 steps) | 235.7 | −20.2% | 54.33 | +0.88 | no shift |
-| `--cfg_interval 0.7 1.0` (CFG on last 6 steps) | **201.4** | **−31.9%** | 52.47 | −0.14 | no shift |
+**n=10 (initial, 2026-08-24/25)** — both intervals looked quality-neutral
+(receipt `cfg-interval.json`).
 
-No dimension moves significantly in either variant (max |t| = 1.77 / 1.47).
-Recommended default for batch throughput:
+**n=36 (expanded, 2026-08-25/26 — authoritative, receipt
+[`cfg-interval36.json`](docs/results/validation/cfg-interval/cfg-interval36.json))**
+— 36 prompts (the original 10 kept, generation byte-identical by
+determinism, + 26 stratified additions covering all five bench
+dimensions; 153 judge tasks per set, 0 parse failures; stats independently
+recomputed, two aggregation conventions agree):
+
+| Config | s/img | vs baseline | Paired total delta | Verdict |
+|---|---:|---:|---|---|
+| baseline (CFG all 50 steps) | 295.9 | — | — | — |
+| `--cfg_interval 0 0.2` (CFG on first 22 steps) | 234.8 | **−20.6%** | **+0.34 ± 2.57 (t=+0.26, n.s.)**; all dims n.s. | ✅ **recommended** |
+| `--cfg_interval 0.7 1.0` (CFG on last 6 steps) | 200.0 | −32.4% | **−6.06 ± 3.85 (t=−3.19, p=0.003)**; Quality −6.5*, Aesthetics −10.8* | ❌ **retracted: real quality cost** |
+
+The n=10 result for `0.7 1.0` was under-powered (CI ±5.5): the expanded
+set resolves its true effect — a significant regression, worst on
+aesthetic detail. This is exactly why the recommendation is `0 0.2`:
 
 ```bash
 bash scripts/run-task.sh t2i --jsonl examples/posters-2026-08.jsonl \
     --output_dir outputs/posters/ --cfg_scale 4.0 --cfg_norm none \
-    --timestep_shift 3.0 --num_steps 50 --cfg_interval 0.7 1.0
+    --timestep_shift 3.0 --num_steps 50 --cfg_interval 0 0.2
 ```
 
-Caveats: validated at 2048²/50 steps with n=10 prompts (detects ~5-point
-total shifts; the V3 total-delta 95% CI is ±5.5 points). Judge runs were
-local int8 (paired design cancels judge bias). Full data, per-dimension
-scores and method:
-[`docs/results/validation/cfg-interval/`](docs/results/validation/cfg-interval/cfg-interval.json).
+Caveats: validated at 2048²/50 steps; n=36 detects ~2.6-point total
+shifts, so "no loss" means "within ±2.6 at 95% confidence". Judge runs
+were local int8 (paired design cancels judge bias). Full data, per-task
+outputs, per-dimension scores and both receipts:
+[`docs/results/validation/cfg-interval/`](docs/results/validation/cfg-interval/cfg-interval36.json).
 
 ### The VRAM story (why `--vram_mode` is the whole game)
 

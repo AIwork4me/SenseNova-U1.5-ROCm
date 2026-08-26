@@ -1,0 +1,54 @@
+[sensenova_u1_rocm] MIOpen bypass active (conv via unfold+GEMM; SENU15_MIOPEN=1 to re-enable)
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.05it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.92it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.64s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.88s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.18s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.37s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:48<00:26,  6.51s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.59s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.65s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.17s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.13s/it]
+T2I:   0%|          | 0/36 [00:00<?, ?it/s]T2I:   3%|▎         | 1/36 [04:55<2:52:15, 295.30s/it]T2I:   6%|▌         | 2/36 [08:44<2:25:11, 256.21s/it]T2I:   8%|▊         | 3/36 [12:31<2:13:38, 242.99s/it]T2I:  11%|█         | 4/36 [16:18<2:06:11, 236.62s/it]T2I:  14%|█▍        | 5/36 [20:06<2:00:45, 233.72s/it]T2I:  17%|█▋        | 6/36 [23:53<1:55:40, 231.36s/it]T2I:  19%|█▉        | 7/36 [28:14<1:56:28, 240.98s/it]T2I:  22%|██▏       | 8/36 [32:01<1:50:20, 236.43s/it]T2I:  25%|██▌       | 9/36 [35:48<1:45:06, 233.56s/it]T2I:  28%|██▊       | 10/36 [39:35<1:40:19, 231.53s/it]T2I:  31%|███       | 11/36 [43:56<1:40:17, 240.72s/it]T2I:  33%|███▎      | 12/36 [47:46<1:34:54, 237.27s/it]T2I:  36%|███▌      | 13/36 [51:32<1:29:42, 234.04s/it]T2I:  39%|███▉      | 14/36 [55:21<1:25:11, 232.36s/it]T2I:  42%|████▏     | 15/36 [59:43<1:24:29, 241.42s/it]T2I:  44%|████▍     | 16/36 [1:03:32<1:19:09, 237.49s/it]T2I:  47%|████▋     | 17/36 [1:07:20<1:14:22, 234.85s/it]T2I:  50%|█████     | 18/36 [1:11:08<1:09:49, 232.72s/it]T2I:  53%|█████▎    | 19/36 [1:15:31<1:08:31, 241.87s/it]T2I:  56%|█████▌    | 20/36 [1:19:19<1:03:22, 237.68s/it]T2I:  58%|█████▊    | 21/36 [1:23:07<58:38, 234.58s/it]  T2I:  61%|██████    | 22/36 [1:26:54<54:15, 232.55s/it]T2I:  64%|██████▍   | 23/36 [1:31:16<52:15, 241.20s/it]T2I:  67%|██████▋   | 24/36 [1:35:04<47:28, 237.37s/it]T2I:  69%|██████▉   | 25/36 [1:38:51<42:56, 234.24s/it]T2I:  72%|███████▏  | 26/36 [1:42:40<38:45, 232.54s/it]T2I:  75%|███████▌  | 27/36 [1:47:01<36:09, 241.03s/it]T2I:  78%|███████▊  | 28/36 [1:50:49<31:38, 237.27s/it]T2I:  81%|████████  | 29/36 [1:54:38<27:22, 234.67s/it]T2I:  83%|████████▎ | 30/36 [1:58:24<23:13, 232.32s/it]T2I:  86%|████████▌ | 31/36 [2:02:46<20:04, 240.94s/it]T2I:  89%|████████▉ | 32/36 [2:06:34<15:48, 237.20s/it]T2I:  92%|█████████▏| 33/36 [2:10:22<11:43, 234.44s/it]T2I:  94%|█████████▍| 34/36 [2:14:10<07:44, 232.49s/it]T2I:  97%|█████████▋| 35/36 [2:17:57<03:50, 230.99s/it]T2I: 100%|██████████| 36/36 [2:21:44<00:00, 229.72s/it]T2I: 100%|██████████| 36/36 [2:21:44<00:00, 236.24s/it]
+
+================================================================
+Profile summary
+================================================================
+  config              : vram_mode=balanced, fast_vram_fraction=0.9, fast_vram_headroom_gib=2.0, fast_activation_reserve_gib=4.0, attn_backend=sdpa, dtype=bfloat16
+  model load          :   67.172 s
+  load peak memory    : cpu RSS 43.00 GiB
+  generations         : 36 call(s), 36 image(s) total, 8452.911 s wall
+  avg per image       :  234.803 s
+  image tokens        : patch_size=32, avg 4096 tok/image (4096)
+  throughput          :    17.44 tok/s
+  generation peak mem : allocated 3.74 GiB, reserved 22.49 GiB, cpu RSS 50.29 GiB
+  per-call breakdown  :
+    [  1] 2048x2048 x1  293.787 s  (  4096 tok,    13.94 tok/s, allocated 3.67 GiB, reserved 21.87 GiB, cpu RSS 50.29 GiB)
+    [  2] 2048x2048 x1  227.122 s  (  4096 tok,    18.03 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [  3] 2048x2048 x1  225.971 s  (  4096 tok,    18.13 tok/s, allocated 3.73 GiB, reserved 22.49 GiB, cpu RSS 50.29 GiB)
+    [  4] 2048x2048 x1  225.431 s  (  4096 tok,    18.17 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [  5] 2048x2048 x1  226.984 s  (  4096 tok,    18.05 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [  6] 2048x2048 x1  225.402 s  (  4096 tok,    18.17 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [  7] 2048x2048 x1  259.162 s  (  4096 tok,    15.80 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [  8] 2048x2048 x1  225.293 s  (  4096 tok,    18.18 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [  9] 2048x2048 x1  225.940 s  (  4096 tok,    18.13 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 10] 2048x2048 x1  225.630 s  (  4096 tok,    18.15 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 11] 2048x2048 x1  260.371 s  (  4096 tok,    15.73 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 12] 2048x2048 x1  227.917 s  (  4096 tok,    17.97 tok/s, allocated 3.74 GiB, reserved 22.49 GiB, cpu RSS 50.29 GiB)
+    [ 13] 2048x2048 x1  225.507 s  (  4096 tok,    18.16 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 14] 2048x2048 x1  227.057 s  (  4096 tok,    18.04 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 15] 2048x2048 x1  260.900 s  (  4096 tok,    15.70 tok/s, allocated 3.71 GiB, reserved 22.46 GiB, cpu RSS 50.29 GiB)
+    [ 16] 2048x2048 x1  226.972 s  (  4096 tok,    18.05 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 17] 2048x2048 x1  227.201 s  (  4096 tok,    18.03 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 18] 2048x2048 x1  226.271 s  (  4096 tok,    18.10 tok/s, allocated 3.74 GiB, reserved 22.49 GiB, cpu RSS 50.29 GiB)
+    [ 19] 2048x2048 x1  261.706 s  (  4096 tok,    15.65 tok/s, allocated 3.73 GiB, reserved 22.49 GiB, cpu RSS 50.29 GiB)
+    [ 20] 2048x2048 x1  226.238 s  (  4096 tok,    18.10 tok/s, allocated 3.73 GiB, reserved 22.46 GiB, cpu RSS 50.29 GiB)
+    [ 21] 2048x2048 x1  225.999 s  (  4096 tok,    18.12 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 22] 2048x2048 x1  226.369 s  (  4096 tok,    18.09 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 23] 2048x2048 x1  260.010 s  (  4096 tok,    15.75 tok/s, allocated 3.73 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 24] 2048x2048 x1  226.939 s  (  4096 tok,    18.05 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 25] 2048x2048 x1  225.560 s  (  4096 tok,    18.16 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 26] 2048x2048 x1  226.824 s  (  4096 tok,    18.06 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 27] 2048x2048 x1  259.352 s  (  4096 tok,    15.79 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 28] 2048x2048 x1  227.050 s  (  4096 tok,    18.04 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 29] 2048x2048 x1  227.520 s  (  4096 tok,    18.00 tok/s, allocated 3.72 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 30] 2048x2048 x1  225.327 s  (  4096 tok,    18.18 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 31] 2048x2048 x1  259.431 s  (  4096 tok,    15.79 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 32] 2048x2048 x1  226.920 s  (  4096 tok,    18.05 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 33] 2048x2048 x1  226.663 s  (  4096 tok,    18.07 tok/s, allocated 3.71 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+    [ 34] 2048x2048 x1  226.659 s  (  4096 tok,    18.07 tok/s, allocated 3.73 GiB, reserved 22.49 GiB, cpu RSS 50.29 GiB)
+    [ 35] 2048x2048 x1  226.101 s  (  4096 tok,    18.12 tok/s, allocated 3.73 GiB, reserved 22.49 GiB, cpu RSS 50.29 GiB)
+    [ 36] 2048x2048 x1  225.326 s  (  4096 tok,    18.18 tok/s, allocated 3.70 GiB, reserved 22.47 GiB, cpu RSS 50.29 GiB)
+================================================================

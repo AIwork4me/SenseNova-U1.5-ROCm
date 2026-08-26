@@ -12,10 +12,11 @@
   含 `--think` 推理模式
 - ✅ **48GB 显卡跑 50.2GB 的 bf16 全量模型**：走上游自带的分层卸载
   （`--vram_mode`），权衡全部实测
-- ✅ **文生图提速 31.9%，品质经 bench 验证**：`--cfg_interval 0.7 1.0`
-  跳过 88% 步数的 CFG；10 提示词配对 + 27B judge（Qwen-Image-Bench
-  官方参数）评分无统计差异
-  （[收据](docs/results/validation/cfg-interval/cfg-interval.json)）
+- ✅ **文生图提速 20.6%，n=36 扩样品质验证**：`--cfg_interval 0 0.2`
+  跳过 56% 步数的 CFG；36 提示词配对 + 27B judge（官方参数）评分
+  无可检出差异（+0.34 ± 2.57）。更激进的 -32% 档被同一扩样验证
+  **否决**（Quality/Aesthetics 显著退化）
+  （[收据](docs/results/validation/cfg-interval/cfg-interval36.json)）
 - ✅ **模型权重逐文件 SHA256 校验**（24 个文件对照清单）
 - ✅ **该定的地方确定**：同种子两次生成逐字节一致（sha256 证明）
 - 🔧 **附赠社区贡献**：定位并绕过了 PyTorch 官方 rocm6.3 轮子在 gfx1100 上
@@ -100,35 +101,42 @@ fast 210.1s/22.3GiB · low 217.8s/**3.7GiB**（基线 200.5/199.2/208.4s，
 low 3.39GiB）——`low` 只慢约 5%、显存约为模型体积（46.8GiB）的 1/13，
 小显存卡的福音。
 
-### 文生图提速：`--cfg_interval`（−32%，品质已验证）
+### 文生图提速：`--cfg_interval`（−21%，n=36 扩样验证）
 
 CFG 每步要把模型跑两遍（cond + uncond），在计算受限的卸载路径上
 `--cfg_interval LO HI` 可把 CFG 限制在 `[LO, HI]` 内的时间步、其余步只跑
-uncond——最多直接省掉 88% 的每步计算。**注意区间是按 `timestep_shift=3.0`
+uncond——直接省掉相应比例的每步计算。**注意区间是按 `timestep_shift=3.0`
 扭曲后的 t′ = 1 − 3(1−t)/(3−2t) 判断的**，不是原始 t：50 步时步点被压向
 低噪声端，凭原始 t 直觉会选错（例如 `(0, 0.7)` 实际只跳 6 步，等于没用）。
 
-实测（2026-08-24/25，2048²×50 步、10 提示词同种子批量；品质由
-Qwen-Image-Bench 官方 judge（27B、temperature 0、thinking 开）对同 10
-提示词逐对评分，t_crit(df=9)=2.262）：
+两轮验证，同一 judge（Qwen-Image-Bench 官方 27B、temperature 0、thinking 开）、
+同种子、逐 prompt 配对：
 
-| 配置 | s/张 | vs 基线 | bench 总分 | paired-t | 结论 |
-|---|---:|---:|---:|---:|---|
-| 基线（50 步全 CFG） | 295.4 | — | 52.82 | — | — |
-| `--cfg_interval 0 0.2`（前 22 步有 CFG） | 235.7 | −20.2% | 54.33 | +0.88 | 无差异 |
-| `--cfg_interval 0.7 1.0`（仅最后 6 步有 CFG） | **201.4** | **−31.9%** | 52.47 | −0.14 | 无差异 |
+- **n=10 初判（2026-08-24/25）**：两档都看不出品质差异（收据 `cfg-interval.json`）。
+- **n=36 扩样（2026-08-25/26，权威结论，收据
+  [`cfg-interval36.json`](docs/results/validation/cfg-interval/cfg-interval36.json)）**：
+  保留原 10 条（生成确定性保证逐字节一致）+ 分层补 26 条，五维覆盖
+  36/36/36/24/21，153 任务/套零解析失败，统计经独立复算、双口径稳健：
 
-两档的所有维度均不显著（max |t| = 1.77 / 1.47）。批量出图推荐默认加：
+| 配置 | s/张 | vs 基线 | 配对总分差 | 结论 |
+|---|---:|---:|---|---|
+| 基线（50 步全 CFG） | 295.9 | — | — | — |
+| `--cfg_interval 0 0.2`（前 22 步有 CFG） | 234.8 | **−20.6%** | **+0.34 ± 2.57（t=+0.26，不显著）**，全维不显著 | ✅ **推荐** |
+| `--cfg_interval 0.7 1.0`（仅最后 6 步有 CFG） | 200.0 | −32.4% | **−6.06 ± 3.85（t=−3.19，p=0.003）**，Quality −6.5*、Aesthetics −10.8* | ❌ **撤回：有真实品质代价** |
+
+n=10 时 `0.7 1.0` 的结论是样本不足（CI ±5.5 分）——扩样后其真实退化显形，
+审美细节受损最重。这正是推荐收敛到 `0 0.2` 的原因。批量出图推荐默认加：
 
 ```bash
 bash scripts/run-task.sh t2i --jsonl examples/posters-2026-08.jsonl \
     --output_dir outputs/posters/ --cfg_scale 4.0 --cfg_norm none \
-    --timestep_shift 3.0 --num_steps 50 --cfg_interval 0.7 1.0
+    --timestep_shift 3.0 --num_steps 50 --cfg_interval 0 0.2
 ```
 
-限定条件：验证于 2048²/50 步、n=10 提示词（可检测约 5 分的总分漂移）；
-judge 为本地 int8 运行（配对设计抵消 judge 偏差）。完整数据与逐维分数：
-[`docs/results/validation/cfg-interval/`](docs/results/validation/cfg-interval/cfg-interval.json)。
+限定条件：验证于 2048²/50 步；n=36 可检测约 2.6 分的总分漂移（"无下降"
+= 95% 置信下不超 ±2.6）；judge 为本地 int8（配对设计抵消偏差）。完整数据、
+逐任务输出、逐维分数与两份收据：
+[`docs/results/validation/cfg-interval/`](docs/results/validation/cfg-interval/cfg-interval36.json)。
 
 生成样图（含确定性双图对比）：[gallery](docs/results/gallery/README.md)。
 
