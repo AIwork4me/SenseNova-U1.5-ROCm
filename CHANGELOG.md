@@ -16,6 +16,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   to PR head e2f2c865; V1–V4 on-model verification (list input fixed,
   tuple output byte-identical) — receipts
   docs/results/validation/interleave-image-size/.
+- Patch 0003: optional torch.compile/cudagraph safety (env-gated
+  `SENSENOVA_COMPILE*`); ported from the Strix Halo sibling repo —
+  verified on gfx1151 (V1–V8 + quality bench there); gfx1100 receipt
+  pending, compile stays opt-in.
 
 ### Changed
 - pytorch#194498 root cause verified on-host: SDPA fused-backend launch
