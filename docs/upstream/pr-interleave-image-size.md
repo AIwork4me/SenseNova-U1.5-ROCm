@@ -52,7 +52,8 @@ Follow-up commit `e2f2c865` ("interleave_gen_image_only: pass
 cur_image_size to _t2i_predict_v", pushed 2026-08-25): the five call sites
 plus the progress-bar description (which printed tuple reprs for list
 input) now use `cur_image_size`. CI green, PR MERGEABLE; PR #260 remains
-open, awaiting maintainer merge.
+open, awaiting maintainer merge (superseded by the retarget section
+below).
 
 Verified on the real model (U1.5-8B-MoT, pixel head, gfx1100/ROCm) with a
 direct driver — the list input has no in-repo caller:
@@ -100,6 +101,6 @@ description", force-pushed via Git Data API) and retargeted the PR base
 to `main`. The carried modeling file is byte-identical to the
 GPU-validated content (blob 040fbc8d, sha256 5cd28513… — the exact bytes
 behind the V1–V4 receipts), so the rebase provably changes no behavior.
-PR final state: base=main, 1 file, +1/−1, CI 2/2 green, mergeable
-(mergeable_state=blocked only because a formal approving review is
-pending — maintainer action).
+PR final state: base=main, 1 file, +1/−1, CI 2/2 green, mergeable —
+approved by yl-1993 2026-08-26; awaiting maintainer merge (additional
+review from ottolu requested).

@@ -1,5 +1,6 @@
 # SenseNova-U1.5-ROCm（中文说明）
 
+[![CI](https://github.com/AIwork4me/SenseNova-U1.5-ROCm/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
 [English](README.md) · Apache-2.0
 
 **一条命令，在 AMD Radeon GPU（ROCm）上本地运行 SenseNova-U1.5-8B-MoT——
@@ -211,6 +212,8 @@ bash scripts/run-task.sh t2i --jsonl examples/posters-2026-08.jsonl \
 | `scripts/validate.sh` | 全量验证套件，产出收据 |
 | `scripts/summarize_results.py` | 从收据打印证据表 |
 | `scripts/make_gallery.py` | 由验证输出生成 webp 图库 |
+| `scripts/rocm_check.py` | 环境体检：HIP 构建、wheel gfx 覆盖、bf16 matmul+SDPA 冒烟、可选 GTT 溢出分配测试 |
+| `scripts/gpu_monitor.py` | 负载运行时采样 VRAM+GTT（JSONL + 峰值摘要） |
 
 ## 致谢
 

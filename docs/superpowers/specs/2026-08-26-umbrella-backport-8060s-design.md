@@ -35,6 +35,8 @@ experiments graduate upstream into this repo via PR.
    | evidence | `docs/results/` receipts (receipt.py, sha256) | `evidence/` (results.json per run, 178 files) |
    | quality gates | CI (shellcheck strict, offline pytest), CONTRIBUTING, CHANGELOG, tests | none of these |
 
+*Update 2026-08-26(b): the 8060S repo completed its alignment wave-2 (PR #6) — governance, `python/`→`scripts/`, CI + tests. The table above reflects design-time state.*
+
 3. **What 8060S has that we lack** (verified by reading its tree):
    a hardware-independent `torch.compile`/cudagraph-safety patch
    (env-gated, V1–V8 verified), `gpu_monitor.py` (VRAM **and GTT** sampling —
