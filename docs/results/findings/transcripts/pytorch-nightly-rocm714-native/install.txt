@@ -1,0 +1,123 @@
+=== Install: upstream PyTorch nightly ROCm 7.14 wheel ===
+date: 2026-08-26T10:58:20Z
+
+## Attempt 1 (failed, network):
+command: .venv-pytorch-nightly-rocm714/bin/python -m pip install torch --index-url https://download.pytorch.org/whl/nightly/rocm7.14
+result: pip metadata resolution OK, but wheel downloads from download-r2.pytorch.org
+        (the host the nightly index hrefs point at) are unreachable from this host:
+        [Errno 101] Network is unreachable (IPv4; no IPv6 route exists either —
+        download-r2 resolves to Cloudflare 104.18.8.52/104.18.9.52, connection times
+        out). files.pythonhosted.org likewise unreachable. download.pytorch.org itself
+        (CloudFront 18.65.14.x) IS reachable and serves the exact same wheel paths
+        directly (verified: HTTP 206 range GET, valid zip magic PK\x03\x04).
+
+## Attempt 2 (successful): direct download from the official upstream host, local install
+Wheels fetched with curl -4 (resumable loop; two mid-transfer stalls resumed):
+  https://download.pytorch.org/whl/nightly/rocm7.14/torch-2.15.0.dev20260825%2Brocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl
+    size: 1394975454 bytes == server content-length
+  https://download.pytorch.org/whl/nightly/rocm7.14/torchvision-0.30.0.dev20260825%2Brocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl
+    size: 3421200 bytes
+Note: identical paths on the host pip was redirected from; artifacts are the official
+upstream nightly wheels (pip validates internal RECORD hashes at install).
+
+command:
+  .venv-pytorch-nightly-rocm714/bin/python -m pip install --no-deps \
+      /tmp/torch-2.15.0.dev20260825+rocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl \
+      /tmp/torchvision-0.30.0.dev20260825+rocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl
+(--no-deps: pure-Python deps were copied verbatim from /workspace/venv-torch212 — the
+AMD-wheel venv already on this host — because PyPI is unreachable here; versions are
+exactly what pip resolved in attempt 1: sympy 1.14.0, networkx 3.6.1, jinja2 3.1.6,
+markupsafe 3.0.3, fsspec 2026.7.0, filelock 3.32.4, typing_extensions 4.16.0, mpmath 1.3.0)
+
+Processing /tmp/torch-2.15.0.dev20260825+rocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl
+Processing /tmp/torchvision-0.30.0.dev20260825+rocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl
+Installing collected packages: torchvision, torch
+
+Successfully installed torch-2.15.0.dev20260825+rocm7.14 torchvision-0.30.0.dev20260825+rocm7.14
+pip exit code: 0
+
+=== post-install identity ===
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/__init__.py", line 496, in <module>
+    from torch._C import *  # noqa: F403
+    ^^^^^^^^^^^^^^^^^^^^^^
+ImportError: libhipfile.so.0: cannot open shared object file: No such file or directory
+
+=== pip show torch ===
+Name: torch
+Version: 2.15.0.dev20260825+rocm7.14
+Summary: Tensors and Dynamic neural networks in Python with strong GPU acceleration
+Home-page: https://pytorch.org
+Author: 
+Author-email: PyTorch Team <packages@pytorch.org>
+License-Expression: Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND BSD-2-Clause AND BSD-3-Clause AND BSL-1.0 AND MIT
+Location: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages
+Requires: filelock, fsspec, jinja2, networkx, rocm, setuptools, sympy, triton-rocm, typing-extensions
+Required-by: torchvision
+
+=== pip freeze ===
+filelock==3.32.4
+fsspec==2026.7.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+mpmath==1.3.0
+networkx==3.6.1
+packaging==26.3
+setuptools==84.0.0
+sympy==1.14.0
+torch @ file:///tmp/torch-2.15.0.dev20260825%2Brocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=ea5317ae0e73a22141939d7d818425c78f02c5ca4880dfc990ab28361530abc5
+torchvision @ file:///tmp/torchvision-0.30.0.dev20260825%2Brocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=36d05d8241ec5bdf989fd2e6285438fc65db418cffaf409f289272edb0ee791d
+typing_extensions==4.16.0
+wheel==0.48.0
+
+## Attempt 2 addendum — runtime dependency completion (2026-08-26T11:02:31Z)
+
+After installing the two nightly wheels, 'import torch' failed:
+  ImportError: libhipfile.so.0: cannot open shared object file
+Root cause (packaging model, NOT a bug in this validation):
+  - torch/lib contains ONLY libc10_hip.so + libtorch_hip.so (+libtorch_rocshmem.so,
+    libaotriton_v2.so): the upstream nightly ROCm wheel does NOT bundle the ROCm
+    userspace; it links the system/venv ROCm.
+  - readelf -d torch/lib/libtorch_hip.so shows RPATH:
+      $ORIGIN/../../_rocm_sdk_core/lib:$ORIGIN/../../_rocm_sdk_core/lib/rocm_sysdeps/lib:$ORIGIN/../../_rocm_sdk_libraries/lib:$ORIGIN
+    i.e. the wheel's supported model is the AMD pip ROCm distribution installed in
+    the SAME venv (repo.amd.com/rocm/whl-multi-arch) — without it, libs resolve from
+    system /opt/rocm-7.2.1 (soname-compatible except libhipfile.so.0, ROCm>=7.14-only).
+
+Resolution (official runtime, installed into the venv):
+  .venv-pytorch-nightly-rocm714/bin/python -m pip install \
+      'rocm-sdk-core==7.14.*' 'rocm-sdk-libraries==7.14.*' 'rocm-sdk-device-gfx1100==7.14.*' \
+      --extra-index-url https://repo.amd.com/rocm/whl-multi-arch/
+  -> Successfully installed rocm-sdk-core-7.14.0 rocm-sdk-device-gfx1100-7.14.0 rocm-sdk-libraries-7.14.0
+  (wheels served from repo.amd.com — reachable from this host; found in pip cache)
+
+Additionally copied from /workspace/venv-torch212 (PyPI unreachable here, cp312-identical):
+  numpy 2.5.2 (+numpy.libs), pillow 12.3.0 (+pillow.libs, PIL)
+
+Final identity (no LD_PRELOAD / no ROCBLAS_TENSILE_LIBPATH / no LD_LIBRARY_PATH):
+torch: 2.15.0.dev20260825+rocm7.14 | hip: 7.14.60850
+torchvision: 0.30.0.dev20260825+rocm7.14 | numpy: 2.5.2 | pillow: 12.3.0
+device: AMD Radeon Pro W7900D | capability: (11, 0)
+cudnn(MIOpen) enabled: True
+smoke bf16 matmul finite: True
+
+=== pip freeze (final venv) ===
+filelock==3.32.4
+fsspec==2026.7.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+mpmath==1.3.0
+networkx==3.6.1
+numpy==2.5.2
+packaging==26.3
+pillow==12.3.0
+rocm-sdk-core==7.14.0
+rocm-sdk-device-gfx1100==7.14.0
+rocm-sdk-libraries==7.14.0
+setuptools==84.0.0
+sympy==1.14.0
+torch @ file:///tmp/torch-2.15.0.dev20260825%2Brocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=ea5317ae0e73a22141939d7d818425c78f02c5ca4880dfc990ab28361530abc5
+torchvision @ file:///tmp/torchvision-0.30.0.dev20260825%2Brocm7.14-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=36d05d8241ec5bdf989fd2e6285438fc65db418cffaf409f289272edb0ee791d
+typing_extensions==4.16.0
+wheel==0.48.0

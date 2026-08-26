@@ -6,6 +6,7 @@ __pycache__/
 
 # Environments (recreated by scripts/01-setup-venv.sh)
 .venv/
+.venv-pytorch-nightly-rocm714/
 
 # Model weights and generated outputs (large, not source-controlled)
 outputs/

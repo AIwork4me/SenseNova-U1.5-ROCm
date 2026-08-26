@@ -7,6 +7,24 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Upstream PyTorch nightly ROCm 7.14 native validation: **PASS — all three
+  [#194447](https://github.com/pytorch/pytorch/issues/194447) regressions
+  absent on gfx1100 with zero workarounds** (torch
+  2.15.0.dev20260825+rocm7.14, hip 7.14.60850; ROCm userspace provided by
+  the AMD pip runtime `rocm-sdk-*` 7.14.0 that the nightly wheel's own
+  RPATH expects — the wheel bundles no ROCm userspace). No `LD_PRELOAD`, no
+  `ROCBLAS_TENSILE_LIBPATH`, MIOpen enabled throughout: bug 1/2/3 exact
+  repros 5/5 independent process runs each; MIOpen kernel compilation
+  proven on a cold cache (fresh HOME: the run passes and writes a new user
+  kernel DB `gfx1100_48.ukdb`); SenseNova-U1.5-8B-MoT VQA E2E correct
+  (23 dishes listed, 22 with prices — truncated at the 768-token cap
+  exactly like the baseline run; ≈24.9 GiB peak); bug-1 median rel err 0.32 % — identical to the 7.2.1-workaround
+  and 7.14-TheRock baselines. Report:
+  docs/results/findings/pytorch-nightly-rocm714-native-validation.md;
+  receipt docs/results/validation/vqa-nightly-rocm714.json; 27 raw
+  transcripts docs/results/findings/transcripts/pytorch-nightly-rocm714-native/;
+  repro scripts tests/validation/. Closing comment drafted (not
+  auto-posted): docs/upstream/issue-194447-closing-comment-draft.md.
 - `--cfg_interval` t2i speedup, validated in two rounds (36-prompt paired
   Qwen-Image-Bench scoring, 27B judge, official params):
   - **`0 0.2` recommended**: −20.6% per 2048²×50-step image, paired total

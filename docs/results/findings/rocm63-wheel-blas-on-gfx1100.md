@@ -185,3 +185,19 @@ unnecessary and fused backends are much faster than the MATH fallback.
 The earlier "two ROCm SDPA backend bugs" framing is superseded — one
 packaging defect explains all of it. torch 2.8+rocm6.3 remains this
 repo's validated default stack.
+
+## Update 2026-08-26 — upstream nightly ROCm 7.14 wheel: native validation PASS
+
+The upstream PyTorch nightly wheel (torch 2.15.0.dev20260825+rocm7.14,
+hip 7.14.60850) passes **all three bug repros and full SenseNova-U1.5 VQA
+inference natively, with zero workarounds** (no LD_PRELOAD, no
+ROCBLAS_TENSILE_LIBPATH, MIOpen enabled) on this gfx1100 host — closing
+the verification loop on
+[pytorch#194447](https://github.com/pytorch/pytorch/issues/194447)
+(maintainer confirmed the nightly stack is ROCm 7.14). Install note: the
+nightly wheel does not bundle the ROCm userspace — its RPATH expects the
+AMD pip ROCm distribution in the same venv (`rocm-sdk-core` /
+`rocm-sdk-libraries` / `rocm-sdk-device-gfx1100` 7.14.0 from
+repo.amd.com/rocm/whl-multi-arch) or an equivalent system ROCm 7.14.
+Full evidence:
+[`pytorch-nightly-rocm714-native-validation.md`](pytorch-nightly-rocm714-native-validation.md).

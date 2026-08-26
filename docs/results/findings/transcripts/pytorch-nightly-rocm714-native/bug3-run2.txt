@@ -1,0 +1,7 @@
+torch: 2.15.0.dev20260825+rocm7.14 | hip: 7.14.60850
+device: AMD Radeon Pro W7900D
+cudnn (MIOpen) enabled: True
+torch.Size([1, 4096, 55, 73])
+finite: True
+PASS
+exit_code=0

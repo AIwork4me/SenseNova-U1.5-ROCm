@@ -1,0 +1,6 @@
+torch: 2.15.0.dev20260825+rocm7.14 | hip: 7.14.60850
+device: AMD Radeon Pro W7900D
+torch.Size([16060, 4096])
+finite: True
+PASS
+exit_code=0

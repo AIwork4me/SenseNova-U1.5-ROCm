@@ -1,0 +1,51 @@
+=== E2E validation context (pytorch nightly rocm7.14, no workarounds) ===
+torch: 2.15.0.dev20260825+rocm7.14
+torch.version.hip: 7.14.60850
+torch.__file__: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/__init__.py
+device: AMD Radeon Pro W7900D
+device capability: (11, 0)
+MIOpen/cuDNN backend enabled: True
+LD_PRELOAD: <unset>
+ROCBLAS_TENSILE_LIBPATH: <unset>
+========================================================================
+Traceback (most recent call last):
+  File "/workspace/SenseNova-U1.5-ROCm/tests/validation/run_e2e_vqa_nightly.py", line 38, in <module>
+    runpy.run_path(target, run_name="__main__")
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "third_party/SenseNova-U1/examples/vqa/inference.py", line 10, in <module>
+    import sensenova_u1
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/__init__.py", line 6, in <module>
+    from .models.neo_unify import (
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/__init__.py", line 3, in <module>
+    from . import neo_unify  # noqa: F401  (re-export & register on import)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/__init__.py", line 5, in <module>
+    from .modeling_neo_chat import NEOChatModel
+  File "/workspace/SenseNova-U1.5-ROCm/third_party/SenseNova-U1/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py", line 10, in <module>
+    from transformers.modeling_utils import PreTrainedModel
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/transformers/modeling_utils.py", line 57, in <module>
+    from .integrations.flex_attention import flex_attention_forward
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/transformers/integrations/flex_attention.py", line 46, in <module>
+    class WrappedFlexAttention:
+  File "/workspace/SenseNova-U1.5-ROCm/.venv/lib/python3.12/site-packages/transformers/integrations/flex_attention.py", line 61, in WrappedFlexAttention
+    @torch.compiler.disable(recursive=False)
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/compiler/__init__.py", line 351, in disable
+    import torch._dynamo
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/_dynamo/__init__.py", line 13, in <module>
+    from . import (
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/_dynamo/aot_compile.py", line 17, in <module>
+    from torch._dynamo.convert_frame import GraphRuntimeEnv
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/_dynamo/convert_frame.py", line 63, in <module>
+    from torch._dynamo.symbolic_convert import TensorifyState
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/_dynamo/symbolic_convert.py", line 55, in <module>
+    from torch._dynamo.exc import (
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/_dynamo/exc.py", line 72, in <module>
+    from .utils import counters
+  File "/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/_dynamo/utils.py", line 2944, in <module>
+    common_constant_types.add(triton.language.dtype)
+                              ^^^^^^^^^^^^^^^
+AttributeError: module 'triton' has no attribute 'language'
+E2E_EXIT=1

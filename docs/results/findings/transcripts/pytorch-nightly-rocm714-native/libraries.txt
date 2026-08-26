@@ -1,0 +1,57 @@
+=== Phase 5: which libraries does the nightly wheel actually load? ===
+date: 2026-08-26T11:02:50Z
+torch dir: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch
+
+--- torch/lib contents (ROCm-relevant) ---
+aotriton.images
+libaotriton_v2.so
+libaotriton_v2.so.0.13.0
+libc10_hip.so
+libtorch_hip.so
+
+--- ldd libtorch_hip.so (ROCm-relevant rows) ---
+	libMIOpen.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/libMIOpen.so.1 (0x0000753036e00000)
+	libhiprtc.so.7 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libhiprtc.so.7 (0x000075306ba67000)
+	libhipblas.so.3 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/libhipblas.so.3 (0x0000753036d12000)
+	libaotriton_v2.so.0.13.0 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/libaotriton_v2.so.0.13.0 (0x000075302e200000)
+	librccl.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/librccl.so.1 (0x000075300e600000)
+	librocblas.so.5 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/librocblas.so.5 (0x0000752ff7c00000)
+	libhipblaslt.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/libhipblaslt.so.1 (0x0000752ff7400000)
+	libamdhip64.so.7 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libamdhip64.so.7 (0x0000752ff5800000)
+	libhsa-runtime64.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libhsa-runtime64.so.1 (0x0000752ff4e00000)
+	libamd_comgr.so.3 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/../../_rocm_sdk_core/lib/libamd_comgr.so.3 (0x0000752ff4000000)
+	librocrand.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/librocrand.so.1 (0x0000752fe5600000)
+	librocroller.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/librocroller.so.1 (0x0000752fc8200000)
+
+--- ldd libtorch_python.so (ROCm-relevant rows) ---
+	libroctx64.so.4 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libroctx64.so.4 (0x0000787caea58000)
+	libhipfile.so.0 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libhipfile.so.0 (0x0000787cad128000)
+	libMIOpen.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/libMIOpen.so.1 (0x0000787c63800000)
+	libamdhip64.so.7 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libamdhip64.so.7 (0x0000787c61a00000)
+	libhiprtc.so.7 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libhiprtc.so.7 (0x0000787c61470000)
+	libhipblas.so.3 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/libhipblas.so.3 (0x0000787c60312000)
+	libaotriton_v2.so.0.13.0 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/libaotriton_v2.so.0.13.0 (0x0000787c57400000)
+	librccl.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/librccl.so.1 (0x0000787c37800000)
+	librocblas.so.5 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/librocblas.so.5 (0x0000787c35e00000)
+	libhipblaslt.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/libhipblaslt.so.1 (0x0000787c35600000)
+	libamd_comgr.so.3 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_libraries/lib/../../_rocm_sdk_core/lib/libamd_comgr.so.3 (0x0000787c34800000)
+	libhsa-runtime64.so.1 => /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/../../_rocm_sdk_core/lib/libhsa-runtime64.so.1 (0x0000787c34200000)
+
+--- RPATH of libtorch_hip.so ---
+ 0x000000000000000f (RPATH)              Library rpath: [$ORIGIN/../../_rocm_sdk_core/lib:$ORIGIN/../../_rocm_sdk_core/lib/rocm_sysdeps/lib:$ORIGIN/../../_rocm_sdk_libraries/lib:$ORIGIN]
+
+--- RUNTIME proof: /proc/self/maps after import torch + CUDA init ---
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_core/lib/libhipfile.so.0
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_core/lib/libhiprtc.so.7
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_core/lib/libroctx64.so.4
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_libraries/lib/libMIOpen.so.1
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_libraries/lib/libhipblas.so.3
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_libraries/lib/libhipblaslt.so.1
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_libraries/lib/librccl.so.1
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/_rocm_sdk_libraries/lib/librocblas.so.5
+LOADED: /workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/lib/python3.12/site-packages/torch/lib/libaotriton_v2.so.0.13.0
+
+Conclusion: all ROCm userspace libraries resolve from the venv's own _rocm_sdk_*
+pip runtime (RPATH-native), NOT from system /opt/rocm-7.2.1 and NOT via any preload.

@@ -1,0 +1,3 @@
+torch.Size([1, 4096, 55, 73])
+finite: True
+PASS

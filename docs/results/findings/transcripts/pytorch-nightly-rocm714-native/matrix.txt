@@ -1,0 +1,18 @@
+bug1 run1: PASS (rc=0)
+bug1 run2: PASS (rc=0)
+bug1 run3: PASS (rc=0)
+bug1 run4: PASS (rc=0)
+bug1 run5: PASS (rc=0)
+| bug1   | 5 runs | passed=5 failed=0 native-crash-signature=0 | workaround=none |
+bug2 run1: PASS (rc=0)
+bug2 run2: PASS (rc=0)
+bug2 run3: PASS (rc=0)
+bug2 run4: PASS (rc=0)
+bug2 run5: PASS (rc=0)
+| bug2   | 5 runs | passed=5 failed=0 native-crash-signature=0 | workaround=none |
+bug3 run1: PASS (rc=0)
+bug3 run2: PASS (rc=0)
+bug3 run3: PASS (rc=0)
+bug3 run4: PASS (rc=0)
+bug3 run5: PASS (rc=0)
+| bug3   | 5 runs | passed=5 failed=0 native-crash-signature=0 | workaround=none |

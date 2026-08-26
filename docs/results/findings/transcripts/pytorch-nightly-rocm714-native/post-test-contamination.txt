@@ -1,0 +1,21 @@
+=== Phase 12: post-test workaround contamination re-check ===
+date: 2026-08-26T11:19:06Z
+
+--- env (current validation shell) ---
+(no ROCm/HIP/TORCH/LD_PRELOAD vars set)
+
+--- explicit ---
+LD_PRELOAD: unset
+ROCBLAS_TENSILE_LIBPATH: unset
+torch.backends.cudnn.enabled: True (asserted inside every bug1/bug3/E2E run; see logs)
+
+--- in-process proof from the executed logs ---
+MIOpen/cuDNN backend enabled: True
+cudnn (MIOpen) enabled: True
+cudnn (MIOpen) enabled: True
+LD_PRELOAD: <unset>
+ROCBLAS_TENSILE_LIBPATH: <unset>
+
+--- MIOpen logging-only diagnostic used (supplementary, NOT in the canonical matrix) ---
+bug3-miopen-logging.txt was run with MIOPEN_ENABLE_LOGGING=1 MIOPEN_LOG_LEVEL=4
+(logging-only variables; no behavioral override)

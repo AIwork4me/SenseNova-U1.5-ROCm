@@ -1,0 +1,186 @@
+=== PyTorch nightly ROCm 7.14 native validation — environment baseline ===
+captured: 2026-08-26T10:36:17Z
+
+--- date ---
+Wed Aug 26 10:36:17 UTC 2026
+--- uname -a ---
+Linux u-18147-942e8579 6.8.0-79-generic #79-Ubuntu SMP PREEMPT_DYNAMIC Tue Aug 12 14:42:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+--- /etc/os-release ---
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.4 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+--- python3 ---
+Python 3.12.3
+/usr/bin/python3
+--- pip (system python3) ---
+pip 24.0 from /usr/lib/python3/dist-packages/pip (python 3.12)
+
+--- rocminfo (first 100 lines) ---
+[37mROCk module version 6.14.14 is loaded[0m
+=====================    
+HSA System Attributes    
+=====================    
+Runtime Version:         1.18
+Runtime Ext Version:     1.15
+System Timestamp Freq.:  1000.000000MHz
+Sig. Max Wait Duration:  18446744073709551615 (0xFFFFFFFFFFFFFFFF) (timestamp count)
+Machine Model:           LARGE                              
+System Endianness:       LITTLE                             
+Mwaitx:                  DISABLED
+XNACK enabled:           NO
+DMAbuf Support:          YES
+VMM Support:             YES
+
+==========               
+HSA Agents               
+==========               
+*******                  
+Agent 1                  
+*******                  
+  Name:                    AMD EPYC 9334 32-Core Processor    
+  Uuid:                    CPU-XX                             
+  Marketing Name:          AMD EPYC 9334 32-Core Processor    
+  Vendor Name:             CPU                                
+  Feature:                 None specified                     
+  Profile:                 FULL_PROFILE                       
+  Float Round Mode:        NEAR                               
+  Max Queue Number:        0(0x0)                             
+  Queue Min Size:          0(0x0)                             
+  Queue Max Size:          0(0x0)                             
+  Queue Type:              MULTI                              
+  Node:                    0                                  
+  Device Type:             CPU                                
+  Cache Info:              
+    L1:                      32768(0x8000) KB                   
+  Chip ID:                 0(0x0)                             
+  ASIC Revision:           0(0x0)                             
+  Cacheline Size:          64(0x40)                           
+  Max Clock Freq. (MHz):   0                                  
+  BDFID:                   0                                  
+  Internal Node ID:        0                                  
+  Compute Unit:            64                                 
+  SIMDs per CU:            0                                  
+  Shader Engines:          0                                  
+  Shader Arrs. per Eng.:   0                                  
+  WatchPts on Addr. Ranges:1                                  
+  Memory Properties:       
+  Features:                None
+  Pool Info:               
+    Pool 1                   
+      Segment:                 GLOBAL; FLAGS: FINE GRAINED        
+      Size:                    528093740(0x1f7a122c) KB           
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 2                   
+      Segment:                 GLOBAL; FLAGS: EXTENDED FINE GRAINED
+      Size:                    528093740(0x1f7a122c) KB           
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 3                   
+      Segment:                 GLOBAL; FLAGS: KERNARG, FINE GRAINED
+      Size:                    528093740(0x1f7a122c) KB           
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 4                   
+      Segment:                 GLOBAL; FLAGS: COARSE GRAINED      
+      Size:                    528093740(0x1f7a122c) KB           
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+  ISA Info:                
+*******                  
+Agent 2                  
+*******                  
+  Name:                    AMD EPYC 9334 32-Core Processor    
+  Uuid:                    CPU-XX                             
+  Marketing Name:          AMD EPYC 9334 32-Core Processor    
+  Vendor Name:             CPU                                
+  Feature:                 None specified                     
+  Profile:                 FULL_PROFILE                       
+  Float Round Mode:        NEAR                               
+  Max Queue Number:        0(0x0)                             
+  Queue Min Size:          0(0x0)                             
+  Queue Max Size:          0(0x0)                             
+  Queue Type:              MULTI                              
+  Node:                    1                                  
+  Device Type:             CPU                                
+  Cache Info:              
+
+--- rocm-smi ---
+
+
+======================================== ROCm System Management Interface ========================================
+================================================== Concise Info ==================================================
+Device  Node  IDs              Temp    Power  Partitions          SCLK  MCLK   Fan    Perf  PwrCap  VRAM%  GPU%  
+[3m              (DID,     GUID)  (Edge)  (Avg)  (Mem, Compute, ID)                                                 [0m
+==================================================================================================================
+0       2     0x744b,   6853   28.0°C  11.0W  N/A, N/A, 0         0Mhz  96Mhz  20.0%  auto  241.0W  0%     0%    
+==================================================================================================================
+============================================== End of ROCm SMI Log ===============================================
+
+--- /opt/rocm ---
+/opt/rocm-7.2.1
+lrwxrwxrwx 1 root root 22 Mar 13 19:42 /opt/rocm -> /etc/alternatives/rocm
+drwxr-xr-x 1 root root 29 Mar 13 19:42 /opt/rocm-7.2.1
+/opt/rocm version:
+7.2.1
+
+--- GPU identity ---
+  Marketing Name:          AMD EPYC 9334 32-Core Processor    
+  Marketing Name:          AMD EPYC 9334 32-Core Processor    
+  Name:                    gfx1100                            
+  Marketing Name:          AMD Radeon Graphics                
+      Name:                    amdgcn-amd-amdhsa--gfx1100         
+      Name:                    amdgcn-amd-amdhsa--gfx11-generic   
+
+--- current PyTorch installations on this host (BEFORE change) ---
+[repo .venv]
+torch: 2.8.0+rocm6.3
+torch.version.hip: 6.3.42131-fa1d09cbd
+torch.cuda.is_available: True
+device: AMD Radeon Graphics
+capability: (11, 0)
+[/workspace/venv-torch212]
+torch: 2.12.0+rocm7.14.0
+torch.version.hip: 7.14.60850
+torch.cuda.is_available: True
+device: AMD Radeon Pro W7900D
+
+--- PHASE 2: workaround contamination check ---
+[env ROCm/HIP/TORCH vars]
+(none)
+
+[LD_PRELOAD]
+LD_PRELOAD=<unset>
+[ROCBLAS_TENSILE_LIBPATH]
+ROCBLAS_TENSILE_LIBPATH=<unset>
+
+--- shell startup files: any auto-exported workaround vars? ---
+/root/.bashrc: <clean>
+/root/.profile: <clean>
+/root/.bash_profile: <absent>
+/workspace/env.sh: <absent>
+
+--- repo .env files ---
+(no .env files)

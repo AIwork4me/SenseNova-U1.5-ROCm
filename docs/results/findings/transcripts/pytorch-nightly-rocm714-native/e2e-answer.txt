@@ -1,0 +1,35 @@
+<think>
+Got it, let's go through each section one by one, make sure I don't miss any, get the name and price right.
+
+First, Skewers + Sides section:
+1. 沙爹雞串燒 / chargrilled chicken satay: 158.00
+2. 香辣虎蝦串燒 / chargrilled coconut & chilli prawn skewers: 148.00
+3. 稱重和牛串燒 / chargrilled Wagyu MBP beef skewers (200gm): 198.00
+4. 鮮製泰式飛餅（宜配咖哩） / fresh made Roti: 58.00
+5. 妙泰國通菜 / wok fried Thai watercress: 88.00
+6. 泰國絲苗白飯 / Thai jasmine rice: 30.00
+
+Next Salads section:
+7. 炭燒茄子虎蝦沙律 / chargrilled eggplant & tiger prawn salad: 158.00
+8. 秦北肉碎生菜包（餸） / chopped duck & Thai herb salad: 158.00
+9. 青木瓜沙律 / pounded green papaya salad with toasted peanuts: 118.00
+
+Then Curries section:
+10. 泰北咖哩雞全麵 / "Khao Soi" of curried chicken with fresh egg noodles: 158.00
+11. 泰北咖哩牛全麵 / "Khao Soi" of curried beef with fresh egg noodles: 158.00
+12. 瑪莎曼咖哩和牛牛臉麵肉 / "Massaman" curry of beef cheeks & potatoes: 258.00
+13. 特式姜黃咖哩虎蝦 / spicy turmeric curry of tiger prawns & betel leaf: 248.00
+14. 泰式黃咖哩雞 / aromatic curry of half a chicken & potatoes: 238.00
+
+Wok 煲炒 section:
+15. 泰式火車炒飯配和牛 / fried rice of Wagyu beef, tomatoes & chilli: 158.00
+16. 招牌泰式蟹肉炒飯 / fried rice of crabmeat & spring onions: 158.00
+17. 泰式虎蝦炒金邊粉 / pad Thai of tiger prawns: 158.00
+18. 香辣泰式炒關河粉（和牛） / stir fried spicy Wagyu beef & flat noodles: 158.00
+19. 泰式炒關河粉（雞） / stir fried chicken & flat noodles: 148.00
+20. 泰式打拋和牛配油炸雞蛋 / Wagyu beef wok fried with chilli, garlic & holy basil: 158.00
+21. 泰式蟹肉麵列 / Thai omlette of crabmeat & spring onions: 178.00
+
+Sweet Roti section:
+22. 鮮製泰式飛餅配朱古力豬乳燉奶 / fresh made roti with Nutella or condensed milk: 78.00
+23. 鮮製泰式香蕉飛餅

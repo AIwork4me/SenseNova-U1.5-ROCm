@@ -1,0 +1,12 @@
+torch: 2.15.0.dev20260825+rocm7.14 | hip: 7.14.60850
+[bug1 conv] shape=(16, 768, 1, 1)
+[bug1 conv] max abs err : 9.292126e-03
+[bug1 conv] mean abs err: 1.484364e-03
+[bug1 conv] median abs err (elementwise over all): 1.185298e-03
+[bug1 conv] median rel err (|ref|>=1e-3 denominator clamp): 3.161735e-03
+[bug2 gemm] shape=(16060, 4096)
+[bug2 gemm] max abs err : 1.190400e-02
+[bug2 gemm] mean abs err: 1.259538e-03
+[bug2 gemm] median abs err (elementwise over all): 1.040831e-03
+[bug2 gemm] median rel err (|ref|>=1e-3 denominator clamp): 2.763352e-03
+NUMERIC-SANITY-DONE

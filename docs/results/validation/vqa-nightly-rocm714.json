@@ -1,0 +1,20 @@
+{
+  "artifacts": {
+    "answer": "docs/results/findings/transcripts/pytorch-nightly-rocm714-native/e2e-answer.txt (in-repo copy; working-tree original at outputs/validation/vqa-menu-nightly.txt)",
+    "transcript": "docs/results/findings/transcripts/pytorch-nightly-rocm714-native/e2e-run2.txt"
+  },
+  "block": "vqa",
+  "command": "SENU15_MIOPEN=1 PYTHONPATH=<nightly-sp>:<repo-sp>:<upstream-src> .venv-pytorch-nightly-rocm714/bin/python tests/validation/run_e2e_vqa_nightly.py third_party/SenseNova-U1/examples/vqa/inference.py --model_path /root/.cache/huggingface/modelscope/SenseNova-U1.5-8B-MoT --vram_mode balanced --attn_backend sdpa --image third_party/SenseNova-U1/examples/vqa/data/images/menu.jpg --question 'List every dish you can read on this menu with its price. Answer as a plain list.' --max_new_tokens 768 --output outputs/validation/vqa-menu-nightly.txt",
+  "ld_preload": "<unset>",
+  "log": "docs/results/findings/transcripts/pytorch-nightly-rocm714-native/e2e-run2.txt",
+  "miopen_enabled": true,
+  "peak_vram_gib_approx": 24.9,
+  "rocm_stack": "upstream-nightly-wheel-native (torch 2.15.0.dev20260825+rocm7.14 + rocm-sdk 7.14.0 pip runtime; no preloads, no libpath overrides)",
+  "rocblas_tensile_libpath": "<unset>",
+  "started_at": "2026-08-26T11:09:00Z",
+  "torch": "2.15.0.dev20260825+rocm7.14",
+  "torch_hip": "7.14.60850",
+  "verdict": "PASS",
+  "vram_mode": "balanced",
+  "wall_seconds_approx": 540
+}
