@@ -1,0 +1,43 @@
+=== SDPA probe matrix on upstream nightly rocm7.14 — phaseC-nightly ===
+date: 2026-08-26T12:20:14Z
+python: /usr/bin/python3.12
+LD_PRELOAD=<unset> ROCBLAS_TENSILE_LIBPATH=<unset>
+torch: 2.15.0.dev20260825+rocm7.14 | hip: 7.14.60850 | device: AMD Radeon Pro W7900D
+aotriton packaging: torch/lib/aotriton.images/ + libaotriton_v2.so.0.13.0 (bundled in wheel)
+
+phase=phaseC-nightly py=/workspace/SenseNova-U1.5-ROCm/.venv-pytorch-nightly-rocm714/bin/python
+FLASH_ATTENTION_kv1024_hd128_c0_s0       RESULT ok sum=171437.6875
+FLASH_ATTENTION_kv1281_hd128_c0_s0       RESULT ok sum=153318.5625
+FLASH_ATTENTION_kv2048_hd64_c1_s0        RESULT ok sum=232085.9062
+FLASH_ATTENTION_kv1024_hd128_c0_s1       RESULT ok sum=171437.6875
+EFFICIENT_ATTENTION_kv1024_hd128_c0_s0   RESULT ok sum=171437.6875
+EFFICIENT_ATTENTION_kv1281_hd128_c0_s0   RESULT ok sum=153318.5625
+EFFICIENT_ATTENTION_kv2048_hd64_c1_s0    RESULT ok sum=232085.9062
+EFFICIENT_ATTENTION_kv1024_hd128_c0_s1   RESULT ok sum=171437.6875
+MATH_kv1024_hd128_c0_s0                  RESULT ok sum=171437.9062
+MATH_kv1281_hd128_c0_s0                  RESULT ok sum=153318.8438
+MATH_kv2048_hd64_c1_s0                   RESULT ok sum=232085.9062
+{
+ "EFFICIENT_ATTENTION": {
+  "total": 4,
+  "ok": 4
+ },
+ "FLASH_ATTENTION": {
+  "total": 4,
+  "ok": 4
+ },
+ "MATH": {
+  "total": 3,
+  "ok": 3
+ }
+}
+matrix -> /workspace/SenseNova-U1.5-ROCm/outputs/validation/sdpa-gfx11/phaseC-nightly/matrix.json
+
+=== pip freeze (torch-relevant, for the record) ===
+numpy                   2.5.2
+rocm-sdk-core           7.14.0
+rocm-sdk-device-gfx1100 7.14.0
+rocm-sdk-libraries      7.14.0
+torch                   2.15.0.dev20260825+rocm7.14
+torchvision             0.30.0.dev20260825+rocm7.14
+triton-rocm             3.8.0+git3f6e4113

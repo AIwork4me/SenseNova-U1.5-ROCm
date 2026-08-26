@@ -1,0 +1,50 @@
+{
+  "block": "t2i-nightly-rocm714",
+  "note": "upstream nightly wheel, zero workarounds (no LD_PRELOAD, no ROCBLAS_TENSILE_LIBPATH, MIOpen enabled); same prompt/seed as t2i-flash-receipt.json for the 2048 run; 1024 runs use num_steps 25",
+  "torch": "2.15.0.dev20260825+rocm7.14",
+  "torch_hip": "7.14.60850",
+  "rocm_stack": "upstream-nightly-wheel-native + AMD pip ROCm 7.14 runtime",
+  "vram_mode": "balanced",
+  "prompt": "A cinematic mountain village at sunrise, golden light over slate roofs, drifting mist between timber houses, ultra detailed",
+  "seed": 42,
+  "verdict": "FAIL — silent output corruption (repeating washed-out grid texture); exits 0",
+  "runs": {
+    "2048x2048_steps50_nightly_stock": {
+      "wall_seconds_total": 677,
+      "model_load_seconds": 66,
+      "image": "t2i-2048-nightly.png",
+      "sha256": "970cd11cd02e1d1f37fc0e0d4fabfeb28b118b432b449ffbdf5ad5e8f9bd7cee",
+      "stats": {"mean": 129.8, "std": 29.1, "hcorr": 0.570, "block64_corr": 0.998},
+      "corrupt": true
+    },
+    "1024x1024_steps25_nightly_stock": {
+      "wall_seconds_total": 195,
+      "image": "t2i-1024-nightly-ab.png",
+      "sha256": "ad51764575470766d68f3890e16e6f748c5e711863f8ce7affcd025d59237c64",
+      "stats": {"mean": 219.8, "std": 33.1, "hcorr": 0.739, "block64_corr": 0.985},
+      "corrupt": true
+    },
+    "1024x1024_steps25_torch28_control": {
+      "wall_seconds_total": 175,
+      "image": "t2i-1024-torch28-ab.png",
+      "sha256": "1ce9d6827200abef697bd155a145becd1291bacfda9696dffef2e85875c169cc",
+      "stats": {"mean": 66.6, "std": 64.8, "hcorr": 0.988, "block64_corr": 0.908},
+      "corrupt": false
+    },
+    "1024x1024_steps25_nightly_mathonly": {
+      "wall_seconds_total": 189,
+      "image": "t2i-1024-nightly-mathonly.png",
+      "sha256": "ad51764575470766d68f3890e16e6f748c5e711863f8ce7affcd025d59237c64",
+      "note": "bit-identical to nightly stock run (enable_flash_sdp(False) + enable_mem_efficient_sdp(False)) — fused SDPA exonerated; stock dispatcher was already on MATH for these layouts",
+      "stats": {"mean": 219.8, "std": 33.1, "hcorr": 0.739, "block64_corr": 0.985},
+      "corrupt": true
+    }
+  },
+  "sdpa_probe_phaseC": {
+    "matrix": "phaseC-nightly-matrix.json",
+    "result": "11/11 ok (FLASH 4/4, EFFICIENT 4/4, MATH 3/3)",
+    "fused_vs_math": "norm_rel <= 5.4e-6, median_rel 0, max_abs at bf16 quanta"
+  },
+  "finding": "docs/results/findings/pytorch-nightly-rocm714-sdpa-t2i.md",
+  "logs": "docs/results/findings/transcripts/sdpa-nightly-rocm714/"
+}

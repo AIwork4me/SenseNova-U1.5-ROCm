@@ -16,6 +16,7 @@ This directory verifies that diagnosis on the issue reporter's host
 | phase | venv delta vs original install | fresh-process SDPA matrix (11 cases) |
 |---|---|---|
 | A | none — faithful rebuild of the original install (`torch 2.12.0+rocm7.14.0` + `torchvision 0.27.0` + `amd-torch-device-gfx1100`, cp312, no workarounds) | **fused 0/8** — `AcceleratorError: CUDA error: invalid argument` (hipErrorInvalidValue) at the trailing checked op, every config; **MATH 3/3 ok** |
+| C (2026-08-26) | different packaging entirely: **upstream nightly** `torch 2.15.0.dev20260825+rocm7.14` (AOTriton bundled in the wheel: `torch/lib/aotriton.images/` + `libaotriton_v2.so`) | **11/11 ok**; fused matches MATH (norm_rel ≤ 5.4e-6) — the #194498 failure mode cannot occur on this packaging. BUT the real-model t2i path silently corrupts on this nightly build (see [`pytorch-nightly-rocm714-sdpa-t2i.md`](../../../results/findings/pytorch-nightly-rocm714-sdpa-t2i.md), receipt `t2i-nightly-receipt.json`) |
 | B | + `amd-torch-device-gfx11==2.12.0+rocm7.14.0` (the ONLY package delta — see the two pip-freeze snapshots) | **11/11 ok**; fused outputs match MATH to bf16 tolerance (rel. diff ≤ 2e-6); MATH sums bit-identical across phases (same seed) |
 
 Matrix runner/probe: `scripts/sdpa-gfx11-matrix.sh` + `scripts/sdpa-gfx11-probe.py`

@@ -62,7 +62,7 @@ for log in sorted((out / "cases").glob("*.txt")):
     })
 summary = {
     "phase": out.name,
-    "torch": __import__("torch").__version__ if False else None,
+    "torch": __import__("torch").__version__,
     "total": len(rows),
     "ok": sum(r["ok"] for r in rows),
     "by_backend": {

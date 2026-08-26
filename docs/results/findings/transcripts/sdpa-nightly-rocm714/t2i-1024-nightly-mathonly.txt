@@ -1,0 +1,13 @@
+=== E2E diagnostic context (nightly rocm7.14, MATH-only SDPA) ===
+torch: 2.15.0.dev20260825+rocm7.14 | hip: 7.14.60850
+LD_PRELOAD: <unset>
+ROCBLAS_TENSILE_LIBPATH: <unset>
+MIOpen/cuDNN backend enabled: True
+flash_sdp: False
+mem_efficient_sdp: False
+math_sdp: True
+===================================================================
+[attn] backend='sdpa' (effective='sdpa')
+Loading checkpoint shards:   0%|          | 0/13 [00:00<?, ?it/s]Loading checkpoint shards:   8%|▊         | 1/13 [00:00<00:01,  6.29it/s]Loading checkpoint shards:  15%|█▌        | 2/13 [00:00<00:02,  3.97it/s]Loading checkpoint shards:  23%|██▎       | 3/13 [00:07<00:32,  3.24s/it]Loading checkpoint shards:  31%|███       | 4/13 [00:14<00:41,  4.64s/it]Loading checkpoint shards:  38%|███▊      | 5/13 [00:20<00:43,  5.42s/it]Loading checkpoint shards:  46%|████▌     | 6/13 [00:27<00:41,  5.89s/it]Loading checkpoint shards:  54%|█████▍    | 7/13 [00:34<00:37,  6.19s/it]Loading checkpoint shards:  62%|██████▏   | 8/13 [00:41<00:31,  6.38s/it]Loading checkpoint shards:  69%|██████▉   | 9/13 [00:47<00:25,  6.46s/it]Loading checkpoint shards:  77%|███████▋  | 10/13 [00:54<00:19,  6.55s/it]Loading checkpoint shards:  85%|████████▍ | 11/13 [01:01<00:13,  6.62s/it]Loading checkpoint shards:  92%|█████████▏| 12/13 [01:06<00:06,  6.15s/it]Loading checkpoint shards: 100%|██████████| 13/13 [01:06<00:00,  5.12s/it]
+[warn] (1024x1024) is outside the trained resolution set; quality may degrade. Supported buckets: 1:1->2048x2048, 16:9->2720x1536, 9:16->1536x2720, 3:2->2496x1664, 2:3->1664x2496, 4:3->2368x1760, 3:4->1760x2368, 1:2->1440x2880, 2:1->2880x1440, 1:3->1152x3456, 3:1->3456x1152
+[saved] outputs/validation/sdpa-gfx11/t2i-1024-nightly-mathonly.png

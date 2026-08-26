@@ -1,0 +1,9 @@
+[annotation added 2026-08-26] same-process comparison — NUMERICS ONLY; launch success was independently proven by the fresh-process matrix (phaseC-nightly-matrix.txt, 11/11)
+torch: 2.15.0.dev20260825+rocm7.14 | hip: 7.14.60850
+kv=1024 hd=128 causal=0 scale=0: FLASH_ATTENTION      vs MATH: max_abs=1.953e-03 median_rel=0.000e+00 max_rel(|ref|>0.1)=7.812e-03 norm_rel=1.086e-06
+kv=1024 hd=128 causal=0 scale=0: EFFICIENT_ATTENTION  vs MATH: max_abs=1.953e-03 median_rel=0.000e+00 max_rel(|ref|>0.1)=7.812e-03 norm_rel=1.086e-06
+kv=1281 hd=128 causal=0 scale=1: FLASH_ATTENTION      vs MATH: max_abs=1.953e-03 median_rel=0.000e+00 max_rel(|ref|>0.1)=7.812e-03 norm_rel=2.105e-06
+kv=1281 hd=128 causal=0 scale=1: EFFICIENT_ATTENTION  vs MATH: max_abs=1.953e-03 median_rel=0.000e+00 max_rel(|ref|>0.1)=7.812e-03 norm_rel=2.105e-06
+kv=2048 hd=64 causal=1 scale=0: FLASH_ATTENTION      vs MATH: max_abs=1.562e-02 median_rel=0.000e+00 max_rel(|ref|>0.1)=1.646e-02 norm_rel=5.387e-06
+kv=2048 hd=64 causal=1 scale=0: EFFICIENT_ATTENTION  vs MATH: max_abs=1.562e-02 median_rel=0.000e+00 max_rel(|ref|>0.1)=1.646e-02 norm_rel=5.387e-06
+DONE
