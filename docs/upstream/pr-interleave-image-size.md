@@ -82,3 +82,24 @@ https://github.com/AIwork4me/SenseNova-U1.5-ROCm (see
 Without the patch the same script fails with the `TypeError` above (short repro: prompt "hello", 5 steps) —
 pre-patch transcript:
 [interleave-prepatch-typeerror.txt](https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/docs/results/logs/interleave-prepatch-typeerror.txt).
+
+## Retarget to main (2026-08-26, per yl-1993 request issuecomment-5425312720)
+
+Discovery: upstream `main` had already absorbed the call-site fix via
+`2f42002` ("fix: pass image size through interleave generation",
+tongwenwen1, 2026-08-25 — 10 `_t2i_predict_v` call sites, including the
+per-image `cur_image_size` refinement). The PR's only remaining delta vs
+`main` was ONE line: the progress-bar description. A naive base change
+would have dragged in 42 files (+772/−6017) of unrelated branch
+divergence (main and feat/u1.5 have disjoint histories, 335/1 unique
+commits).
+
+Action: rebuilt the branch as a single commit on `origin/main`
+(`5f4aca0e`, "fix(interleave): per-image size in progress-bar
+description", force-pushed via Git Data API) and retargeted the PR base
+to `main`. The carried modeling file is byte-identical to the
+GPU-validated content (blob 040fbc8d, sha256 5cd28513… — the exact bytes
+behind the V1–V4 receipts), so the rebase provably changes no behavior.
+PR final state: base=main, 1 file, +1/−1, CI 2/2 green, mergeable
+(mergeable_state=blocked only because a formal approving review is
+pending — maintainer action).
