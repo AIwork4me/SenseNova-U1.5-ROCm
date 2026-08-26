@@ -19,4 +19,4 @@ jobs:
       - name: ShellCheck the pipeline scripts
         run: |
           sudo apt-get install -y shellcheck -q
-          shellcheck scripts/*.sh scripts/lib/common.sh
+          shellcheck scripts/*.sh scripts/lib/common.sh docs/hardware/strix-halo/hsa_fix.sh

@@ -51,3 +51,25 @@ re-runs a single block for a minimal reproduction.
 - Scripts: `set -euo pipefail`, a `usage()` with `--help`, clear `[project]`
   log prefixes — follow the existing scripts.
 - Numbers in docs: cite the receipt file they came from.
+
+## Contributing between the two repos
+
+This repo is the **umbrella** (hardware-generic assets + hardware
+profiles). [SenseNova-U1.5-ROCm-8060S](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S) is the **Strix Halo lab**:
+APU-first experiments live there; verified work graduates here.
+
+**8060S → umbrella (graduation).** A change graduates when it is
+① hardware-independent or absorbed as a hardware profile, ② verified on
+gfx1151 with evidence in the 8060S repo, ③ passes this repo's offline
+CI, ④ documented EN+CN, ⑤ not a duplicate of an existing tool here.
+Open a PR labelled `backport`; the commit carries
+`Ported from …@<sha>` and the claim is labelled
+`verified on: gfx1151` until a gfx1100 receipt lands here.
+
+**Umbrella → 8060S (flow-down).** Changes to shared surfaces
+(`patches/`, `scripts/`) are cherry-picked by the 8060S repo as
+needed; that repo records `Merged-upstream: <sha>`.
+
+**Evidence across repos.** `receipt.py` records `hardware=<gfx>` on
+every run; cross-hardware claims must link the producing repo's
+evidence.

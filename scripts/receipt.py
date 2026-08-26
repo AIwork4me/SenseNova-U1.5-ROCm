@@ -6,6 +6,9 @@ Usage: receipt.py <receipt.json> <key>=<value> [<key>=<value> ...]
 Values are parsed as JSON when possible, else kept as strings.
 Special keys computed automatically when the referenced files exist:
   sha256:<path>   -> {path: {sha256, bytes}}
+Conventional keys recorded by validate.sh runs: `block`, `hardware`
+(gfx arch the run executed on, e.g. gfx1100 / gfx1151 — lets
+cross-hardware evidence be queried), `rocm_stack`.
 Used by scripts/validate.sh; every claim in docs/results/ must trace to one
 of the receipts this script writes.
 """

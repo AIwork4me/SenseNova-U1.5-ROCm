@@ -78,3 +78,21 @@ on torch 2.8+BLAS-preload (receipt `docs/results/validation/t2i-torch212-fixed.j
 still open; [pytorch/pytorch#194498](https://github.com/pytorch/pytorch/issues/194498);
 compatibility write-up:
 [OpenSenseNova/SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261)).
+
+## 0003-optional-torch-compile-and-cudagraph-safety.patch
+
+**Opt-in acceleration (all platforms).** Adds env-gated `torch.compile`
+around `_t2i_predict_v` (and optionally `extract_feature`/`patchify`):
+`SENSENOVA_COMPILE=1|default|reduce-overhead|…` enables,
+`SENSENOVA_COMPILE_SUPPRESS=1` sets dynamo suppress-errors,
+`SENSENOVA_COMPILE_FEATURES=1` also compiles the feature/patchify path.
+The model-side hunk marks cudagraph step boundaries and materializes the
+conditioned prediction before the unconditioned re-run of the same
+compiled callable — without it, cudagraph output pooling overwrites the
+CFG condition with the uncondition result.
+
+verified on: gfx1151 (Strix Halo) — V1–V8 speedup + Qwen-Image-Bench
+paired quality validation live in the
+[8060S repo](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S)
+(`evidence/speedup2/`, PASS-with-caveat: compile stays opt-in until a
+gfx1100 receipt exists here).

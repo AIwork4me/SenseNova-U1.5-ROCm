@@ -41,6 +41,11 @@ add_rocm_path
 require_venv
 require_model
 
+# GPU arch for receipt labels (CONTRIBUTING "Evidence across repos": every
+# run records hardware=<gfx>). Same probe as scripts/00-check-env.sh; hosts
+# without rocminfo or a GPU yield empty -> receipts fall back to "unknown".
+GPU_ARCH="$(rocminfo 2>/dev/null | awk '/^ *Name: *gfx/ {gsub(/ /,"",$2); print $2}' | head -1 || true)"
+
 VRAM_MODE="${VRAM_MODE:-balanced}"
 RESULTS="$ROOT/docs/results"
 LOGS="$RESULTS/logs"
@@ -112,6 +117,7 @@ run_block() {
     peak=$(peak_vram_bytes)
     "$ROOT/scripts/receipt.py" "$RECEIPTS/$name.json" \
         "block=$name" \
+        "hardware=${GPU_ARCH:-unknown}" \
         "wall_seconds=$wall" \
         "peak_vram_bytes=$peak" \
         "peak_vram_gib=$("$PY" -c "print(round($peak / 2**30, 2))")" \
@@ -182,6 +188,7 @@ if [ -z "${ONLY:-}" ] || [ "$ONLY" = determinism ]; then
             > "$LOGS/determinism-$run.log" 2>&1
     done
     "$ROOT/scripts/receipt.py" "$RECEIPTS/determinism.json" \
+        "hardware=${GPU_ARCH:-unknown}" \
         "sha256:$OUT_DIR/validation/determinism-a.png" \
         "sha256:$OUT_DIR/validation/determinism-b.png" \
         "identical=$("$PY" - <<'PYEOF'

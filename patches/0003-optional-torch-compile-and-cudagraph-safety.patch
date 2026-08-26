@@ -1,0 +1,60 @@
+diff --git a/examples/t2i/inference.py b/examples/t2i/inference.py
+index 63a7416..20a5e95 100644
+--- a/examples/t2i/inference.py
++++ b/examples/t2i/inference.py
+@@ -2,11 +2,13 @@ from __future__ import annotations
+ 
+ import argparse
+ import json
++import os
+ from pathlib import Path
+ from typing import Sequence
+ 
+ import numpy as np
+ import torch
++import torch._dynamo
+ from PIL import Image
+ 
+ import sensenova_u1
+@@ -428,6 +430,19 @@ def main() -> None:
+             print(f"load lora {args.lora_path}")
+             engine.model = load_and_merge_lora_weight_from_safetensors(engine.model, args.lora_path)
+ 
++        comp_mode = os.environ.get("SENSENOVA_COMPILE", "")
++        if comp_mode:
++            if os.environ.get("SENSENOVA_COMPILE_SUPPRESS", "0") == "1":
++                torch._dynamo.config.suppress_errors = True
++            comp_kwargs: dict = {"dynamic": False}
++            if comp_mode not in ("1", "default"):
++                comp_kwargs["mode"] = comp_mode
++            engine.model._t2i_predict_v = torch.compile(engine.model._t2i_predict_v, **comp_kwargs)
++            if os.environ.get("SENSENOVA_COMPILE_FEATURES", "0") == "1":
++                engine.model.extract_feature = torch.compile(engine.model.extract_feature, **comp_kwargs)
++                engine.model.patchify = torch.compile(engine.model.patchify, **comp_kwargs)
++            print(f"[compile] enabled {comp_kwargs}")
++
+         cfg_interval = tuple(args.cfg_interval)
+ 
+         if args.prompt is not None:
+diff --git a/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py b/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py
+index f52a7fe..47bda48 100644
+--- a/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py
++++ b/src/sensenova_u1/models/neo_unify/modeling_neo_chat.py
+@@ -1815,9 +1815,16 @@ class NEOChatModel(PreTrainedModel):
+                 timestep_embeddings += noise_embeddings
+             image_embeds = image_embeds + timestep_embeddings
+ 
++            # no-op without cudagraphs; prevents graph-output overwriting when
++            # the same compiled graph runs twice per step (cond + uncond)
++            torch.compiler.cudagraph_mark_step_begin()
+             v_pred_condition = self._t2i_predict_v(image_embeds, indexes_image_condition, attention_mask_condition, past_key_values_condition, t, z, image_token_num=token_h*token_w, timestep_embeddings=timestep_embeddings, image_size=image_size)
+-            
++            # materialize outside the cudagraph output pool before the same
++            # compiled callable re-runs for the CFG unconditional pass
++            v_pred_condition = v_pred_condition.clone()
++
+             if t >= cfg_interval[0] and t <= cfg_interval[1] and cfg_scale > 1:
++                torch.compiler.cudagraph_mark_step_begin()
+                 v_pred_uncondition = self._t2i_predict_v(image_embeds, indexes_image_uncondition, attention_mask_uncondition, past_key_values_uncondition, t, z, image_token_num=token_h*token_w, timestep_embeddings=timestep_embeddings, image_size=image_size)
+                 if cfg_norm == 'cfg_zero_star':
+                     positive_flat = v_pred_condition.view(batch_size, -1)  

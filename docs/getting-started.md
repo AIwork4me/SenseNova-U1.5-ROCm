@@ -2,6 +2,9 @@
 
 From a bare Linux host with an AMD GPU to your first SenseNova-U1.5 output.
 
+For how this port works (wheels, attention backend, memory tiers):
+[Porting Notes](porting.md) · [移植笔记](porting_CN.md)
+
 ## What you need
 
 | Requirement | Why | Reference host |

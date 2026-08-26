@@ -87,13 +87,15 @@ def test_receipt_writer():
         out = os.path.join(td, "receipt.json")
         r = subprocess.run(
             [sys.executable, f"{ROOT}/scripts/receipt.py", out,
-             "block=t2i", "wall_seconds=12.5", f"sha256:{art}", "note=plain text"],
+             "block=t2i", "wall_seconds=12.5", "hardware=gfx1151",
+             f"sha256:{art}", "note=plain text"],
             capture_output=True, text=True)
         assert r.returncode == 0, r.stderr
         receipt = json.load(open(out))
         assert receipt["block"] == "t2i"
         assert receipt["wall_seconds"] == 12.5      # parsed as number
         assert receipt["note"] == "plain text"       # kept as string
+        assert receipt["hardware"] == "gfx1151"
         import hashlib
         assert receipt["artifacts"][art]["sha256"] == hashlib.sha256(b"hello").hexdigest()
         assert receipt["artifacts"][art]["bytes"] == 5
@@ -144,6 +146,59 @@ def test_fullstack_mode_logic():
             ["bash", "-c", probe.format(p=os.path.join(td, "nope"), env="export ROCM_FULL_STACK=1", c=common)],
             capture_output=True, text=True)
         assert r.returncode != 0 and "ROCM_FULL_STACK=1" in r.stderr, r.stderr
+
+
+def test_gpu_monitor_help():
+    r = subprocess.run(
+        [sys.executable, f"{ROOT}/scripts/gpu_monitor.py", "--help"],
+        capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "VRAM" in r.stdout and "GTT" in r.stdout
+
+
+def test_gpu_monitor_parses_rocm_smi_csv():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "gpu_monitor", f"{ROOT}/scripts/gpu_monitor.py")
+    gm = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gm)
+
+    # header mirrors real rocm-smi 4.0.0 (ROCm 7.8) --csv output; the
+    # parser matches the capital-"Used" column case-sensitively
+    fake_csv = ("device,VRAM Total Memory (B),VRAM Total Used Memory (B)\n"
+                "card0,34359738368,10737418240\n"
+                "card1,34359738368,2147483648\n")
+    class FakeProc:
+        returncode = 0
+        stdout = fake_csv
+    real_run = gm.subprocess.run
+    gm.subprocess.run = lambda *a, **k: FakeProc()
+    try:
+        assert gm._used_bytes("vram") == 10737418240  # max across cards
+        vram, gtt = gm.sample_rocm_smi()
+        assert abs(vram - 10.0) < 0.01 and abs(gtt - 10.0) < 0.01  # /2**30
+    finally:
+        gm.subprocess.run = real_run
+
+
+def test_rocm_check_help():
+    r = subprocess.run(
+        [sys.executable, f"{ROOT}/scripts/rocm_check.py", "--help"],
+        capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "alloc" in r.stdout.lower()
+
+
+def test_rocm_check_finish_formats_report():
+    import importlib.util, io, contextlib
+    spec = importlib.util.spec_from_file_location(
+        "rocm_check", f"{ROOT}/scripts/rocm_check.py")
+    rc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rc)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        code = rc.finish({"torch": "x", "ok": False}, as_json=False, ok=False)
+    assert code == 1 and "[FAIL]" in buf.getvalue()
 
 
 if __name__ == "__main__":

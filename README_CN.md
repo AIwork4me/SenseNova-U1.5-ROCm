@@ -27,10 +27,24 @@
   [SenseNova-U1#260](https://github.com/OpenSenseNova/SenseNova-U1/pull/260)）与
   ROCm SDPA 融合后端崩溃（补丁 0002，[pytorch#194498](https://github.com/pytorch/pytorch/issues/194498)、
   [SenseNova-U1#261](https://github.com/OpenSenseNova/SenseNova-U1/issues/261)）
+- 🧪 **gfx1151（Strix Halo APU）同样全量验证**：证据见姊妹仓库
+  [SenseNova-U1.5-ROCm-8060S](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S)
+  （Strix Halo 实验室），硬件配置在本仓库
+  [docs/hardware/strix-halo/](docs/hardware/strix-halo/)
 
 ```bash
 bash scripts/quickstart.sh          # 可选任务: t2i | vqa | edit | interleave
 ```
+
+## 硬件覆盖
+
+| 硬件 | 状态 | 位置 |
+|---|---|---|
+| gfx1100（RDNA3 独显） | 完全验证 —— 收据见 [docs/results/](docs/results/) | 本仓库 |
+| gfx1151（Strix Halo APU） | 完全验证 —— 证据见 [8060S 仓库](https://github.com/AIwork4me/SenseNova-U1.5-ROCm-8060S)；配置：[docs/hardware/strix-halo/](docs/hardware/strix-halo/) | 本仓库 + Strix Halo 实验室 |
+
+其他 AMD GPU：本管线与硬件无关（见[移植指南](docs/porting.md)）——
+欢迎提交验证报告（issue 模板 `validation_report`）。
 
 ## 效果展示：电影海报风格
 
