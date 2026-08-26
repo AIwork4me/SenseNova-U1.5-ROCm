@@ -23,8 +23,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   docs/results/findings/pytorch-nightly-rocm714-native-validation.md;
   receipt docs/results/validation/vqa-nightly-rocm714.json; 27 raw
   transcripts docs/results/findings/transcripts/pytorch-nightly-rocm714-native/;
-  repro scripts tests/validation/. Closing comment drafted (not
-  auto-posted): docs/upstream/issue-194447-closing-comment-draft.md.
+  repro scripts tests/validation/. Closing comment posted and #194447
+  closed as completed 2026-08-26
+  ([issuecomment-5425045146](https://github.com/pytorch/pytorch/issues/194447#issuecomment-5425045146));
+  verbatim final text in
+  docs/upstream/issue-194447-closing-comment-draft.md.
 - `--cfg_interval` t2i speedup, validated in two rounds (36-prompt paired
   Qwen-Image-Bench scoring, 27B judge, official params):
   - **`0 0.2` recommended**: −20.6% per 2048²×50-step image, paired total
