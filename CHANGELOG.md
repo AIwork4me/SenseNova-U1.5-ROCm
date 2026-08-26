@@ -20,6 +20,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   `SENSENOVA_COMPILE*`); ported from the Strix Halo sibling repo —
   verified on gfx1151 (V1–V8 + quality bench there); gfx1100 receipt
   pending, compile stays opt-in.
+- `scripts/gpu_monitor.py`: sample VRAM + GTT while a workload runs
+  (JSONL + peak summary) — GTT visibility is what evidences APU
+  GTT-spill runs.
 
 ### Changed
 - pytorch#194498 root cause verified on-host: SDPA fused-backend launch

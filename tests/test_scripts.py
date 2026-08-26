@@ -146,6 +146,39 @@ def test_fullstack_mode_logic():
         assert r.returncode != 0 and "ROCM_FULL_STACK=1" in r.stderr, r.stderr
 
 
+def test_gpu_monitor_help():
+    r = subprocess.run(
+        [sys.executable, f"{ROOT}/scripts/gpu_monitor.py", "--help"],
+        capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "VRAM" in r.stdout and "GTT" in r.stdout
+
+
+def test_gpu_monitor_parses_rocm_smi_csv():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "gpu_monitor", f"{ROOT}/scripts/gpu_monitor.py")
+    gm = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gm)
+
+    # header mirrors real rocm-smi 4.0.0 (ROCm 7.8) --csv output; the
+    # parser matches the capital-"Used" column case-sensitively
+    fake_csv = ("device,VRAM Total Memory (B),VRAM Total Used Memory (B)\n"
+                "card0,34359738368,10737418240\n"
+                "card1,34359738368,2147483648\n")
+    class FakeProc:
+        returncode = 0
+        stdout = fake_csv
+    real_run = gm.subprocess.run
+    gm.subprocess.run = lambda *a, **k: FakeProc()
+    try:
+        assert gm._used_bytes("vram") == 10737418240  # max across cards
+        vram, gtt = gm.sample_rocm_smi()
+        assert abs(vram - 10.0) < 0.01 and abs(gtt - 10.0) < 0.01  # /2**30
+    finally:
+        gm.subprocess.run = real_run
+
+
 if __name__ == "__main__":
     failures = 0
     for name, fn in sorted(globals().items()):
