@@ -62,7 +62,7 @@ Upstream ships a tiered layer-offload engine
 
 | vram_mode | strategy | suitable GPU memory |
 |---|---|---|
-| `full` | everything GPU-resident | ~45+ GiB addressable (discrete VRAM — or VRAM+GTT on APUs) |
+| `full` | everything GPU-resident | ~52+ GiB discrete VRAM; on APUs the VRAM+GTT pool counts — see the [strix-halo profile](hardware/strix-halo/README.md) |
 | `fast` | most layers resident; generation layers swapped per step | ~24 GB |
 | `balanced` | heavier offload with async prefetch | ~16-24 GB |
 | `low` | most aggressive offload | ~12-16 GB |

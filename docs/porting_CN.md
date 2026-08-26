@@ -55,7 +55,7 @@ bf16 权重约 50 GB。两套互补机制：
 
 | vram_mode | 策略 | 适用 GPU 内存 |
 |---|---|---|
-| `full` | 全部驻留 GPU | 需 ~45+ GiB 可寻址内存（独立卡的 VRAM——或 APU 的 VRAM+GTT） |
+| `full` | 全部驻留 GPU | 需 ~52+ GiB 独立显存；APU 上可计入 VRAM+GTT 池——见 [strix-halo profile](hardware/strix-halo/README.md) |
 | `fast` | 多数层驻留；生成层按步换入 | ~24 GB |
 | `balanced` | 更重的 offload + 异步预取 | ~16-24 GB |
 | `low` | 最激进 offload | ~12-16 GB |
