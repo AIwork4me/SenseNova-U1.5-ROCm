@@ -179,6 +179,26 @@ def test_gpu_monitor_parses_rocm_smi_csv():
         gm.subprocess.run = real_run
 
 
+def test_rocm_check_help():
+    r = subprocess.run(
+        [sys.executable, f"{ROOT}/scripts/rocm_check.py", "--help"],
+        capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "alloc" in r.stdout.lower()
+
+
+def test_rocm_check_finish_formats_report():
+    import importlib.util, io, contextlib
+    spec = importlib.util.spec_from_file_location(
+        "rocm_check", f"{ROOT}/scripts/rocm_check.py")
+    rc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rc)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        code = rc.finish({"torch": "x", "ok": False}, as_json=False, ok=False)
+    assert code == 1 and "[FAIL]" in buf.getvalue()
+
+
 if __name__ == "__main__":
     failures = 0
     for name, fn in sorted(globals().items()):

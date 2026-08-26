@@ -23,6 +23,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - `scripts/gpu_monitor.py`: sample VRAM + GTT while a workload runs
   (JSONL + peak summary) — GTT visibility is what evidences APU
   GTT-spill runs.
+- `scripts/rocm_check.py`: env sanity check (HIP build, wheel gfx
+  coverage, bf16 matmul + SDPA smoke, optional GTT-spill alloc test).
 
 ### Changed
 - pytorch#194498 root cause verified on-host: SDPA fused-backend launch
