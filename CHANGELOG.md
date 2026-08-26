@@ -29,6 +29,15 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   memory model, HSA runtime shim (`hsa_fix.sh`, now CI-shellchecked),
   gfx1151 wheel guidance, AOTriton hd72 caveat — the umbrella's first
   APU profile, ported from the 8060S repo.
+- `docs/porting.md` + `docs/porting_CN.md`: generic ROCm porting notes,
+  split from the 8060S repo's porting doc (APU-specific depth moved to
+  the strix-halo profile).
+- `docs/upstream/aotriton-54.md`: upstream tracking entry for the
+  AOTriton hd=72 silent-wrong-output bug (issue #54, fix unmerged);
+  verified on gfx1151, evidence in the 8060S repo.
+- Governance: Code of Conduct, `SECURITY.md`, bug/validation issue
+  templates, PR template (evidence gates), CONTRIBUTING cross-repo
+  section (graduation model), README/README_CN hardware-coverage table.
 
 ### Changed
 - pytorch#194498 root cause verified on-host: SDPA fused-backend launch
