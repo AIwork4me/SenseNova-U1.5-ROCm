@@ -75,7 +75,7 @@ environment variable or by passing `--vram_mode` yourself.
 
 | source | index | covers |
 |---|---|---|
-| **AMD official multi-arch** | `https://repo.amd.com/rocm/whl-multi-arch/` (`torch 2.12.0+rocm7.14.0`) | multi-gfx family wheels; gfx1100 and gfx1151 covered — gfx1151 runs without the HSA preload |
+| **AMD official multi-arch** | `https://repo.amd.com/rocm/whl-multi-arch/` (`torch 2.12.0+rocm7.14.0`) | multi-gfx family wheels; gfx1100 and gfx1151 covered — gfx1151 runs without the HSA preload (verified on: gfx1151; see the [strix-halo profile](hardware/strix-halo/README.md)) |
 | Official PyTorch ROCm 7 | `https://download.pytorch.org/whl/rocm7.0` (`torch 2.10.0+rocm7.0`) | gfx942, gfx950, gfx1100/1101, gfx1151, gfx1200 — gfx1151 needs the HSA preload (see the [strix-halo profile](hardware/strix-halo/README.md)) |
 | AMD arch-specific nightlies | `https://rocm.nightlies.amd.com/v2/<gfx>/` | fallback for arches the official wheels miss |
 

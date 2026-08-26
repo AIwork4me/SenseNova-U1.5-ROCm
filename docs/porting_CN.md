@@ -67,7 +67,7 @@ bf16 权重约 50 GB。两套互补机制：
 
 | 来源 | 索引 | 覆盖 |
 |---|---|---|
-| **AMD 官方多架构** | `https://repo.amd.com/rocm/whl-multi-arch/`（`torch 2.12.0+rocm7.14.0`） | 多 gfx 家族 wheel；gfx1100 与 gfx1151 均在覆盖内——gfx1151 无需 HSA 预加载 |
+| **AMD 官方多架构** | `https://repo.amd.com/rocm/whl-multi-arch/`（`torch 2.12.0+rocm7.14.0`） | 多 gfx 家族 wheel；gfx1100 与 gfx1151 均在覆盖内——gfx1151 无需 HSA 预加载（verified on: gfx1151；见 [strix-halo profile](hardware/strix-halo/README.md)） |
 | 官方 PyTorch ROCm 7 | `https://download.pytorch.org/whl/rocm7.0`（`torch 2.10.0+rocm7.0`） | gfx942、gfx950、gfx1100/1101、gfx1151、gfx1200 —— gfx1151 需 HSA 预加载（见 [strix-halo profile](hardware/strix-halo/README.md)） |
 | AMD 按架构 nightly | `https://rocm.nightlies.amd.com/v2/<gfx>/` | 官方 wheel 缺架构时的回退 |
 
