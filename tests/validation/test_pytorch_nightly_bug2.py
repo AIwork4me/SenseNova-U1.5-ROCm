@@ -13,6 +13,10 @@ No LD_PRELOAD, no ROCBLAS_TENSILE_LIBPATH, no backend disabling.
 """
 import sys
 
+import pytest
+
+pytest.importorskip("torch", reason="GPU repro script — run on a torch host")
+
 import torch
 
 print(f"torch: {torch.__version__} | hip: {torch.version.hip}")
