@@ -274,6 +274,8 @@ Practical guidance (measured, see receipts):
 | `scripts/validate.sh` | full validation suite, writes receipts under `docs/results/` |
 | `scripts/summarize_results.py` | regenerates the evidence tables from receipts |
 | `scripts/make_gallery.py` | builds the webp gallery from validation outputs |
+| `scripts/rocm_check.py` | env sanity: HIP build, wheel gfx coverage, bf16 matmul+SDPA smoke, optional GTT-spill alloc test |
+| `scripts/gpu_monitor.py` | samples VRAM+GTT while a workload runs (JSONL + peak summary) |
 
 ## Evidence & receipts
 

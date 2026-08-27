@@ -100,3 +100,7 @@ Full root-cause analysis with all transcripts:
 https://github.com/AIwork4me/SenseNova-U1.5-ROCm/blob/main/docs/results/findings/rocm63-wheel-blas-on-gfx1100.md
 
 Happy to run any additional diagnostics you need on this hardware.
+
+## Resolution (2026-08-26)
+
+Closed as completed via [issuecomment-5425045146](https://github.com/pytorch/pytorch/issues/194447#issuecomment-5425045146) (closing comment mirrored in [issue-194447-closing-comment-draft.md](issue-194447-closing-comment-draft.md)); nightly native validation PASS report at [docs/results/findings/pytorch-nightly-rocm714-native-validation.md](../results/findings/pytorch-nightly-rocm714-native-validation.md).

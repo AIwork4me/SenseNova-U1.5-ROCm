@@ -106,16 +106,19 @@ touching 10 `_t2i_predict_v` call sites** we carry as a patch
 - The bug is **hardware-independent** (the same code path exists on CUDA;
   reproduced independently on gfx1100 and gfx1151) — see upstream
   [PR #260](https://github.com/OpenSenseNova/SenseNova-U1/pull/260)
-  (open; local copy:
+  (open, retargeted to `main` 2026-08-26; local copy:
   [docs/upstream/pr-interleave-image-size.md](upstream/pr-interleave-image-size.md)),
-  which also carries an independent cross-platform confirmation. This
-  repo's 0001 is regenerated to that PR's head — the reviewed version that
-  passes the per-image `cur_image_size` inside `interleave_gen_image_only`.
+  which also carries an independent cross-platform confirmation. Upstream
+  `main` already carries the 10-call-site fix (`2f42002`); the PR now only
+  adds the per-image progress-bar line. This repo's 0001 (modeling file
+  byte-identical to the PR's) remains required UNTIL the pinned checkout
+  `feat/u1.5@76c32c2` advances past `2f42002`.
 - `scripts/01-setup-venv.sh` applies the patch automatically after cloning
   the pinned upstream checkout (`git apply`, idempotent — see
   [patches/README.md](../patches/README.md)).
 
-If upstream merges the fix, delete the patch file and the setup step.
+Once the pinned upstream commit advances past `2f42002`, delete the patch
+file and the setup step.
 
 ## 7. What this repository changes vs upstream
 

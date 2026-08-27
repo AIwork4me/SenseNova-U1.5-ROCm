@@ -96,16 +96,17 @@ gfx1100 上验证的栈），安装后跑 GPU 冒烟测试。`scripts/rocm_check
 - 该 bug **与硬件无关**（CUDA 上同样存在这条代码路径；在 gfx1100 与
   gfx1151 上独立复现）——见上游
   [PR #260](https://github.com/OpenSenseNova/SenseNova-U1/pull/260)
-  （开放中；本地留存：
+  （开放中，2026-08-26 重定向至 `main`；本地留存：
   [docs/upstream/pr-interleave-image-size.md](upstream/pr-interleave-image-size.md)），
-  其中也带有一次独立跨平台确认。本仓库的 0001 按该 PR 的 head 重新
-  生成——即评审后的版本，在 `interleave_gen_image_only` 内改传每张图
-  的 `cur_image_size`。
+  其中也带有一次独立跨平台确认。上游 `main` 已通过 `2f42002` 吸收了
+  10 处调用点的修复；该 PR 现在只补充逐图进度条那一行。本仓库的
+  0001（建模文件与该 PR 逐字节一致）在固定 checkout
+  `feat/u1.5@76c32c2` 越过 `2f42002` 之前仍然必需。
 - `scripts/01-setup-venv.sh` 在克隆固定 commit 的上游后自动应用补丁
   （`git apply`，幂等——见
   [patches/README.md](../patches/README.md)）。
 
-若上游合并该修复，删掉补丁文件与对应安装步骤即可。
+一旦固定 commit 越过 `2f42002`，即删除补丁文件与对应安装步骤。
 
 ## 7. 本仓库相对上游改了什么
 

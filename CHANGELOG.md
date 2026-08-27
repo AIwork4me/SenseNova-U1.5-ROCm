@@ -69,6 +69,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   section (graduation model), README/README_CN hardware-coverage table.
 
 ### Changed
+- PR#260 retargeted to `main` (2026-08-26): upstream `2f42002` had already
+  absorbed the 10 call sites; branch rebuilt as a single 1-line commit
+  `5f4aca0e` (modeling file byte-identical to the GPU-validated `e2f2c865`
+  content) — see docs/upstream/pr-interleave-image-size.md.
 - pytorch#194498 root cause verified on-host: SDPA fused-backend launch
   failures are a wheel-metadata defect (amd-torch-device-gfx1100 missing
   its amd-torch-device-gfx11 family dependency; diagnosis by liminfei-amd,

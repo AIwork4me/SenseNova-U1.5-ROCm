@@ -27,6 +27,11 @@ current tuple inside its loop. Same-seed tuple outputs are byte-identical
 before/after the follow-up; list input now completes. Full V1–V4 matrix:
 [../docs/results/validation/interleave-image-size/README.md](../docs/results/validation/interleave-image-size/README.md).
 
+**Status 2026-08-26:** upstream `main` absorbed the call-site fix
+(`2f42002`); PR#260 was retargeted to `main` as a single 1-line commit
+(`5f4aca0e`, modeling file byte-identical to this patch). The patch stays
+while this repo pins `feat/u1.5@76c32c2`.
+
 **Symptom before the patch** (pre-patch run transcript:
 [../docs/results/logs/interleave-prepatch-typeerror.txt](../docs/results/logs/interleave-prepatch-typeerror.txt)):
 
