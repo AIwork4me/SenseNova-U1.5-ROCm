@@ -13,5 +13,12 @@
   "rocm_stack": "none-torch212+sdpa-math-patch",
   "torch": "2.12.0+rocm7.14.0",
   "vram_mode": "balanced",
-  "wall_seconds": 687.7
+  "wall_seconds": 687.7,
+  "correction": {
+    "date": "2026-09-01",
+    "verdict_superseded": "the archived artifacts sha256 above is NOT success evidence — the png is grid-corrupted",
+    "details": "2026-08-23 verified only exit code 0 and a valid PNG container; no visual or grid-statistics check was run. Re-measured 2026-09-01 with the findings-doc methodology: mean 129.6 / std 28.0 / hcorr 0.525 / block64-corr 0.996 — the repeating-grid corruption signature. The same corruption was independently reproduced 2026-09-01 on a fresh torch 2.12.0+rocm7.14.0 wheel stack in full-stack mode (hcorr 0.510 / block64-corr 0.995), while the identical prompt/seed/pipeline on torch 2.8.0+rocm6.3 rendered byte-identical to the archived known-good image.",
+    "evidence": "outputs/regression-714/corrupt-2.12/ (corrupt artifact + run.log + stats); docs/results/findings/pytorch-nightly-rocm714-sdpa-t2i.md (Update 2026-09-01)",
+    "resolution": "generation on gfx1100 retreated to gen-validated torch 2.8.0+rocm6.3 via the STACK knob (commit fcfa48f); 7.14 remains the script default for everything else"
+  }
 }
