@@ -2,27 +2,59 @@
 # 01-setup-venv.sh — build the Python environment for SenseNova-U1.5 on ROCm.
 #
 # Creates .venv/ inside the project and installs:
-#   - PyTorch 2.12.0 + torchvision 0.27.0 from the AMD ROCm 7.14
-#     multi-arch index (gfx1100 via [device-gfx1100] extras)
+#   - PyTorch per $STACK (see below)
 #   - the upstream inference stack (transformers, accelerate, ...) at
 #     versions compatible with the pinned SenseNova-U1 checkout
 #   - the `sensenova_u1` package itself (editable, --no-deps) from
 #     third_party/SenseNova-U1 @ 76c32c2
 #   - every patch in patches/*.patch (idempotent; see patches/README.md)
+#   - pytest (the offline unit gate: CONTRIBUTING.md "python3 -m pytest tests/ -q")
 #
 # Ends with a GPU smoke test: torch must see the AMD GPU and run a matmul.
 #
+# Stacks (STACK=, default 714):
+#   714            torch 2.12.0 + torchvision 0.27.0 (+ torchaudio 2.11.0)
+#                  from the AMD ROCm 7.14 multi-arch index (gfx1100 via
+#                  [device-gfx1100] extras). Default per the 2026-09-01
+#                  migration (commit e8467ce).
+#   gen-validated  torch 2.8.0 + torchvision 0.23.0 from
+#                  https://download.pytorch.org/whl/rocm6.3 — the last
+#                  stack validated for GENERATION on this gfx1100 host.
+#                  Exists because the torch 2.12.0+rocm7.14.0 wheels
+#                  silently corrupt t2i output here (exit 0, valid PNG
+#                  container, washed-out repeating-grid content) in BOTH
+#                  workaround modes (full-stack and zero-workaround);
+#                  same-prompt/seed renders correctly on 2.8.0+rocm6.3.
+#                  Same failure family as the nightly corruption in
+#                  docs/results/findings/pytorch-nightly-rocm714-sdpa-t2i.md
+#                  (fused SDPA exonerated, understanding path fine, op not
+#                  bisected); 2026-09-01 regression evidence in
+#                  outputs/regression-714/corrupt-2.12/. NOTE: the
+#                  download.pytorch.org/whl/rocm6.3 index is a documented,
+#                  generation-validated EXCEPTION authorized 2026-09-01 for
+#                  this stack only — do not use it elsewhere.
+#
 # Env knobs:
-#   PY_INDEX_ROCM   torch wheel index (default: AMD rocm7.14 multi-arch — matches torch 2.12.0)
-#   SKIP_SMOKE=1    skip the GPU smoke test
+#   STACK          714 | gen-validated  (default: 714)
+#   PY_INDEX_ROCM  torch wheel index (default follows STACK: AMD rocm7.14
+#                  multi-arch for 714, download.pytorch.org rocm6.3 for
+#                  gen-validated)
+#   SKIP_SMOKE=1   skip the GPU smoke test
 set -euo pipefail
 
 usage() {
     cat <<'EOF'
-Usage: bash scripts/01-setup-venv.sh
+Usage: [STACK=714|gen-validated] bash scripts/01-setup-venv.sh
 
-Creates .venv/ with ROCm PyTorch 2.12.0 (7.14) and the SenseNova-U1 inference stack,
-then verifies torch can see and compute on the AMD GPU.
+Creates .venv/ with the selected ROCm PyTorch stack and the SenseNova-U1
+inference stack, then verifies torch can see and compute on the AMD GPU.
+
+Stacks:
+  714            (default) torch 2.12.0+rocm7.14.0, AMD multi-arch index
+  gen-validated  torch 2.8.0+rocm6.3 — the generation-validated retreat:
+                 torch 2.12 wheels silently corrupt t2i on gfx1100 (see
+                 script header / docs/results/findings/
+                 pytorch-nightly-rocm714-sdpa-t2i.md family)
 EOF
 }
 
@@ -37,7 +69,14 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT/scripts/lib/common.sh"
 add_rocm_path
 
-PY_INDEX_ROCM="${PY_INDEX_ROCM:-https://repo.amd.com/rocm/whl-multi-arch/}"
+STACK="${STACK:-714}"
+case "$STACK" in
+    714)            PY_INDEX_DEFAULT="https://repo.amd.com/rocm/whl-multi-arch/" ;;
+    gen-validated)  PY_INDEX_DEFAULT="https://download.pytorch.org/whl/rocm6.3" ;;
+    *) die "unknown STACK '$STACK' (expected 714 | gen-validated)" ;;
+esac
+PY_INDEX_ROCM="${PY_INDEX_ROCM:-$PY_INDEX_DEFAULT}"
+export STACK
 UPSTREAM="$ROOT/third_party/SenseNova-U1"
 UPSTREAM_URL="${UPSTREAM_URL:-https://github.com/OpenSenseNova/SenseNova-U1.git}"
 
@@ -74,18 +113,28 @@ source "$VENV/bin/activate"
 # Upgrade pip quietly first so the extra index parses cleanly.
 pip install -q --upgrade pip >/dev/null
 
-log "installing ROCm PyTorch (this downloads ~6 GiB of wheels)"
-pip install --index-url "$PY_INDEX_ROCM" \
-    "torch[device-gfx1100]==2.12.0+rocm7.14.0" \
-    "torchvision[device-gfx1100]==0.27.0+rocm7.14.0" \
-    "torchaudio==2.11.0+rocm7.14.0"
+log "installing ROCm PyTorch (STACK=$STACK, this downloads several GiB of wheels)"
+if [ "$STACK" = "714" ]; then
+    pip install --index-url "$PY_INDEX_ROCM" \
+        "torch[device-gfx1100]==2.12.0+rocm7.14.0" \
+        "torchvision[device-gfx1100]==0.27.0+rocm7.14.0" \
+        "torchaudio==2.11.0+rocm7.14.0"
 
-# The install above placed a full ROCm 7.14 SDK inside the venv
-# (site-packages/_rocm_sdk_*). Re-source common.sh so its full-stack
-# workaround engages from the wheel SDK; on a fresh machine the earlier
-# source ran before the venv existed and could only see the host's older
-# ROCm, whose preloads break import torch under these wheels.
-source "$ROOT/scripts/lib/common.sh"
+    # The install above placed a full ROCm 7.14 SDK inside the venv
+    # (site-packages/_rocm_sdk_*). Re-source common.sh so its full-stack
+    # workaround engages from the wheel SDK; on a fresh machine the earlier
+    # source ran before the venv existed and could only see the host's older
+    # ROCm, whose preloads break import torch under these wheels.
+    source "$ROOT/scripts/lib/common.sh"
+else
+    # gen-validated: byte-identical install line to the pre-migration script
+    # (git show 6a5785d:scripts/01-setup-venv.sh). The 2.8 wheels bundle no
+    # _rocm_sdk_* SDK, so common.sh stays in its BLAS-mode fallback (host
+    # hipBLAS/rocBLAS + Tensile kernels, MIOpen bypassed) — the mode every
+    # historical validated output was produced with.
+    pip install "torch==2.8.0" "torchvision==0.23.0" \
+        --index-url "$PY_INDEX_ROCM"
+fi
 
 log "installing the SenseNova-U1 inference stack"
 # Mirror of upstream pyproject [project].dependencies (cu128-specific index
@@ -106,11 +155,17 @@ pip install \
 log "installing sensenova_u1 (editable, no deps — deps installed above)"
 pip install -e "$UPSTREAM" --no-deps
 
+log "installing pytest (offline unit-test gate — CONTRIBUTING.md)"
+# Not an inference dependency; the 2026-09-01 regression gate found rebuilt
+# venvs without it fail `pytest tests/ -q` outright.
+pip install -q pytest
+
 log "writing environment fingerprint"
 mkdir -p "$ROOT/docs/results"
 "$PY" - <<'PYEOF' > "$ROOT/docs/results/environment.json"
-import json, subprocess, sys, torch, transformers, accelerate
+import json, os, subprocess, sys, torch, transformers, accelerate
 info = {
+    "stack": os.environ.get("STACK", "714"),
     "python": sys.version.split()[0],
     "torch": torch.__version__,
     "torch_backend": "hip" if torch.version.hip else "cuda",
