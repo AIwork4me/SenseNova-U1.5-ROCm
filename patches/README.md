@@ -38,6 +38,24 @@ TypeError: 'NoneType' object is not subscriptable
 
 ## 0002-sdpa-rocm-math-backend-compat.patch
 
+> **STATUS UPDATE 2026-09-01 — scale-semantics bug in this patch's MATH
+> fallback was the root cause of the t2i silent corruption on torch ≥ 2.9;
+> fixed in this patch today.** The old fallback pre-scaled `q` by
+> `softmax_scale` and called SDPA with `scale=None`, assuming MATH would not
+> rescale — but `scale=None` means "apply the default 1/√E", so the scale
+> double-applied (effective 1/128 instead of 1/√128), collapsed generation
+> attention to near-uniform mixing, and corrupted every t2i render on
+> torch 2.12/nightly while torch 2.8 stayed correct (branch not taken).
+> The fallback now passes `scale=softmax_scale` explicitly; end-to-end
+> revalidation on the official 2.12.0+rocm7.14.0 wheel reproduced
+> good-class output (hcorr 0.974 / block64 0.717, visually verified).
+> Full evidence chain:
+> [../docs/results/findings/t2i-corruption-rootcause-patch0002-math-scale.md](../docs/results/findings/t2i-corruption-rootcause-patch0002-math-scale.md).
+> The MATH restriction itself is retained as the conservative default for
+> unrepairable installs; on wheel-repaired installs (family wheel present)
+> lifting it would roughly halve t2i wall time — future optimization, to be
+> A/B'd separately.
+
 > **STATUS UPDATE 2026-08-25 — root cause found upstream; this patch is a
 > fallback, not a requirement, on fixed installs.** The fused-backend
 > failures are a wheel-metadata defect: `amd-torch-device-gfx1100` was
@@ -68,7 +86,9 @@ same-process probe contamination by the deferred error.)
 
 **Fix:** in `_sdpa_attn_func`, on ROCm with torch ≥ 2.9 only, restrict
 the dispatcher to the MATH backend (proven healthy for every shape
-tested) and pre-scale `q` instead of passing `scale`. torch 2.8 and CUDA
+tested) and pass `scale=softmax_scale` explicitly — never pre-scale `q`
+in place of the kwarg (see the 2026-09-01 status update above for why
+that double-applies and corrupted generation). torch 2.8 and CUDA
 hosts keep the stock (fast) behavior.
 Cost on the reference host: 2048×2048@50 steps runs 687.7 s vs 420.1 s
 on torch 2.8+BLAS-preload (receipt `docs/results/validation/t2i-torch212-fixed.json`)

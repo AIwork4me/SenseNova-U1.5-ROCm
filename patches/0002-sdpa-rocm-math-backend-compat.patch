@@ -1,16 +1,15 @@
 diff --git a/src/sensenova_u1/models/neo_unify/modeling_qwen3.py b/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
-index ebb961b..6427afc 100644
+index ebb961b..02ca0f4 100644
 --- a/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
 +++ b/src/sensenova_u1/models/neo_unify/modeling_qwen3.py
-@@ -1,6 +1,7 @@
+@@ -1,5 +1,6 @@
  from typing import Callable, Optional, Union
  
- import torch
 +import contextlib
+ import torch
  import torch._dynamo
  from torch import nn
- 
-@@ -111,28 +112,47 @@ def _sdpa_attn_func(q, k, v, dropout_p: float = 0.0, softmax_scale=None, causal:
+@@ -111,28 +112,45 @@ def _sdpa_attn_func(q, k, v, dropout_p: float = 0.0, softmax_scale=None, causal:
          k_bhsd = k_bhsd.repeat_interleave(n_rep, dim=1)
          v_bhsd = v_bhsd.repeat_interleave(n_rep, dim=1)
  
@@ -32,17 +31,16 @@ index ebb961b..6427afc 100644
 +    # 2.12.0+rocm7.14.0 wheel; see pytorch/pytorch#194498 and
 +    # https://github.com/AIwork4me/SenseNova-U1.5-ROCm docs/results/findings):
 +    #   both fused SDPA backends (FLASH and mem-efficient) fail kernel launch
-+    #   with hipErrorInvalidValue for EVERY configuration tested (bf16; kv
-+    #   1024–4096 power-of-two or not; head_dim 64/128; causal or not;
-+    #   contiguous or transposed; with or without an explicit `scale`). The
-+    #   launch error is deferred and surfaces at the next checked CUDA call —
-+    #   misleading tracebacks. Only the MATH backend is healthy, so on ROCm
-+    #   torch >= 2.9 we restrict the dispatcher to MATH and pre-scale q
-+    #   instead of passing `scale`. torch 2.8 and CUDA hosts keep the stock
-+    #   (fast) behavior.
++    #   with hipErrorInvalidValue for every configuration tested, so on ROCm
++    #   torch >= 2.9 we restrict the dispatcher to MATH. The scale must be
++    #   passed through `scale=` explicitly: `scale=None` means "apply the
++    #   default 1/sqrt(E)", so pre-scaling q while dropping the kwarg
++    #   double-applies the scale, collapses softmax to near-uniform mixing,
++    #   and silently corrupts generation. Root-caused 2026-09-01; see
++    #   docs/results/findings/t2i-corruption-rootcause-patch0002-math-scale.md
++    #   in the SenseNova-U1.5-ROCm repo.
 +    _torch_ver = tuple(int(x) for x in torch.__version__.split("+")[0].split(".")[:2])
 +    _needs_fix = torch.version.hip is not None and _torch_ver >= (2, 9)
-+    _scale = softmax_scale
 +    _sdpa_ctx = contextlib.nullcontext()
 +    if _needs_fix:
 +        try:
@@ -52,9 +50,6 @@ index ebb961b..6427afc 100644
 +            _sdpa_ctx = sdpa_kernel([SDPBackend.MATH])
 +        except ImportError:
 +            pass
-+        if _scale is not None:
-+            q_bhsd = q_bhsd * _scale
-+            _scale = None
 +    with _sdpa_ctx:
 +        try:
              out = torch.nn.functional.scaled_dot_product_attention(
@@ -63,13 +58,15 @@ index ebb961b..6427afc 100644
                  v_bhsd,
                  dropout_p=dropout_p,
                  is_causal=causal,
-+                scale=_scale,
++                scale=softmax_scale,
              )
 -        else:
 +        except TypeError:
-+            # older torch without the `scale` kwarg
-+            if _scale is not None:
-+                q_bhsd = q_bhsd * _scale
++            # Ancient torch without the `scale` kwarg: SDPA there always
++            # applies its default 1/sqrt(E), so compensate by pre-multiplying
++            # q by softmax_scale * sqrt(E) to land on the intended scaling.
++            if softmax_scale is not None:
++                q_bhsd = q_bhsd * (softmax_scale * q_bhsd.size(-1) ** 0.5)
              out = torch.nn.functional.scaled_dot_product_attention(
                  q_bhsd,
                  k_bhsd,

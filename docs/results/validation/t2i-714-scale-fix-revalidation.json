@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "outputs/validate-714fix/run1/0001_1664x2496.png": {
+      "bytes": 6948505,
+      "sha256": "d4db0afba2157a15abbcbf337f157da4a26c8d763d2f889a9c72eeee8666ef69"
+    },
+    "outputs/validate-714fix/run2/0001_1664x2496.png": {
+      "bytes": 6948505,
+      "sha256": "d4db0afba2157a15abbcbf337f157da4a26c8d763d2f889a9c72eeee8666ef69"
+    }
+  },
+  "block": "t2i-714-scale-fix-revalidation",
+  "date": "2026-09-01",
+  "determinism": "run1 == run2 byte-identical; also byte-identical to the decisive monkey-patch experiment image (outputs/debug-2.12-corruption/fix712b/out.png) that carried the first vision verification",
+  "input": "outputs/regression-714/input-1line.jsonl (baxian prompt, width 1664, height 2496, seed 2026, sha256 prefix ee6d3e31)",
+  "logs": [
+    "outputs/validate-714fix/run1.log",
+    "outputs/validate-714fix/run2.log",
+    "outputs/debug-2.12-corruption/setup-714-fixed.log"
+  ],
+  "note": "provenance: the temporary launcher scripts/run-validate714.sh did not print the run-task.sh task=/model=/vram_mode= header line; task/model/vram_mode provenance rests on the launcher flags (inference.py t2i, --model_path modelscope/SenseNova-U1.5-8B-MoT, --vram_mode balanced, --attn_backend sdpa) corroborated by log content and timestamps (independent verifier accepted)",
+  "rocm_stack": "714-wheel-fullstack",
+  "stats_vs_references": {
+    "fixed-714-run1": { "mean": 68.443, "std": 71.501, "hcorr": 0.9742, "block64_corr": 0.7171 },
+    "good-2.8-reference": { "mean": 68.293, "std": 72.115, "hcorr": 0.9728, "block64_corr": 0.7113 },
+    "corrupt-2.12-pre-fix": { "mean": 130.403, "std": 30.902, "hcorr": 0.5226, "block64_corr": 0.8041 }
+  },
+  "torch": "2.12.0+rocm7.14.0",
+  "vision_check": "two independent vision-model checks (controller + verification subagent) read a coherent theatrical poster: readable ink-brush title 八仙！ with THE EIGHT IMMORTALS subtitle, 2026 暑期献映 credits, eight immortals crossing a stormy ink-wash sea; no grid/woven texture or structural corruption",
+  "verdict": "PASS — generation on the official ROCm 7.14 wheel stack is restored by the patches/0002 scale fix",
+  "wall_seconds": { "run1": 612.58, "run2": 619.5 },
+  "vram_mode": "balanced",
+  "what_changed": "patches/0002 _sdpa_attn_func MATH fallback now passes scale=softmax_scale explicitly (no q pre-scaling); root cause and full evidence chain in docs/results/findings/t2i-corruption-rootcause-patch0002-math-scale.md"
+}
