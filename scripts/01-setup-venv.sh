@@ -2,8 +2,8 @@
 # 01-setup-venv.sh — build the Python environment for SenseNova-U1.5 on ROCm.
 #
 # Creates .venv/ inside the project and installs:
-#   - PyTorch 2.8.0 + torchvision 0.23.0 from the ROCm wheel index
-#     (gfx1100-class GPUs are natively supported by these wheels)
+#   - PyTorch 2.12.0 + torchvision 0.27.0 from the AMD ROCm 7.14
+#     multi-arch index (gfx1100 via [device-gfx1100] extras)
 #   - the upstream inference stack (transformers, accelerate, ...) at
 #     versions compatible with the pinned SenseNova-U1 checkout
 #   - the `sensenova_u1` package itself (editable, --no-deps) from
@@ -13,7 +13,7 @@
 # Ends with a GPU smoke test: torch must see the AMD GPU and run a matmul.
 #
 # Env knobs:
-#   PY_INDEX_ROCM   torch wheel index (default: rocm6.3 — matches torch 2.8.0)
+#   PY_INDEX_ROCM   torch wheel index (default: AMD rocm7.14 multi-arch — matches torch 2.12.0)
 #   SKIP_SMOKE=1    skip the GPU smoke test
 set -euo pipefail
 
@@ -21,7 +21,7 @@ usage() {
     cat <<'EOF'
 Usage: bash scripts/01-setup-venv.sh
 
-Creates .venv/ with ROCm PyTorch 2.8.0 and the SenseNova-U1 inference stack,
+Creates .venv/ with ROCm PyTorch 2.12.0 (7.14) and the SenseNova-U1 inference stack,
 then verifies torch can see and compute on the AMD GPU.
 EOF
 }
@@ -37,7 +37,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT/scripts/lib/common.sh"
 add_rocm_path
 
-PY_INDEX_ROCM="${PY_INDEX_ROCM:-https://download.pytorch.org/whl/rocm6.3}"
+PY_INDEX_ROCM="${PY_INDEX_ROCM:-https://repo.amd.com/rocm/whl-multi-arch/}"
 UPSTREAM="$ROOT/third_party/SenseNova-U1"
 UPSTREAM_URL="${UPSTREAM_URL:-https://github.com/OpenSenseNova/SenseNova-U1.git}"
 
@@ -74,9 +74,18 @@ source "$VENV/bin/activate"
 # Upgrade pip quietly first so the extra index parses cleanly.
 pip install -q --upgrade pip >/dev/null
 
-log "installing ROCm PyTorch (this downloads ~3 GiB of wheels)"
-pip install "torch==2.8.0" "torchvision==0.23.0" \
-    --index-url "$PY_INDEX_ROCM"
+log "installing ROCm PyTorch (this downloads ~6 GiB of wheels)"
+pip install --index-url "$PY_INDEX_ROCM" \
+    "torch[device-gfx1100]==2.12.0+rocm7.14.0" \
+    "torchvision[device-gfx1100]==0.27.0+rocm7.14.0" \
+    "torchaudio==2.11.0+rocm7.14.0"
+
+# The install above placed a full ROCm 7.14 SDK inside the venv
+# (site-packages/_rocm_sdk_*). Re-source common.sh so its full-stack
+# workaround engages from the wheel SDK; on a fresh machine the earlier
+# source ran before the venv existed and could only see the host's older
+# ROCm, whose preloads break import torch under these wheels.
+source "$ROOT/scripts/lib/common.sh"
 
 log "installing the SenseNova-U1 inference stack"
 # Mirror of upstream pyproject [project].dependencies (cu128-specific index

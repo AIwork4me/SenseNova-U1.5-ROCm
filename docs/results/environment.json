@@ -1,13 +1,13 @@
 {
   "python": "3.12.3",
-  "torch": "2.8.0+rocm6.3",
+  "torch": "2.12.0+rocm7.14.0",
   "torch_backend": "hip",
-  "torch_hip_version": "6.3.42131-fa1d09cbd",
+  "torch_hip_version": "7.14.60850",
   "transformers": "4.57.1",
   "accelerate": "1.14.0",
   "gpu_available": true,
   "gpu_count": 1,
-  "gpu_name": "AMD Radeon Graphics",
+  "gpu_name": "AMD Radeon Pro W7900D",
   "gpu_arch": [
     11,
     0

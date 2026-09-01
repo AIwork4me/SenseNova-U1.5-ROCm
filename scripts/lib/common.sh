@@ -43,13 +43,16 @@ OUT_DIR="${OUT_DIR:-$ROOT/outputs}"
 #   - BLAS mode: preload the system ROCm's hipBLAS+rocBLAS and point rocBLAS
 #     at the system Tensile kernels; bypass MIOpen convs (cudnn off) due to (c).
 #   - FULL-STACK mode (auto when a ROCm >= 7.14 install is found, e.g. from
-#     scripts/install-rocm-7.14-gfx110x.sh): preload that stack's
+#     scripts/install-rocm-7.14-gfx110x.sh, or — default since the torch
+#     2.12.0+rocm7.14.0 migration — the ROCm 7.14 wheel SDK pip installs
+#     into the venv under site-packages/_rocm_sdk_*): preload that stack's
 #     MIOpen+comgr+hipBLAS+rocBLAS — bug (c) is fixed in 7.14's comgr, so
 #     MIOpen convs stay ENABLED (no unfold+GEMM penalty). Verified: the model
 #     runs end-to-end with cudnn on; numerics identical at bf16 level.
 # Knobs:
-#   ROCM_FULL_STACK=auto|1|0   default auto — engages when a valid prefix is
-#                              found; 0 forces BLAS mode; 1 requires it
+#   ROCM_FULL_STACK=auto|1|0   default auto — engages when a valid 7.14 stack
+#                              is found (prefix dir or venv wheel SDK);
+#                              0 forces BLAS mode; 1 requires it
 #   ROCM714_PREFIX=/path       explicit full-stack prefix
 #   BLAS_FIX=0                 disable the workaround entirely (CUDA hosts /
 #                              a future fixed wheel)
@@ -107,22 +110,69 @@ _find_fullstack_prefix() {
     return 1
 }
 
+_sdk_dso() {
+    # $1 = dir, $2 = DSO basename without extension: prints the first of
+    # "$1/$2.so", "$1/$2.so.<N>" that exists. Wheel SDKs ship versioned
+    # sonames only (libMIOpen.so.1, librocblas.so.5, ...).
+    local f
+    for f in "$1/$2.so" "$1/$2".so.*; do
+        [ -e "$f" ] && { printf '%s' "$f"; return 0; }
+    done
+    return 1
+}
+
+_setup_wheel_fullstack() {
+    # The torch 2.12.0+rocm7.14.0 wheels install a complete ROCm 7.14 SDK
+    # into the venv: core runtime + comgr under _rocm_sdk_core/lib, the math
+    # stack (MIOpen, hipBLAS, rocBLAS, Tensile kernels) under
+    # _rocm_sdk_libraries/lib. Sets _fs_preload/_fs_tensile from it and
+    # returns 0; returns 1 when the venv carries no complete wheel SDK.
+    # This must engage INSTEAD of the BLAS fallback below: preloading the
+    # host's older hipBLAS/rocBLAS drags in its libhsa-runtime64, which
+    # shadows the wheel's and makes import torch die with "undefined symbol:
+    # hsa_amd_vmem_export_fabric_handle, version ROCR_1" (observed 2026-09-01,
+    # host ROCm 7.2.1 vs wheel 7.14).
+    local sp core math miopen comgr hipblas rocblas
+    for sp in "$VENV"/lib/python*/site-packages; do
+        core="$sp/_rocm_sdk_core/lib"
+        math="$sp/_rocm_sdk_libraries/lib"
+        [ -d "$core" ] && [ -d "$math" ] || continue
+        miopen="$(_sdk_dso "$math" libMIOpen)" || continue
+        comgr="$(_sdk_dso "$core" libamd_comgr)" || continue
+        hipblas="$(_sdk_dso "$math" libhipblas)" || continue
+        rocblas="$(_sdk_dso "$math" librocblas)" || continue
+        ls "$math"/rocblas/library/*gfx*.dat >/dev/null 2>&1 || continue
+        _fs_preload="$miopen:$comgr:$hipblas:$rocblas"
+        _fs_tensile="$math/rocblas/library"
+        return 0
+    done
+    return 1
+}
+
 if [ "${BLAS_FIX:-1}" = "1" ]; then
     _fs_mode="${ROCM_FULL_STACK:-auto}"
     _fs_prefix=""
+    _fs_preload=""
+    _fs_tensile=""
     if [ "$_fs_mode" != "0" ]; then
         _fs_prefix="$(_find_fullstack_prefix)" || _fs_prefix=""
+        if [ -n "$_fs_prefix" ]; then
+            _fs_preload="$_fs_prefix/lib/libMIOpen.so:$_fs_prefix/lib/libamd_comgr.so:$_fs_prefix/lib/libhipblas.so:$_fs_prefix/lib/librocblas.so"
+            _fs_tensile="$_fs_prefix/lib/rocblas/library"
+        else
+            _setup_wheel_fullstack || true
+        fi
     fi
-    if [ -n "$_fs_prefix" ]; then
+    if [ -n "$_fs_preload" ]; then
         case ":${LD_PRELOAD:-}:" in
-            *":$_fs_prefix/lib/libMIOpen.so:"*) ;;   # already applied (double-sourced)
-            *) export LD_PRELOAD="$_fs_prefix/lib/libMIOpen.so:$_fs_prefix/lib/libamd_comgr.so:$_fs_prefix/lib/libhipblas.so:$_fs_prefix/lib/librocblas.so${LD_PRELOAD:+:$LD_PRELOAD}" ;;
+            *":$_fs_preload:"*) ;;   # already applied (double-sourced)
+            *) export LD_PRELOAD="$_fs_preload${LD_PRELOAD:+:$LD_PRELOAD}" ;;
         esac
-        export ROCBLAS_TENSILE_LIBPATH="$_fs_prefix/lib/rocblas/library"
+        export ROCBLAS_TENSILE_LIBPATH="$_fs_tensile"
         export SENU15_MIOPEN=1          # keep MIOpen enabled: 7.14 comgr JIT works
         export ROCM_FULL_STACK_ACTIVE=1
     elif [ "$_fs_mode" = "1" ]; then
-        die "ROCM_FULL_STACK=1 but no valid ROCm >=7.14 prefix found (looked at \$ROCM714_PREFIX, ~/rocm-7.14*, /root/rocm-7.14*, /opt/rocm-7.14*) — run scripts/install-rocm-7.14-gfx110x.sh or set ROCM_FULL_STACK=0"
+        die "ROCM_FULL_STACK=1 but no valid ROCm >=7.14 stack found (looked at \$ROCM714_PREFIX, ~/rocm-7.14*, /root/rocm-7.14*, /opt/rocm-7.14*, and the venv's rocm7.14 wheel SDK) — run scripts/01-setup-venv.sh (torch 2.12 rocm7.14 wheels) or scripts/install-rocm-7.14-gfx110x.sh, or set ROCM_FULL_STACK=0"
     else
         # BLAS mode: system hipBLAS/rocBLAS only; MIOpen bypassed (see (c))
         _rocm_home="${ROCM_HOME:-}"
