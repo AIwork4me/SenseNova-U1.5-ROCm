@@ -18,3 +18,4 @@ models/
 third_party/
 HANDOFF.md
 docs/announcements/
+.venv-714dbg/
